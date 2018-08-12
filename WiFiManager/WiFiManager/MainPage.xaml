@@ -4,11 +4,106 @@
              xmlns:local="clr-namespace:WiFiManager"
              x:Class="WiFiManager.MainPage">
 
+    <ContentPage.Resources>
+
+        <!-- Default DataTemplate -->
+        <DataTemplate x:Key="DefaultDataTemplate">
+        </DataTemplate>
+        <DataTemplate x:Key="NoteDataTemplate">
+            <ViewCell>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackLayout  Grid.Row="0">
+                        <Label Text="{Binding Name}" />
+                    </StackLayout>
+                    <StackLayout  Grid.Row="1">
+                        <Label Text="{Binding BssID}" />
+                    </StackLayout>
+                </Grid>
+            </ViewCell>
+        </DataTemplate>
+        <DataTemplate x:Key="EditNoteDataTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Text="Name:" />
+                <Label Grid.Row="1" Text="BSSID:" />
+            </Grid>
+        </DataTemplate>
+
+        <local:ItemTemplateSelector x:Key="viewInListTemplateSelector"
+              DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
+              NoteDataTemplate="{StaticResource NoteDataTemplate}" 
+                                        />
+        <local:ItemTemplateSelector x:Key="editTemplateSelector"
+              DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
+              NoteDataTemplate="{StaticResource EditNoteDataTemplate}" 
+                                        />
+
+    </ContentPage.Resources>
     <StackLayout>
-        <!-- Place new controls here -->
-    	<Label Text="Welcome to Xamarin.Forms!" 
-           HorizontalOptions="Center"
-           VerticalOptions="CenterAndExpand" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <ListView
+                Grid.Row="0"
+                VerticalOptions="FillAndExpand" 
+                ItemsSource="{Binding WifiNetworks}"
+                SelectedItem="{Binding SelectedNetwork}"
+                ItemTemplate="{StaticResource viewInListTemplateSelector}"
+                ItemSelected="ListView_ItemSelected"
+                >
+                <ListView.Behaviors>
+                    <!-- The behavior that allows to use a command for the SelectedItem event -->
+                    <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
+                </ListView.Behaviors>
+            </ListView>
+            <StackLayout Grid.Row="1" x:Name="DetailsArea">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="20" />
+                        <RowDefinition/>
+                        <RowDefinition  Height="40" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Text="{Binding Name}"></Label>
+                    <Label Grid.Row="1" Text="{Binding BssID}"></Label>
+                    <ListView Grid.Row="2" ItemsSource="{Binding CoordsAndPower}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <StackLayout Orientation="Horizontal">
+                                        <Label Text="{Binding Power}"></Label>
+                                        <Label Text="{Binding Long}"></Label>
+                                        <Label Text="{Binding Lat}"></Label>
+                                    </StackLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Button Grid.Row="3" Text="Refresh" Clicked="RefreshCoords_Clicked" />
+                </Grid>
+            </StackLayout>
+
+        </Grid>
+
     </StackLayout>
 
 </ContentPage>
