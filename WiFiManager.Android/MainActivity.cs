@@ -10,7 +10,7 @@ using Android.Net.Wifi;
 using Android.Locations;
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
-using WiFiManager;
+using Plugin.Permissions;
 
 
 namespace WiFiManager.Droid
@@ -25,9 +25,16 @@ namespace WiFiManager.Droid
 
             base.OnCreate(bundle);
 
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App(this));
         }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
         public MainPageVM GetActiveWifiNetworks()
         {
             var vm = new MainPageVM();

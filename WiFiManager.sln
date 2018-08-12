@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiManager.Android", "WiFiManager\WiFiManager.Android\WiFiManager.Android.csproj", "{1983C4DD-32C9-4726-A1D2-9E576675DB6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiManager.Android", "WiFiManager.Android\WiFiManager.Android.csproj", "{1983C4DD-32C9-4726-A1D2-9E576675DB6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiManager", "WiFiManager\WiFiManager\WiFiManager.csproj", "{1C484AD6-3556-4C33-B408-971FAC177C40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiManager", "WiFiManager\WiFiManager.csproj", "{1C484AD6-3556-4C33-B408-971FAC177C40}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiManager.Common", "WiFiManager.Common\WiFiManager.Common.csproj", "{1DD656EB-74BF-4C01-9488-E10DE2FB3125}"
 EndProject

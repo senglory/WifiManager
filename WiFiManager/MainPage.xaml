@@ -80,12 +80,14 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="20" />
                         <RowDefinition Height="20" />
+                        <RowDefinition Height="20" />
                         <RowDefinition/>
                         <RowDefinition  Height="40" />
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Text="{Binding Name}"></Label>
                     <Label Grid.Row="1" Text="{Binding BssID}"></Label>
-                    <ListView Grid.Row="2" ItemsSource="{Binding CoordsAndPower}">
+                    <Entry Grid.Row="2" Text="{Binding Password}" Placeholder="Enter the password"></Entry>
+                    <ListView Grid.Row="3" ItemsSource="{Binding CoordsAndPower}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <ViewCell>
@@ -98,7 +100,7 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <Button Grid.Row="3" Text="Refresh" Clicked="RefreshCoords_Clicked" />
+                    <Button Grid.Row="4" Text="Refresh" Clicked="RefreshCoords_Clicked" />
                 </Grid>
             </StackLayout>
 

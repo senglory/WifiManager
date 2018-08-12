@@ -1,0 +1,70 @@
+https://www.qemu.org/2017/11/22/haxm-usage-windows/
+
+
+Java.Lang.NoSuchFieldError: no field with name='providerFriendlyName' signature='Ljava/lang/String;' in class Landroid/net/wifi/WifiConfiguration;
+  at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw () [0x0000c] in <f32579baafc1404fa37ba3ec1abdc0bd>:0 
+  at Java.Interop.JniEnvironment+InstanceFields.GetFieldID (Java.Interop.JniObjectReference type, System.String name, System.String signature) [0x0005b] in <7802aa64ad574c33adca332a3fa9706a>:0 
+  at Java.Interop.JniType.GetInstanceField (System.String name, System.String signature) [0x0000c] in <7802aa64ad574c33adca332a3fa9706a>:0 
+  at Java.Interop.JniPeerMembers+JniInstanceFields.GetFieldInfo (System.String encodedMember) [0x00036] in <7802aa64ad574c33adca332a3fa9706a>:0 
+  at Java.Interop.JniPeerMembers+JniInstanceFields.GetObjectValue (System.String encodedMember, Java.Interop.IJavaPeerable self) [0x00006] in <7802aa64ad574c33adca332a3fa9706a>:0 
+  at Android.Net.Wifi.WifiConfiguration.get_ProviderFriendlyName () [0x0000a] in <263adecfa58f4c449f1ff56156d886fd>:0 
+  at AndroidXamarinWIFIApp1.MainPage..ctor () [0x0004d] in C:\prj\Demo\AndroidXamarinWIFIApp1\AndroidXamarinWIFIApp1\MainPage.xaml.cs:29 
+  --- End of managed Java.Lang.NoSuchFieldError stack trace ---
+java.lang.NoSuchFieldError: no field with name='providerFriendlyName' signature='Ljava/lang/String;' in class Landroid/net/wifi/WifiConfiguration;
+	at md596e9f8c3f4c3af17a76d9f5d49b1d184.MainActivity.n_onCreate(Native Method)
+	at md596e9f8c3f4c3af17a76d9f5d49b1d184.MainActivity.onCreate(MainActivity.java:29)
+	at android.app.Activity.performCreate(Activity.java:5417)
+	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1088)
+	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2320)
+	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2417)
+	at android.app.ActivityThread.access$800(ActivityThread.java:151)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1342)
+	at android.os.Handler.dispatchMessage(Handler.java:110)
+	at android.os.Looper.loop(Looper.java:193)
+	at android.app.ActivityThread.main(ActivityThread.java:5322)
+	at java.lang.reflect.Method.invokeNative(Native Method)
+	at java.lang.reflect.Method.invoke(Method.java:515)
+	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:829)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:645)
+	at dalvik.system.NativeStart.main(Native Method)
+
+
+
+
+// http://blog.ariankulp.com/2015/03/programmatically-joining-wifi-network.html
+public bool JoinWifi(string ssid, string key)
+{
+ try
+ {
+  WifiConfiguration wifiConfig = new WifiConfiguration();
+  wifiConfig.Ssid = String.Format("\"{0}\"", ssid);
+  wifiConfig.PreSharedKey = String.Format("\"{0}\"", key);
+  WifiManager wifiManager = (WifiManager)GetSystemService(Context.WifiService);
+  wifiManager.SetWifiEnabled(true); 
+  // Get or add network to known list
+  int netId;
+  var network = wifiManager.ConfiguredNetworks.FirstOrDefault(cn=>cn.Ssid == ssid);
+  if( network != null ) 
+    netId = network.NetworkId;
+  else
+  {
+   netId = wifiManager.AddNetwork(wifiConfig);
+   wifiManager.SaveConfiguration();
+  } 
+  // Make sure network hasn't changed
+  wifiManager.UpdateNetwork(wifiConfig);
+  var currConn = wifiManager.ConnectionInfo;
+  if( currConn != null && currConn.NetworkId != netId )
+  {
+   wifiManager.Disconnect();
+   wifiManager.EnableNetwork(netId, true);
+   wifiManager.Reconnect();
+  } 
+  // Make sure system doesn't save power by disabling WiFi
+  wifiManager.CreateWifiLock(Android.Net.WifiMode.Full, "myLockId");  
+  return true; 
+ }
+ catch( Exception x) {
+  return false;
+ }
+}

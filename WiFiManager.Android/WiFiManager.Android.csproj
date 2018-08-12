@@ -91,7 +91,7 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\WiFiManager.Common\WiFiManager.Common.csproj">
+    <ProjectReference Include="..\WiFiManager.Common\WiFiManager.Common.csproj">
       <Project>{1dd656eb-74bf-4c01-9488-e10de2fb3125}</Project>
       <Name>WiFiManager.Common</Name>
     </ProjectReference>

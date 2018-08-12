@@ -11,9 +11,11 @@ using WiFiManager.Common;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-//using Android.Net.Wifi;
-//using Android.Locations;
 using Plugin.Geolocator;
+using Plugin.Geolocator.Abstractions;
+using Plugin.Permissions.Abstractions;
+
+
 
 namespace WiFiManager
 {
@@ -44,6 +46,10 @@ namespace WiFiManager
 
         private async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
+            var hasPermission = await Utils.CheckPermissions(Permission.Location);
+            if (!hasPermission)
+                return;
+
             var mpv = this.BindingContext as MainPageVM;
             var netw = mpv.SelectedNetwork.CoordsAndPower;
             //LocationManager LocMgr = Android.App.Application.Context.GetSystemService("location") as LocationManager;
@@ -60,8 +66,13 @@ namespace WiFiManager
 
             var locator = CrossGeolocator.Current;
             locator.DesiredAccuracy = 1;
+            var includeHeading = true;
 
-            var position = await locator.GetPositionAsync(new TimeSpan(0, 0, 0, 0, 10000));
+            var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
+            if (position == null)
+            {
+                return;
+            }
             netw.Add(new CoordsAndPower
             {
                 Lat = position.Latitude,
