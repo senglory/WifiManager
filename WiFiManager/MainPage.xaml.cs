@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
 
 
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 using Plugin.Geolocator;
-using Plugin.Geolocator.Abstractions;
 using Plugin.Permissions.Abstractions;
 
 
@@ -40,8 +32,9 @@ namespace WiFiManager
         private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             var netw = e.SelectedItem as WifiNetwork;
-            netw.CoordsAndPower.Clear();
-            DetailsArea.BindingContext = e.SelectedItem;
+            //netw.CoordsAndPower.Clear();
+            DetailsArea.BindingContext = netw;
+            //lstCoords.ItemsSource = netw.CoordsAndPower;
         }
 
         private async void RefreshCoords_Clicked(object sender, EventArgs e)
@@ -51,7 +44,7 @@ namespace WiFiManager
                 return;
 
             var mpv = this.BindingContext as MainPageVM;
-            var netw = mpv.SelectedNetwork.CoordsAndPower;
+            var coords = mpv.SelectedNetwork.CoordsAndPower;
             //LocationManager LocMgr = Android.App.Application.Context.GetSystemService("location") as LocationManager;
             //var locationCriteria = new Criteria();
             //locationCriteria.Accuracy = Accuracy.High;
@@ -73,12 +66,13 @@ namespace WiFiManager
             {
                 return;
             }
-            netw.Add(new CoordsAndPower
+            coords.Add(new CoordsAndPower
             {
                 Lat = position.Latitude,
                 Long = position.Longitude,
                 Alt = position.Altitude
             });
+            lstCoords.ItemsSource = coords;
         }
     }
 }

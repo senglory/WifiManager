@@ -68,3 +68,7 @@ public bool JoinWifi(string ssid, string key)
   return false;
  }
 }
+
+
+https://stackoverflow.com/questions/15014519/apk-installation-failed-install-failed-verification-failure/34666037
+

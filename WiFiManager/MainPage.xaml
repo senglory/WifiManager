@@ -11,38 +11,19 @@
         </DataTemplate>
         <DataTemplate x:Key="NoteDataTemplate">
             <ViewCell>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <StackLayout  Grid.Row="0">
-                        <Label Text="{Binding Name}" />
-                    </StackLayout>
-                    <StackLayout  Grid.Row="1">
-                        <Label Text="{Binding BssID}" />
-                    </StackLayout>
-                </Grid>
+                <StackLayout  HorizontalOptions="Fill">
+                    <Label Text="{Binding Name}" />
+                    <Label Text="{Binding BssID}" />
+                </StackLayout>
             </ViewCell>
         </DataTemplate>
         <DataTemplate x:Key="EditNoteDataTemplate">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" Text="Name:" />
-                <Label Grid.Row="1" Text="BSSID:" />
-            </Grid>
+            <ViewCell>
+                <StackLayout  HorizontalOptions="Fill">
+                    <Entry Text="{Binding Name}" />
+                    <Entry Text="{Binding BssID}" />
+                </StackLayout>
+            </ViewCell>
         </DataTemplate>
 
         <local:ItemTemplateSelector x:Key="viewInListTemplateSelector"
@@ -70,10 +51,10 @@
                 ItemTemplate="{StaticResource viewInListTemplateSelector}"
                 ItemSelected="ListView_ItemSelected"
                 >
-                <ListView.Behaviors>
-                    <!-- The behavior that allows to use a command for the SelectedItem event -->
-                    <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
-                </ListView.Behaviors>
+                <!-- The behavior that allows to use a command for the SelectedItem event -->
+                <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
+                <!--<ListView.Behaviors>
+                </ListView.Behaviors>-->
             </ListView>
             <StackLayout Grid.Row="1" x:Name="DetailsArea">
                 <Grid>
@@ -87,14 +68,15 @@
                     <Label Grid.Row="0" Text="{Binding Name}"></Label>
                     <Label Grid.Row="1" Text="{Binding BssID}"></Label>
                     <Entry Grid.Row="2" Text="{Binding Password}" Placeholder="Enter the password"></Entry>
-                    <ListView Grid.Row="3" ItemsSource="{Binding CoordsAndPower}">
+
+                    <ListView x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" Grid.Row="3" VerticalOptions="FillAndExpand" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <ViewCell>
-                                    <StackLayout Orientation="Horizontal">
-                                        <Label Text="{Binding Power}"></Label>
-                                        <Label Text="{Binding Long}"></Label>
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                                        <Label Text="{Binding Long}" BackgroundColor="AliceBlue"></Label>
                                         <Label Text="{Binding Lat}"></Label>
+                                        <Label Text="{Binding Power}"></Label>
                                     </StackLayout>
                                 </ViewCell>
                             </DataTemplate>

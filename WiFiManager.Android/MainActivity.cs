@@ -46,14 +46,20 @@ namespace WiFiManager.Droid
             {
                 try
                 {
-                    vm.WifiNetworks.Add(new WifiNetwork()
+                    var netw = new WifiNetwork()
                     {
                         BssID = n.Bssid,
                         Name = n.Ssid,
                         NetworkType = n.Capabilities,
 
-                    }
-                            );
+                    };
+                    vm.WifiNetworks.Add(netw);
+                    //netw.CoordsAndPower.Add(new CoordsAndPower
+                    //{
+                    //    Lat = 11.3,
+                    //    Long = 54.7888,
+                    //    Alt = 122
+                    //});
                     //Debug.WriteLine(n.Level);
                 }
                 catch (Exception ex)
