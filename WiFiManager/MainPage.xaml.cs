@@ -19,7 +19,7 @@ namespace WiFiManager
         {
             this.mgr = mgr;
             InitializeComponent();
-            this.BindingContext = mgr.GetActiveWifiNetworks();
+            this.BindingContext =  mgr.GetActiveWifiNetworks();
         }
 
         private void Refresh_Clicked(object sender, EventArgs e)
@@ -72,7 +72,7 @@ namespace WiFiManager
                 Long = position.Longitude,
                 Alt = position.Altitude
             });
-            lstCoords.ItemsSource = coords;
+            //lstCoords.ItemsSource = coords;
         }
     }
 }

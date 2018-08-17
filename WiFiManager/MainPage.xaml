@@ -11,7 +11,7 @@
         </DataTemplate>
         <DataTemplate x:Key="NoteDataTemplate">
             <ViewCell>
-                <StackLayout  HorizontalOptions="Fill">
+                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill">
                     <Label Text="{Binding Name}" />
                     <Label Text="{Binding BssID}" />
                 </StackLayout>
@@ -19,7 +19,7 @@
         </DataTemplate>
         <DataTemplate x:Key="EditNoteDataTemplate">
             <ViewCell>
-                <StackLayout  HorizontalOptions="Fill">
+                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill">
                     <Entry Text="{Binding Name}" />
                     <Entry Text="{Binding BssID}" />
                 </StackLayout>
@@ -37,39 +37,34 @@
 
     </ContentPage.Resources>
     <StackLayout>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
-            <ListView
-                Grid.Row="0"
-                VerticalOptions="FillAndExpand" 
-                ItemsSource="{Binding WifiNetworks}"
-                SelectedItem="{Binding SelectedNetwork}"
-                ItemTemplate="{StaticResource viewInListTemplateSelector}"
-                ItemSelected="ListView_ItemSelected"
-                >
-                <!-- The behavior that allows to use a command for the SelectedItem event -->
-                <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
-                <!--<ListView.Behaviors>
-                </ListView.Behaviors>-->
-            </ListView>
-            <StackLayout Grid.Row="1" x:Name="DetailsArea">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="20" />
-                        <RowDefinition Height="20" />
-                        <RowDefinition/>
-                        <RowDefinition  Height="40" />
-                    </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Text="{Binding Name}"></Label>
-                    <Label Grid.Row="1" Text="{Binding BssID}"></Label>
-                    <Entry Grid.Row="2" Text="{Binding Password}" Placeholder="Enter the password"></Entry>
-
-                    <ListView x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" Grid.Row="3" VerticalOptions="FillAndExpand" >
+        <Button Text="Save" Command="{Binding SaveCommand}"  ></Button>
+        <ListView
+            VerticalOptions="FillAndExpand" 
+            ItemsSource="{Binding WifiNetworks}"
+            SelectedItem="{Binding SelectedNetwork}"
+            ItemTemplate="{StaticResource viewInListTemplateSelector}"
+            ItemSelected="ListView_ItemSelected"
+            >
+            <!-- The behavior that allows to use a command for the SelectedItem event -->
+            <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
+            <!--<ListView.Behaviors>
+            </ListView.Behaviors>-->
+        </ListView>
+        <StackLayout x:Name="DetailsArea">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand" Padding="5">
+                    <Label Text="{Binding Name}"></Label>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Padding="5">
+                        <Label Text="Password"></Label>
+                        <Entry Text="{Binding Password}" WidthRequest="100" MinimumWidthRequest="75"></Entry>
+                    </StackLayout>
+                </StackLayout>
+                <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" VerticalOptions="FillAndExpand" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <ViewCell>
@@ -82,12 +77,9 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <Button Grid.Row="4" Text="Refresh" Clicked="RefreshCoords_Clicked" />
-                </Grid>
-            </StackLayout>
-
-        </Grid>
-
+                <Button Grid.Row="2" Text="Refresh Coords" Clicked="RefreshCoords_Clicked" />
+            </Grid>
+        </StackLayout>
     </StackLayout>
 
 </ContentPage>

@@ -1,15 +1,19 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Text;
+using Xamarin.Forms;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
+
 using WiFiManager.Common.BusinessObjects;
 
 namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
+        string _filePath;
         ObservableCollection<WifiNetwork> _WifiNetworks;
         public ObservableCollection<WifiNetwork> WifiNetworks
         {
@@ -58,6 +62,16 @@ namespace WiFiManager.Common
         public MainPageVM()
         {
             WifiNetworks = new ObservableCollection<WifiNetwork>();
+            SaveCommand = new Command(DoSave);
+        }
+
+
+
+        void DoSave(object parameter)
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string str = JsonConvert.SerializeObject(WifiNetworks, settings);
+            File.WriteAllText(_filePath, str);
         }
 
         protected bool SetProperty<T>(ref T backingStore, T value,
@@ -108,5 +122,7 @@ namespace WiFiManager.Common
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public Command SaveCommand { get; set; }
     }
 }
