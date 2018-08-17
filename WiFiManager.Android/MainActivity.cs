@@ -73,8 +73,8 @@ namespace WiFiManager.Droid
 
 
             var vm = new MainPageVM();
-            vm.WifiNetworks = DoLoad(_filePath);
-            return vm;
+            //vm.WifiNetworks = DoLoad(_filePath);
+            //return vm;
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             wifiManager.StartScan();
             var networks = wifiManager.ConfiguredNetworks;

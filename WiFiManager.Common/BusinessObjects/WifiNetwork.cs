@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace WiFiManager.Common.BusinessObjects
 {
     public class WifiNetwork : BaseObj
     {
+        public bool IsEnabled { get; set; }
         public string BssID { get; set; }
         public string NetworkType { get; set; }
         public string Password { get; set; }
         public string WpsPin { get; set; }
 
-        public List<CoordsAndPower> CoordsAndPower { get; set; }
+        public ObservableCollection<CoordsAndPower> CoordsAndPower { get; set; }
 
         public WifiNetwork()
         {
-            CoordsAndPower = new List<CoordsAndPower>();
+            IsEnabled = true;
+            CoordsAndPower = new ObservableCollection<CoordsAndPower>();
         }
 
         public override bool Fit(string filter)

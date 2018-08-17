@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 using WiFiManager.Common.BusinessObjects;
+using System.Threading.Tasks;
 
 namespace WiFiManager.Common
 {
@@ -74,6 +75,11 @@ namespace WiFiManager.Common
             File.WriteAllText(_filePath, str);
         }
 
+        async Task ExecuteConnectDisconnectCommand()
+        {
+
+        }
+
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
             Action onChanged = null)
@@ -124,5 +130,24 @@ namespace WiFiManager.Common
         }
 
         public Command SaveCommand { get; set; }
+
+
+        private Command _ConnectDisconnectCommand;
+        public const string ConnectDisconnectCommandPropertyName = "ConnectDisconnectCommand";
+
+        public Command ConnectDisconnectCommand
+        {
+            get
+            {
+                /*the false returned in second constructor parameter will mean that button bound to this command 
+                will alwasy be disabled; please change to your logic eg IsBusy view model property*/
+
+                return _ConnectDisconnectCommand ?? (_ConnectDisconnectCommand =
+                    new Command(
+                        async () => await ExecuteConnectDisconnectCommand(),
+                        () => false)
+                    );
+            } 
+        }
     }
 }

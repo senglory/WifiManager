@@ -34,11 +34,26 @@
               DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
               NoteDataTemplate="{StaticResource EditNoteDataTemplate}" 
                                         />
+        <local:BooleanInverseConverter x:Key="booleanInverse" />
 
     </ContentPage.Resources>
-    <StackLayout>
-        <Button Text="Save" Command="{Binding SaveCommand}"  ></Button>
+    <StackLayout >
+        <ActivityIndicator x:Name="pleaseWait"
+                           IsRunning="False"
+                           IsVisible="False"
+                           VerticalOptions="Center" 
+                           />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="200" />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+        </Grid>
+
+        <Button Grid.Row="0" Text="Save" Command="{Binding SaveCommand}"  ></Button>
         <ListView
+            Grid.Row="1"
             VerticalOptions="FillAndExpand" 
             ItemsSource="{Binding WifiNetworks}"
             SelectedItem="{Binding SelectedNetwork}"
@@ -50,34 +65,39 @@
             <!--<ListView.Behaviors>
             </ListView.Behaviors>-->
         </ListView>
-        <StackLayout x:Name="DetailsArea">
+        <StackLayout Grid.Row="2" x:Name="DetailsArea">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                    <RowDefinition />
                     <RowDefinition Height="40" />
                 </Grid.RowDefinitions>
-                <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand" Padding="5">
+                <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand">
                     <Label Text="{Binding Name}"></Label>
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Padding="5">
+                    <StackLayout HorizontalOptions="FillAndExpand" Padding="5">
                         <Label Text="Password"></Label>
-                        <Entry Text="{Binding Password}" WidthRequest="100" MinimumWidthRequest="75"></Entry>
+                        <Entry Text="{Binding Password}" WidthRequest="100"></Entry>
+                        <Switch BindingContext="{Binding Path=IsEnabled,
+                                       Converter={StaticResource booleanInverse}}"></Switch>
                     </StackLayout>
                 </StackLayout>
-                <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" VerticalOptions="FillAndExpand" >
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <ViewCell>
-                                    <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
-                                        <Label Text="{Binding Long}" BackgroundColor="AliceBlue"></Label>
-                                        <Label Text="{Binding Lat}"></Label>
-                                        <Label Text="{Binding Power}"></Label>
-                                    </StackLayout>
-                                </ViewCell>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                <Button Grid.Row="2" Text="Refresh Coords" Clicked="RefreshCoords_Clicked" />
+                <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" >
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                                    <Label Text="{Binding Lat}"></Label>
+                                    <Label Text="{Binding Long}"></Label>
+                                    <Label Text="{Binding Power}"></Label>
+                                </StackLayout>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                    <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" />
+                    <Button Text="Connect/Disconnect" Command="{Binding ConnectDisconnectCommand}"  IsEnabled="{Binding IsEnabled}" />
+                </StackLayout>
             </Grid>
         </StackLayout>
     </StackLayout>

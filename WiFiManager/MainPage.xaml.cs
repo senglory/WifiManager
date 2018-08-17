@@ -43,36 +43,63 @@ namespace WiFiManager
             if (!hasPermission)
                 return;
 
-            var mpv = this.BindingContext as MainPageVM;
-            var coords = mpv.SelectedNetwork.CoordsAndPower;
-            //LocationManager LocMgr = Android.App.Application.Context.GetSystemService("location") as LocationManager;
-            //var locationCriteria = new Criteria();
-            //locationCriteria.Accuracy = Accuracy.High;
-            //locationCriteria.PowerRequirement = Power.High;
-            //var locationProvider = LocMgr.GetBestProvider(locationCriteria, true);
-            //var lastLocation = LocMgr.GetLastKnownLocation(locationProvider);
-            //netw.Add(new CoordsAndPower {
-            //    Lat = lastLocation.Latitude,
-            //    Long=lastLocation.Longitude,
-            //    Alt=lastLocation.Altitude
-            //});
-
-            var locator = CrossGeolocator.Current;
-            locator.DesiredAccuracy = 1;
-            var includeHeading = true;
-
-            var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
-            if (position == null)
+            try
             {
-                return;
+                pleaseWait.IsVisible = true;
+                pleaseWait.IsRunning = true;// my activity indicator
+
+                //await long operation here, i.e.:
+                var mpv = this.BindingContext as MainPageVM;
+                var coords = mpv.SelectedNetwork.CoordsAndPower;
+                //LocationManager LocMgr = Android.App.Application.Context.GetSystemService("location") as LocationManager;
+                //var locationCriteria = new Criteria();
+                //locationCriteria.Accuracy = Accuracy.High;
+                //locationCriteria.PowerRequirement = Power.High;
+                //var locationProvider = LocMgr.GetBestProvider(locationCriteria, true);
+                //var lastLocation = LocMgr.GetLastKnownLocation(locationProvider);
+                //netw.Add(new CoordsAndPower {
+                //    Lat = lastLocation.Latitude,
+                //    Long=lastLocation.Longitude,
+                //    Alt=lastLocation.Altitude
+                //});
+
+                var locator = CrossGeolocator.Current;
+                locator.DesiredAccuracy = 1;
+                var includeHeading = true;
+
+                var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
+                if (position == null)
+                {
+                    return;
+                }
+                coords.Add(new CoordsAndPower
+                {
+                    Lat = position.Latitude,
+                    Long = position.Longitude,
+                    Alt = position.Altitude
+                });
+                //lstCoords.ItemsSource = coords;
             }
-            coords.Add(new CoordsAndPower
+            finally
             {
-                Lat = position.Latitude,
-                Long = position.Longitude,
-                Alt = position.Altitude
-            });
-            //lstCoords.ItemsSource = coords;
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;// my activity indicator
+            }
+
+        }
+
+        private void ConnDisconn_Clicked(object sender, EventArgs e)
+        {
+            try
+            {
+                pleaseWait.IsVisible = true;
+                pleaseWait.IsRunning = true;
+            }
+            finally
+            {
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
+            }
         }
     }
 }
