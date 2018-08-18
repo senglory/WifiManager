@@ -64,6 +64,8 @@ namespace WiFiManager.Common
         {
             WifiNetworks = new ObservableCollection<WifiNetwork>();
             SaveCommand = new Command(DoSave);
+            ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
+            RefreshNetworksCommand= new Command(DoSave);
         }
 
 
@@ -75,7 +77,7 @@ namespace WiFiManager.Common
             File.WriteAllText(_filePath, str);
         }
 
-        async Task ExecuteConnectDisconnectCommand()
+        void ExecuteConnectDisconnectCommand()
         {
 
         }
@@ -130,24 +132,27 @@ namespace WiFiManager.Common
         }
 
         public Command SaveCommand { get; set; }
+        public Command RefreshNetworksCommand { get; set; }
 
 
-        private Command _ConnectDisconnectCommand;
-        public const string ConnectDisconnectCommandPropertyName = "ConnectDisconnectCommand";
+        public Command ConnectDisconnectCommand { get; set; }
 
-        public Command ConnectDisconnectCommand
-        {
-            get
-            {
-                /*the false returned in second constructor parameter will mean that button bound to this command 
-                will alwasy be disabled; please change to your logic eg IsBusy view model property*/
+        //private Command _ConnectDisconnectCommand;
+        //public const string ConnectDisconnectCommandPropertyName = "ConnectDisconnectCommand";
 
-                return _ConnectDisconnectCommand ?? (_ConnectDisconnectCommand =
-                    new Command(
-                        async () => await ExecuteConnectDisconnectCommand(),
-                        () => false)
-                    );
-            } 
-        }
+        //public Command ConnectDisconnectCommand
+        //{
+        //    get
+        //    {
+        //        /*the false returned in second constructor parameter will mean that button bound to this command 
+        //        will alwasy be disabled; please change to your logic eg IsBusy view model property*/
+
+        //        return _ConnectDisconnectCommand ?? (_ConnectDisconnectCommand =
+        //            new Command(
+        //                async () => await ExecuteConnectDisconnectCommand(),
+        //                () => false)
+        //            );
+        //    } 
+        //}
     }
 }

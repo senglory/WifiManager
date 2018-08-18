@@ -72,3 +72,8 @@ public bool JoinWifi(string ssid, string key)
 
 https://stackoverflow.com/questions/15014519/apk-installation-failed-install-failed-verification-failure/34666037
 
+https://forums.xamarin.com/discussion/100629/how-should-i-enable-and-disable-a-button-based-on-all-valid-inputs
+
+https://stackoverflow.com/questions/41070613/xamarin-forms-switch-toggled-event-doesnt-bind-with-viewmodel
+
+https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xaml-basics/data-binding-basics
