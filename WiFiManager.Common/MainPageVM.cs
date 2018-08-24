@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -65,9 +66,14 @@ namespace WiFiManager.Common
             WifiNetworks = new ObservableCollection<WifiNetwork>();
             SaveCommand = new Command(DoSave);
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
-            RefreshNetworksCommand= new Command(DoSave);
+            RefreshNetworksCommand= new Command(DoRefreshNetworks);
         }
 
+        void DoRefreshNetworks()
+        {
+
+
+        }
 
 
         void DoSave(object parameter)
@@ -77,7 +83,7 @@ namespace WiFiManager.Common
             File.WriteAllText(_filePath, str);
         }
 
-        void ExecuteConnectDisconnectCommand()
+        void ExecuteConnectDisconnectCommand(object parameter)
         {
 
         }

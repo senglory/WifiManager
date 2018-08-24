@@ -3,6 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 using WiFiManager.Common;
+using Plugin.Connectivity;
 
 [assembly: XamlCompilation (XamlCompilationOptions.Compile)]
 namespace WiFiManager
@@ -18,17 +19,22 @@ namespace WiFiManager
 
 		protected override void OnStart ()
 		{
-			// Handle when your app starts
-		}
+            CrossConnectivity.Current.ConnectivityChanged += Current_ConnectivityChanged;
+        }
 
-		protected override void OnSleep ()
-		{
-			// Handle when your app sleeps
-		}
+        private void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
 
-		protected override void OnResume ()
+        protected override void OnSleep ()
 		{
-			// Handle when your app resumes
-		}
-	}
+            CrossConnectivity.Current.ConnectivityChanged -= Current_ConnectivityChanged;
+        }
+
+        protected override void OnResume ()
+		{
+            CrossConnectivity.Current.ConnectivityChanged += Current_ConnectivityChanged;
+        }
+    }
 }

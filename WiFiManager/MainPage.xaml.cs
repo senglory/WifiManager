@@ -1,11 +1,12 @@
 ﻿using System;
-using WiFiManager.Common.BusinessObjects;
-using WiFiManager.Common;
-
 
 using Xamarin.Forms;
 using Plugin.Geolocator;
 using Plugin.Permissions.Abstractions;
+using Xamarin.Forms.PlatformConfiguration;
+
+using WiFiManager.Common.BusinessObjects;
+using WiFiManager.Common;
 
 
 
@@ -46,54 +47,61 @@ namespace WiFiManager
             try
             {
                 pleaseWait.IsVisible = true;
-                pleaseWait.IsRunning = true;// my activity indicator
+                pleaseWait.IsRunning = true;
 
-                //await long operation here, i.e.:
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
-                //LocationManager LocMgr = Android.App.Application.Context.GetSystemService("location") as LocationManager;
-                //var locationCriteria = new Criteria();
-                //locationCriteria.Accuracy = Accuracy.High;
-                //locationCriteria.PowerRequirement = Power.High;
-                //var locationProvider = LocMgr.GetBestProvider(locationCriteria, true);
-                //var lastLocation = LocMgr.GetLastKnownLocation(locationProvider);
-                //netw.Add(new CoordsAndPower {
-                //    Lat = lastLocation.Latitude,
-                //    Long=lastLocation.Longitude,
-                //    Alt=lastLocation.Altitude
-                //});
-
-                var locator = CrossGeolocator.Current;
-                locator.DesiredAccuracy = 1;
-                var includeHeading = true;
-
-                var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
-                if (position == null)
-                {
-                    return;
-                }
-                coords.Add(new CoordsAndPower
-                {
-                    Lat = position.Latitude,
-                    Long = position.Longitude,
-                    Alt = position.Altitude
+            }
+            catch (Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    DisplayAlert("Error", ex.Message, "OK");
                 });
-                //lstCoords.ItemsSource = coords;
             }
             finally
             {
                 pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;// my activity indicator
+                pleaseWait.IsRunning = false;
             }
 
         }
 
-        private void ConnDisconn_Clicked(object sender, EventArgs e)
+        private async void ConnDisconn_Clicked(object sender, EventArgs e)
         {
             try
             {
                 pleaseWait.IsVisible = true;
                 pleaseWait.IsRunning = true;
+
+                var mpv = this.BindingContext as MainPageVM;
+                var nw = mpv.SelectedNetwork;
+                mgr.Connect(nw.BssID,  nw.Name,nw.Password);
+            }
+            catch(Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    DisplayAlert("Error", ex.Message, "OK");
+                });
+            }
+            finally
+            {
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
+            }
+        }
+
+        private async void RefreshNetworks_Clicked(object sender, EventArgs e)
+        {
+            try
+            {
+                pleaseWait.IsVisible = true;
+                pleaseWait.IsRunning = true;
+
+                this.BindingContext = await mgr.GetActiveWifiNetworksAsync(); 
+            }
+            catch (Exception ex)
+            {
+                int rr = 0;
             }
             finally
             {
