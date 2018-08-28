@@ -144,7 +144,7 @@ namespace WiFiManager.Droid
             var connManager =  (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
             var ni1=connManager.ActiveNetworkInfo;
             
-            if (ni1.IsConnected && ni1.Type==ConnectivityType.Wifi)
+            if (ni1!=null && ni1.IsConnected && ni1.Type==ConnectivityType.Wifi)
             {
                 var wifiInfo = wifiManager.ConnectionInfo;
                 var bdi = wifiManager.Disconnect();

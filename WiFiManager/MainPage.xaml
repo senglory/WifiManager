@@ -6,12 +6,22 @@
 
     <ContentPage.Resources>
 
+        
         <!-- Default DataTemplate -->
         <DataTemplate x:Key="DefaultDataTemplate">
         </DataTemplate>
         <DataTemplate x:Key="NoteDataTemplate">
             <ViewCell>
-                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill">
+                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill" >
+                    <StackLayout.Resources>
+                        <Style TargetType="StackLayout">
+                            <Style.Triggers>
+                                <Trigger TargetType="StackLayout" Property="IsFocused" Value="True">
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackLayout.Resources>
                     <Label Text="{Binding Name}" />
                     <Label Text="{Binding BssID}" />
                 </StackLayout>
@@ -35,13 +45,58 @@
               NoteDataTemplate="{StaticResource EditNoteDataTemplate}" 
                                         />
         <local:BooleanInverseConverter x:Key="booleanInverse" />
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="Green" />
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="TextColor" Value="Green" />
+                <Setter Property="BackgroundColor" Value="Black" />
+                <Setter Property="BorderColor" Value="Beige" />
+                <Setter Property="BorderWidth" Value="1" />
+            </Style>
+            <Style TargetType="StackLayout">
+                <Setter Property="BackgroundColor" Value="Black" />
+            </Style>
+            <Style TargetType="ListView">
+                <Setter Property="BackgroundColor" Value="Black" />
+            </Style>
 
+            <Style x:Key="MyLabelStyle" TargetType="StackLayout">
+                <!--<Style.Triggers>-->
+                    <!--<DataTrigger TargetType="StackLayout" Binding="{Binding SetToBlack}" Value="True" >
+                        <Setter Property="BackgroundColor" Value="DarkGray" />
+                    </DataTrigger>-->
+                    <!--<MultiTrigger TargetType="StackLayout">
+                        <MultiTrigger.Conditions>
+                            <BindingCondition Property="{Binding IsEnabled}" Value="true" />
+                        </MultiTrigger.Conditions>
+                        <Setter Property="Foreground" Value="Yellow" />
+                    </MultiTrigger>-->
+
+                    <!--<MultiTrigger TargetType="Button">
+                        <MultiTrigger.Conditions>
+                            <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                        </MultiTrigger.Conditions>
+                        <Setter Property="IsEnabled" Value="True" />
+                    </MultiTrigger>-->
+
+                <!--</Style.Triggers>-->
+                <Style.Triggers>
+                    <Trigger TargetType="StackLayout" Property="IsFocused" Value="True">
+                        <Setter Property="BackgroundColor" Value="Orange" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+        </ResourceDictionary>
     </ContentPage.Resources>
-    <StackLayout >
+    <StackLayout>
         <ActivityIndicator x:Name="pleaseWait"
                            IsRunning="False"
                            IsVisible="False"
                            VerticalOptions="Center" 
+                           BackgroundColor="Black"
                            />
         <Grid>
             <Grid.RowDefinitions>
@@ -51,12 +106,14 @@
             </Grid.RowDefinitions>
         </Grid>
         <StackLayout Grid.Row="0" HorizontalOptions="Fill" Orientation="Horizontal">
-            <Button Text="Save" Command="{Binding SaveCommand}"  ></Button>
-            <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"  ></Button>
+            <Button Text="Save" Command="{Binding SaveCommand}" ></Button>
+            <Button Text="Refresh" Clicked="RefreshNetworks_Clicked" ></Button>
         </StackLayout>
+
         <ListView
             Grid.Row="1"
             VerticalOptions="FillAndExpand" 
+            SeparatorColor="Beige"
             ItemsSource="{Binding WifiNetworks}"
             SelectedItem="{Binding SelectedNetwork}"
             ItemTemplate="{StaticResource viewInListTemplateSelector}"
@@ -66,6 +123,19 @@
             <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
             <!--<ListView.Behaviors>
             </ListView.Behaviors>-->
+            <!--<ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <MultiTrigger TargetType="ListViewItem">
+                            <MultiTrigger.Conditions>
+                                <BindingCondition Binding="{Binding Path=Selected}" Value="true" />
+                                <BindingCondition Binding="{Binding Path=Focused}" Value="true" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="ListViewItem.BackColor" Value="Pink" />
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>-->
         </ListView>
         <StackLayout Grid.Row="2" x:Name="DetailsArea">
             <Grid>
@@ -96,18 +166,9 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
                     <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked"  />
-                    <Button Text="Connect/Disconnect" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}">
-                        <!--<Button.Triggers>
-                            <MultiTrigger TargetType="Button">
-                                <MultiTrigger.Conditions>
-                                    <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-                                </MultiTrigger.Conditions>
-                                <Setter Property="IsEnabled" Value="True" />
-                            </MultiTrigger>
-                        </Button.Triggers>-->
-                    </Button>
+                    <Button Text="Connect/Disconnect" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"/>
                 </StackLayout>
             </Grid>
         </StackLayout>

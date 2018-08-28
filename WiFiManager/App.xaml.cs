@@ -24,7 +24,7 @@ namespace WiFiManager
 
         private void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
         {
-            //throw new NotImplementedException();
+            var qq = "";
         }
 
         protected override void OnSleep ()

@@ -11,6 +11,8 @@ namespace WiFiManager
         public DataTemplate DefaultnDataTemplate { get; set; }
         public DataTemplate NoteDataTemplate { get; set; }
 
+        public object FromLV { get; set; }
+
         protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
         {
             if (null == item)
