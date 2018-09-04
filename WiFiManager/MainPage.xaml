@@ -40,10 +40,7 @@
               DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
               NoteDataTemplate="{StaticResource NoteDataTemplate}" 
                                         />
-        <local:ItemTemplateSelector x:Key="editTemplateSelector"
-              DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
-              NoteDataTemplate="{StaticResource EditNoteDataTemplate}" 
-                                        />
+
         <local:BooleanInverseConverter x:Key="booleanInverse" />
         <ResourceDictionary>
             <Style TargetType="Label">
@@ -62,33 +59,7 @@
                 <Setter Property="BackgroundColor" Value="Black" />
             </Style>
 
-            <Style x:Key="MyLabelStyle" TargetType="StackLayout">
-                <!--<Style.Triggers>-->
-                    <!--<DataTrigger TargetType="StackLayout" Binding="{Binding SetToBlack}" Value="True" >
-                        <Setter Property="BackgroundColor" Value="DarkGray" />
-                    </DataTrigger>-->
-                    <!--<MultiTrigger TargetType="StackLayout">
-                        <MultiTrigger.Conditions>
-                            <BindingCondition Property="{Binding IsEnabled}" Value="true" />
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Foreground" Value="Yellow" />
-                    </MultiTrigger>-->
 
-                    <!--<MultiTrigger TargetType="Button">
-                        <MultiTrigger.Conditions>
-                            <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-                        </MultiTrigger.Conditions>
-                        <Setter Property="IsEnabled" Value="True" />
-                    </MultiTrigger>-->
-
-                <!--</Style.Triggers>-->
-                <Style.Triggers>
-                    <Trigger TargetType="StackLayout" Property="IsFocused" Value="True">
-                        <Setter Property="BackgroundColor" Value="Orange" />
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-            
         </ResourceDictionary>
     </ContentPage.Resources>
     <StackLayout>
@@ -111,13 +82,13 @@
         </StackLayout>
 
         <ListView
+            x:Name="lstNetworks"
             Grid.Row="1"
             VerticalOptions="FillAndExpand" 
             SeparatorColor="Beige"
             ItemsSource="{Binding WifiNetworks}"
             SelectedItem="{Binding SelectedNetwork}"
             ItemTemplate="{StaticResource viewInListTemplateSelector}"
-            ItemSelected="ListView_ItemSelected"
             >
             <!-- The behavior that allows to use a command for the SelectedItem event -->
             <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
@@ -137,7 +108,7 @@
                 </Style>
             </ListView.Resources>-->
         </ListView>
-        <StackLayout Grid.Row="2" x:Name="DetailsArea">
+        <StackLayout Grid.Row="2" x:Name="DetailsArea" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition />

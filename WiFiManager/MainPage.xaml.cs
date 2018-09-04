@@ -30,14 +30,6 @@ namespace WiFiManager
 
 
 
-        private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
-            var netw = e.SelectedItem as WifiNetwork;
-            //netw.CoordsAndPower.Clear();
-            DetailsArea.BindingContext = netw;
-            //lstCoords.ItemsSource = netw.CoordsAndPower;
-        }
-
         private async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
             var hasPermission = await Utils.CheckPermissions(Permission.Location);

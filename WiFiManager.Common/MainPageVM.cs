@@ -105,6 +105,16 @@ namespace WiFiManager.Common
             //return true;
         }
 
+        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public Command SaveCommand { get; set; }
+        public Command RefreshNetworksCommand { get; set; }
+        public Command ConnectDisconnectCommand { get; set; }
+
+
         //private Command loadTweetsCommand;
 
         //public Command LoadTweetsCommand
@@ -131,17 +141,6 @@ namespace WiFiManager.Common
         //    IsBusy = false;
         //    LoadTweetsCommand.ChangeCanExecute();
         //}
-
-        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public Command SaveCommand { get; set; }
-        public Command RefreshNetworksCommand { get; set; }
-
-
-        public Command ConnectDisconnectCommand { get; set; }
 
         //private Command _ConnectDisconnectCommand;
         //public const string ConnectDisconnectCommandPropertyName = "ConnectDisconnectCommand";
