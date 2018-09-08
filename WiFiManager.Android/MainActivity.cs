@@ -29,6 +29,10 @@ namespace WiFiManager.Droid
     [Activity(Label = "WiFiManager", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, IWifiOperations
     {
+        string filePathCSV = Path.Combine(
+"/storage/sdcard0/DCIM"
+, "WIFINETWORKS.csv");
+
         protected override void OnCreate(Bundle bundle)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -71,14 +75,13 @@ namespace WiFiManager.Droid
             //    Alt = position.Altitude
             //});
 
-            var _filePath = Path.Combine(
-    //Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-    "/storage/sdcard0/DCIM"
-    , "WIFINETWORKS.txt");
 
-            var vm = new MainPageVM();
-            //vm.WifiNetworks = DoLoad(_filePath);
-            //return vm;
+            var filePathJSON = Path.Combine(
+    "/storage/sdcard0/DCIM"
+    , "WIFINETWORKS.JSON");
+
+
+            var wifiNetworks = new List<WifiNetworkDto>();
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
 
             wifiManager.StartScan();
@@ -89,14 +92,15 @@ namespace WiFiManager.Droid
             {
                 try
                 {
-                    var netw = new WifiNetwork()
+                    var netw = new WifiNetworkDto()
                     {
-                        BssID = n.Bssid,
+                        BssID = n.Bssid.ToUpper(),
                         Name = n.Ssid,
                         NetworkType = n.Capabilities,
-                        Level = n.Level
+                        Level = n.Level,
+                        IsEnabled=true 
                     };
-                    vm.WifiNetworks.Add(netw);
+                    wifiNetworks.Add(netw);
                 }
                 catch (Exception ex)
                 {
@@ -106,28 +110,28 @@ namespace WiFiManager.Droid
                 }
             }
 
+            var vm = new MainPageVM(wifiNetworks, filePathCSV);
+            try
+            {
+                var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
+                var hasPermission = t.Result;
+                if (hasPermission)
+                    vm.AppendNetworksFromCSV(filePathCSV);
+                vm.SortList();
+            }
+            catch (Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    //DisplayAlert("Error", ex.Message, "OK");
+                });
+            }
+
             return vm;
         }
 
-        ObservableCollection<WifiNetwork> DoLoad(string filePath)
-        {
-            var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
-            var hasPermission = t.Result;
-            if (!hasPermission)
-                return null;
 
 
-            if (File.Exists(filePath))
-            {
-                JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-                var s = File.ReadAllText(filePath);
-                var ocwn = JsonConvert.DeserializeObject<ObservableCollection<WifiNetwork>>(s, settings);
-                return ocwn;
-            }
-            return null;
-        }
-
-        public  void Connect(string bssid, string ssid, string password)
+        public void Connect(string bssid, string ssid, string password)
         {
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
@@ -203,7 +207,7 @@ namespace WiFiManager.Droid
             //    Alt = position.Altitude
             //});
 
-            var vm = new MainPageVM();
+            var wifiNetworks = new List<WifiNetworkDto>();
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             wifiManager.StartScan();
             var networks = wifiManager.ConfiguredNetworks;
@@ -213,13 +217,14 @@ namespace WiFiManager.Droid
             {
                 try
                 {
-                    var netw = new WifiNetwork()
+                    var netw = new WifiNetworkDto()
                     {
-                        BssID = n.Bssid,
+                        BssID = n.Bssid.ToUpper(),
                         Name = n.Ssid,
                         NetworkType = n.Capabilities,
+                        IsEnabled = true
                     };
-                    vm.WifiNetworks.Add(netw);
+                    wifiNetworks.Add(netw);
                     //netw.CoordsAndPower.Add(new CoordsAndPower
                     //{
                     //    Lat = 11.3,
@@ -230,14 +235,29 @@ namespace WiFiManager.Droid
                 }
                 catch (Exception ex)
                 {
-                    int y = 0;
+                    Device.BeginInvokeOnMainThread(() => {
+                        //DisplayAlert("Error", ex.Message, "OK");
+                    });
                 }
             }
+            var vm = new MainPageVM(wifiNetworks, filePathCSV);
+            try
+            {
+                var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
+                var hasPermission = t.Result;
+                if (hasPermission)
+                    vm.AppendNetworksFromCSV(filePathCSV);
+                vm.SortList();
+            }
+            catch (Exception ex)
+            {
 
+                throw;
+            }
             return vm;
         }
 
-        public async Task GetActualCoordsAsync(WifiNetwork network) {
+        public async Task GetActualCoordsAsync(WifiNetworkDto network) {
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             wifiManager.StartScan();
             var networks = wifiManager.ConfiguredNetworks;

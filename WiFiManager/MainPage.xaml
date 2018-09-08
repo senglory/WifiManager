@@ -16,9 +16,15 @@
                     <StackLayout.Resources>
                         <Style TargetType="StackLayout">
                             <Style.Triggers>
-                                <Trigger TargetType="StackLayout" Property="IsFocused" Value="True">
+                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsInCSVList}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="Gray" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsSelected}" Value="True">
                                     <Setter Property="BackgroundColor" Value="OrangeRed" />
-                                </Trigger>
+                                </DataTrigger>
+                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsEnabled}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="DarkRed" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </StackLayout.Resources>
@@ -44,6 +50,10 @@
         <local:BooleanInverseConverter x:Key="booleanInverse" />
         <ResourceDictionary>
             <Style TargetType="Label">
+                <Setter Property="TextColor" Value="Green" />
+                <Setter Property="HeightRequest" Value="30"/>
+            </Style>
+            <Style TargetType="Entry">
                 <Setter Property="TextColor" Value="Green" />
             </Style>
             <Style TargetType="Button">
@@ -90,23 +100,7 @@
             SelectedItem="{Binding SelectedNetwork}"
             ItemTemplate="{StaticResource viewInListTemplateSelector}"
             >
-            <!-- The behavior that allows to use a command for the SelectedItem event -->
-            <!--<behaviorsPack:SelectedItemBehavior Command="{Binding ItemSelectedCommand}" />-->
-            <!--<ListView.Behaviors>
-            </ListView.Behaviors>-->
-            <!--<ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <Style.Triggers>
-                        <MultiTrigger TargetType="ListViewItem">
-                            <MultiTrigger.Conditions>
-                                <BindingCondition Binding="{Binding Path=Selected}" Value="true" />
-                                <BindingCondition Binding="{Binding Path=Focused}" Value="true" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="ListViewItem.BackColor" Value="Pink" />
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.Resources>-->
+
         </ListView>
         <StackLayout Grid.Row="2" x:Name="DetailsArea" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
             <Grid>
@@ -120,8 +114,7 @@
                     <StackLayout HorizontalOptions="FillAndExpand" Padding="5">
                         <Label Text="Password"></Label>
                         <Entry Text="{Binding Password}" WidthRequest="100"></Entry>
-                        <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled,
-                                       Converter={StaticResource booleanInverse}}"></Switch>
+                        <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" />
                     </StackLayout>
                 </StackLayout>
                 <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" >
@@ -139,7 +132,7 @@
                 </ListView>
                 <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
                     <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked"  />
-                    <Button Text="Connect/Disconnect" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"/>
+                    <Button Text="Conn/Disconn" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"/>
                 </StackLayout>
             </Grid>
         </StackLayout>

@@ -17,7 +17,7 @@ namespace WiFiManager
         {
             if (null == item)
                 return DefaultnDataTemplate;
-            if (item.GetType() == typeof(WifiNetwork))
+            if (item.GetType() == typeof(WifiNetworkDto))
             {
                 return NoteDataTemplate;
             }
