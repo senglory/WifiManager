@@ -24,6 +24,8 @@ using WiFiManager.Common;
 using Android.Net;
 using Xamarin.Forms;
 
+
+
 namespace WiFiManager.Droid
 {
     [Activity(Label = "WiFiManager", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
@@ -32,6 +34,10 @@ namespace WiFiManager.Droid
         string filePathCSV = Path.Combine(
 "/storage/sdcard0/DCIM"
 , "WIFINETWORKS.csv");
+
+        string filePathJSON = Path.Combine(
+"/storage/sdcard0/DCIM"
+, "WIFINETWORKS.JSON");
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -76,9 +82,6 @@ namespace WiFiManager.Droid
             //});
 
 
-            var filePathJSON = Path.Combine(
-    "/storage/sdcard0/DCIM"
-    , "WIFINETWORKS.JSON");
 
 
             var wifiNetworks = new List<WifiNetworkDto>();
@@ -110,7 +113,7 @@ namespace WiFiManager.Droid
                 }
             }
 
-            var vm = new MainPageVM(wifiNetworks, filePathCSV);
+            var vm = new MainPageVM(wifiNetworks, filePathCSV, filePathJSON);
             try
             {
                 var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
@@ -131,7 +134,7 @@ namespace WiFiManager.Droid
 
 
 
-        public void Connect(string bssid, string ssid, string password)
+        public bool Connect(string bssid, string ssid, string password)
         {
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
@@ -153,6 +156,8 @@ namespace WiFiManager.Droid
                 var wifiInfo = wifiManager.ConnectionInfo;
                 var bdi = wifiManager.Disconnect();
                 var brr=wifiManager.RemoveNetwork(wifiInfo.NetworkId);
+
+                return true;
             }
             else {
                 //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.WpaPsk);
@@ -183,6 +188,7 @@ namespace WiFiManager.Droid
                 //var current = Xamarin.esse;
                 //var bd2 = wifiManager.Reconnect();
                 //wifiManager.UpdateNetwork(wifiConfig);
+                return wifiInfo.BSSID == "00:00:00:00:00:00";
             }
         }
 
@@ -240,13 +246,15 @@ namespace WiFiManager.Droid
                     });
                 }
             }
-            var vm = new MainPageVM(wifiNetworks, filePathCSV);
+            var vm = new MainPageVM(wifiNetworks, filePathCSV, filePathJSON);
             try
             {
                 var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
                 var hasPermission = t.Result;
                 if (hasPermission)
+                {
                     vm.AppendNetworksFromCSV(filePathCSV);
+                }
                 vm.SortList();
             }
             catch (Exception ex)

@@ -58,16 +58,24 @@ namespace WiFiManager
 
         }
 
-        private async void ConnDisconn_Clicked(object sender, EventArgs e)
+        private void ConnDisconn_Clicked(object sender, EventArgs e)
         {
             try
             {
-                pleaseWait.IsVisible = true;
-                pleaseWait.IsRunning = true;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
 
                 var mpv = this.BindingContext as MainPageVM;
                 var nw = mpv.SelectedNetwork;
-                mgr.Connect(nw.BssID,  nw.Name,nw.Password);
+                var bres = mgr.Connect(nw.BssID,  nw.Name,nw.Password);
+                if (!bres)
+                {
+                    Device.BeginInvokeOnMainThread(() => {
+                        DisplayAlert("Error", "Can't connect", "OK");
+                    });
+                }
             }
             catch(Exception ex)
             {
@@ -77,8 +85,10 @@ namespace WiFiManager
             }
             finally
             {
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                });
             }
         }
 

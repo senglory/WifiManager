@@ -15,6 +15,7 @@ namespace WiFiManager.Common.BusinessObjects
         public string Password { get; set; }
         public string WpsPin { get; set; }
         public int Level { get; set; }
+        public string Provider { get; set; }
         public bool IsSelected{ get; set; }
         public bool IsEnabled { get; set; }
         public bool IsInCSVList { get; set; }

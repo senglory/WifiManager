@@ -3,14 +3,15 @@ using System.IO;
 using System.Collections.Generic;
 using Xamarin.Forms;
 using System.Linq;
-using Xamarin.Forms.PlatformConfiguration;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 using WiFiManager.Common.BusinessObjects;
 
+using Xamarin.Forms.PlatformConfiguration;
 using Newtonsoft.Json;
+using AutoMapper;
 
 
 
@@ -18,7 +19,7 @@ namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
-        //string _filePath;
+        string filePathJSON;
         string filePathCSV;
 
 
@@ -79,9 +80,25 @@ namespace WiFiManager.Common
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public MainPageVM(List<WifiNetworkDto> networks, string filePathCSV)
+        static readonly MapperConfiguration config;
+        static readonly IMapper mapper;
+
+        static MainPageVM()
+        {
+            config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
+                cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
+                cfg.IgnoreUnmapped();
+            });
+            config.AssertConfigurationIsValid();
+            mapper = config.CreateMapper();
+        }
+
+        public MainPageVM(List<WifiNetworkDto> networks, string filePathCSV, string filePathJSON)
         {
             this.filePathCSV = filePathCSV;
+            this.filePathJSON = filePathJSON;
             WifiNetworks = new ObservableCollection<WifiNetworkDto>(networks);
             SaveCommand = new Command(DoSave);
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
@@ -102,10 +119,13 @@ namespace WiFiManager.Common
 
         void DoSave(object parameter)
         {
-            //JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-            //string str = JsonConvert.SerializeObject(WifiNetworks, settings);
-            //File.WriteAllText(_filePath, str);
             SaveToCSV();
+        }
+        void DoSaveJson(object parameter)
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string str = JsonConvert.SerializeObject(WifiNetworks, settings);
+            File.WriteAllText(filePathJSON, str);
         }
 
         public void AppendNetworksFromCSV( string csvFilePath)
@@ -121,19 +141,28 @@ namespace WiFiManager.Common
                     {
                         var s = fr.ReadLine();
                         var arrs = s.Split(new char[] { ';' });
-                        var nw = new WifiNetworkDto
+                        var nw = new WifiNetwork
                         {
                             BssID = arrs[1].ToUpper(),
                             Name = arrs[0],
                             Password = arrs[2],
                             IsEnabled = !Convert.ToBoolean(int.Parse ( arrs[3])),
-                            NetworkType = arrs[4]
+                            NetworkType = arrs[4],
+                            Provider = arrs[5]
                         };
-                        var detected = AllRecordsQuickSearch.ContainsKey(nw.BssID);
-                        nw.IsInCSVList = detected;
-                        if (detected)
-                            AllRecordsQuickSearch[nw.BssID].IsEnabled = nw.IsEnabled;
-                        WifiNetworks.Add(nw);
+                        var nwdto = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+                        var isInCSVList = AllRecordsQuickSearch.ContainsKey(nwdto.BssID);
+                        nwdto.IsInCSVList = isInCSVList;
+                        if (isInCSVList)
+                        {
+                            AllRecordsQuickSearch[nw.BssID].IsEnabled = nwdto.IsEnabled;
+                            AllRecordsQuickSearch[nw.BssID].Password = nwdto.Password;
+                            AllRecordsQuickSearch[nw.BssID].Provider = nwdto.Provider;
+                        }
+                        else
+                        {
+                            WifiNetworks.Add(nwdto);
+                        }
                     }
                 }
             }
@@ -144,11 +173,11 @@ namespace WiFiManager.Common
             {
                 using (var fw = new StreamWriter(fs))
                 {
-                    fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType");
+                    fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
                     foreach (var nw in WifiNetworks)
                     {
                         var isBanned = nw.IsEnabled ? 0 : 1;
-                        fw.WriteLine($"{nw.Name};{nw.BssID};{nw.Password};{isBanned};{nw.NetworkType}");
+                        fw.WriteLine($"{nw.Name};{nw.BssID};{nw.Password};{isBanned};{nw.NetworkType};{nw.Provider}");
                     }
                 }
             }

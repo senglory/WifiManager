@@ -47,7 +47,6 @@
               NoteDataTemplate="{StaticResource NoteDataTemplate}" 
                                         />
 
-        <local:BooleanInverseConverter x:Key="booleanInverse" />
         <ResourceDictionary>
             <Style TargetType="Label">
                 <Setter Property="TextColor" Value="Green" />
@@ -100,41 +99,56 @@
             SelectedItem="{Binding SelectedNetwork}"
             ItemTemplate="{StaticResource viewInListTemplateSelector}"
             >
-
         </ListView>
         <StackLayout Grid.Row="2" x:Name="DetailsArea" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition Height="40" />
-                </Grid.RowDefinitions>
-                <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand">
-                    <Label Text="{Binding Name}"></Label>
-                    <StackLayout HorizontalOptions="FillAndExpand" Padding="5">
-                        <Label Text="Password"></Label>
-                        <Entry Text="{Binding Password}" WidthRequest="100"></Entry>
-                        <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" />
-                    </StackLayout>
+            <Frame HasShadow="False" Padding="1"  BorderColor="#F69927">
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition Height="40" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="40" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"></Label>
+                                <Switch Grid.Row="0" Grid.Column="1"  x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="Password"></Label>
+                                <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Password}" WidthRequest="100"></Entry>
+                            </Grid>
+                        </StackLayout>
+                        <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" >
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ViewCell>
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                                            <Label Text="{Binding Lat}"></Label>
+                                            <Label Text="{Binding Long}"></Label>
+                                            <Label Text="{Binding Power}"></Label>
+                                        </StackLayout>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
+                            <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked"  />
+                            <Button Text="Conn/Disconn" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"/>
+                        </StackLayout>
+                    </Grid>
                 </StackLayout>
-                <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" >
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <ViewCell>
-                                <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
-                                    <Label Text="{Binding Lat}"></Label>
-                                    <Label Text="{Binding Long}"></Label>
-                                    <Label Text="{Binding Power}"></Label>
-                                </StackLayout>
-                            </ViewCell>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-                <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
-                    <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked"  />
-                    <Button Text="Conn/Disconn" Clicked="ConnDisconn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"/>
-                </StackLayout>
-            </Grid>
+            </Frame>
         </StackLayout>
     </StackLayout>
 
