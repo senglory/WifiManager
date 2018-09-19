@@ -38,11 +38,14 @@ namespace WiFiManager
 
             try
             {
-                pleaseWait.IsVisible = true;
-                pleaseWait.IsRunning = true;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
 
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
+                await mgr.GetActualCoordsAsync(mpv.SelectedNetwork);
             }
             catch (Exception ex)
             {
@@ -52,8 +55,10 @@ namespace WiFiManager
             }
             finally
             {
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                });
             }
 
         }

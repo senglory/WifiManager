@@ -159,7 +159,8 @@ namespace WiFiManager.Droid
 
                 return true;
             }
-            else {
+            else
+            {
                 //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.WpaPsk);
                 //var connectivityManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
                 //var mobileState = connectivityManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
@@ -170,9 +171,9 @@ namespace WiFiManager.Droid
                 //}
 
                 wifiManager.SetWifiEnabled(true);
-                var addNetwork = wifiManager.AddNetwork(wifiConfig);
+                var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
                 var bd = wifiManager.Disconnect();
-                var enableNetwork = wifiManager.EnableNetwork(addNetwork, true);
+                var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
                 var brc = wifiManager.Reconnect();
 
                 //foreach (var n in wifiManager.ConfiguredNetworks)
@@ -188,7 +189,8 @@ namespace WiFiManager.Droid
                 //var current = Xamarin.esse;
                 //var bd2 = wifiManager.Reconnect();
                 //wifiManager.UpdateNetwork(wifiConfig);
-                return wifiInfo.BSSID == "00:00:00:00:00:00";
+                var finalState = connManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
+                return finalState == NetworkInfo.State.Connected;
             }
         }
 

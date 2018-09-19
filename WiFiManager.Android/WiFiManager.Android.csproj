@@ -19,6 +19,11 @@
     <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>C:\prj\MAIN.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>qazwsx2009</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias>example</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>qazwsx2009</AndroidSigningKeyPass>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

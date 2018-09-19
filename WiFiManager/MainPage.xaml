@@ -49,17 +49,25 @@
 
         <ResourceDictionary>
             <Style TargetType="Label">
-                <Setter Property="TextColor" Value="Green" />
-                <Setter Property="HeightRequest" Value="30"/>
+                <Setter Property="TextColor" Value="LightGreen" />
+                <Setter Property="HeightRequest" Value="27"/>
             </Style>
             <Style TargetType="Entry">
-                <Setter Property="TextColor" Value="Green" />
+                <Setter Property="TextColor" Value="LightGreen" />
             </Style>
             <Style TargetType="Button">
-                <Setter Property="TextColor" Value="Green" />
+                <Setter Property="TextColor" Value="LightGreen" />
                 <Setter Property="BackgroundColor" Value="Black" />
                 <Setter Property="BorderColor" Value="Beige" />
                 <Setter Property="BorderWidth" Value="1" />
+                <Style.Triggers>
+                    <EventTrigger Event="Pressed">
+                        <local:ButtonTriggerAction BackgroundColor="Maroon" />
+                    </EventTrigger>
+                    <EventTrigger Event="Released">
+                        <local:ButtonTriggerAction BackgroundColor="Black" />
+                    </EventTrigger>
+                </Style.Triggers>
             </Style>
             <Style TargetType="StackLayout">
                 <Setter Property="BackgroundColor" Value="Black" />
@@ -81,8 +89,8 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
-                <RowDefinition Height="200" />
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
         </Grid>
         <StackLayout Grid.Row="0" HorizontalOptions="Fill" Orientation="Horizontal">
@@ -129,11 +137,11 @@
                                 <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Password}" WidthRequest="100"></Entry>
                             </Grid>
                         </StackLayout>
-                        <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}" >
+                        <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}"  RowHeight="25" >
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ViewCell>
-                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Ivory">
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="DarkGray"  >
                                             <Label Text="{Binding Lat}"></Label>
                                             <Label Text="{Binding Long}"></Label>
                                             <Label Text="{Binding Power}"></Label>

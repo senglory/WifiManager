@@ -155,6 +155,7 @@ namespace WiFiManager.Common
                         nwdto.IsInCSVList = isInCSVList;
                         if (isInCSVList)
                         {
+                            AllRecordsQuickSearch[nw.BssID].IsInCSVList = nwdto.IsInCSVList;
                             AllRecordsQuickSearch[nw.BssID].IsEnabled = nwdto.IsEnabled;
                             AllRecordsQuickSearch[nw.BssID].Password = nwdto.Password;
                             AllRecordsQuickSearch[nw.BssID].Provider = nwdto.Provider;
