@@ -49,7 +49,7 @@ namespace WiFiManager.Common
         }
 
         #region New - http://stackoverflow.com/questions/954480/automapper-ignore-the-rest/31182390#31182390
-        private static void IgnoreUnmappedProperties(TypeMap map, IMappingExpression expr)
+        static void IgnoreUnmappedProperties(TypeMap map, IMappingExpression expr)
         {
             foreach (string propName in map.GetUnmappedPropertyNames())
             {

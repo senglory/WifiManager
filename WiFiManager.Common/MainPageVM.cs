@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
-using Xamarin.Forms;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 
 using WiFiManager.Common.BusinessObjects;
 
+using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration;
 using Newtonsoft.Json;
 using AutoMapper;
@@ -36,6 +37,8 @@ namespace WiFiManager.Common
                 _allrecsQuickSearch.Clear();
                 foreach (var nw in _WifiNetworks)
                 {
+                    if (string.IsNullOrEmpty(nw.BssID))
+                        continue;
                     _allrecsQuickSearch.Add(nw.BssID, nw);
                 }
                 SetProperty(ref _WifiNetworks, value, "WifiNetworks");
@@ -43,7 +46,7 @@ namespace WiFiManager.Common
         }
 
 
-        private WifiNetworkDto _selectedNetwork;
+        WifiNetworkDto _selectedNetwork;
         public WifiNetworkDto SelectedNetwork
         {
             get
@@ -107,7 +110,8 @@ namespace WiFiManager.Common
 
         public void SortList()
         {
-            WifiNetworks = new ObservableCollection<WifiNetworkDto>(WifiNetworks.OrderByDescending(nw => nw.IsInCSVList).OrderBy(nw => nw.IsEnabled).OrderBy(nw => nw.Name));
+            var lst1 = WifiNetworks.OrderByDescending(nw => nw.IsInCSVList).OrderBy(nw => nw.IsEnabled).OrderBy(nw => nw.Name).ToList();
+            WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
         }
 
         void DoRefreshNetworks()
@@ -150,24 +154,44 @@ namespace WiFiManager.Common
                             NetworkType = arrs[4],
                             Provider = arrs[5]
                         };
-                        var nwdto = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
-                        var isInCSVList = AllRecordsQuickSearch.ContainsKey(nwdto.BssID);
-                        nwdto.IsInCSVList = isInCSVList;
+                        var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+                        var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
+                        var isInCSVList = existingWifi != null;
+                        wifiDtoFromFile.IsInCSVList = isInCSVList;
                         if (isInCSVList)
                         {
-                            AllRecordsQuickSearch[nw.BssID].IsInCSVList = nwdto.IsInCSVList;
-                            AllRecordsQuickSearch[nw.BssID].IsEnabled = nwdto.IsEnabled;
-                            AllRecordsQuickSearch[nw.BssID].Password = nwdto.Password;
-                            AllRecordsQuickSearch[nw.BssID].Provider = nwdto.Provider;
+                            // update existing Wifi info from file
+                            AllRecordsQuickSearch[nw.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
+                            AllRecordsQuickSearch[nw.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
+                            AllRecordsQuickSearch[nw.BssID].Password = wifiDtoFromFile.Password;
+                            AllRecordsQuickSearch[nw.BssID].Provider = wifiDtoFromFile.Provider;
                         }
                         else
                         {
-                            WifiNetworks.Add(nwdto);
+                            // wifi not in CSV list - add it
+                            WifiNetworks.Add(wifiDtoFromFile);
                         }
                     }
                 }
             }
         }
+
+        WifiNetworkDto GetExistingWifiDto(WifiNetworkDto wifiDtoFromFile)
+        {
+            if (string.IsNullOrEmpty(wifiDtoFromFile.BssID))
+            {
+                return WifiNetworks.FirstOrDefault(r => r.Name == wifiDtoFromFile.Name);
+            }
+            if (AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
+            {
+                return AllRecordsQuickSearch[wifiDtoFromFile.BssID];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         void SaveToCSV()
         {
             using (var fs = new FileStream(filePathCSV, FileMode.Create))

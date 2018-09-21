@@ -8,8 +8,9 @@ using Xamarin.Forms;
 
 namespace WiFiManager.Common.BusinessObjects
 {
-    public class WifiNetworkDto : BaseObj
+    public class WifiNetworkDto
     {
+        public string Name { get; set; }
         public string BssID { get; set; }
         public string NetworkType { get; set; }
         public string Password { get; set; }
@@ -37,11 +38,6 @@ namespace WiFiManager.Common.BusinessObjects
         void DoRefeshCoordsCommand(object parameter)
         {
 
-        }
-        public override bool Fit(string filter)
-        {
-            var r = base.Fit(filter);
-            return r || BssID.Contains(filter);
         }
     }
 }

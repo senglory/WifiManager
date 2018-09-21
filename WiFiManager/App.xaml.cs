@@ -22,7 +22,7 @@ namespace WiFiManager
             CrossConnectivity.Current.ConnectivityChanged += Current_ConnectivityChanged;
         }
 
-        private void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
+        protected void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
         {
             var qq = "";
         }

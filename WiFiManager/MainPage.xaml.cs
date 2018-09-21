@@ -20,17 +20,20 @@ namespace WiFiManager
         {
             this.mgr = mgr;
             InitializeComponent();
-            this.BindingContext =  mgr.GetActiveWifiNetworks();
+            DoRefreshAvailableNetworks();
         }
 
-        private void Refresh_Clicked(object sender, EventArgs e)
+        void Refresh_Clicked(object sender, EventArgs e)
+        {
+            DoRefreshAvailableNetworks();
+        }
+
+        void DoRefreshAvailableNetworks()
         {
             this.BindingContext = mgr.GetActiveWifiNetworks();
         }
 
-
-
-        private async void RefreshCoords_Clicked(object sender, EventArgs e)
+        async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
             var hasPermission = await Utils.CheckPermissions(Permission.Location);
             if (!hasPermission)
@@ -45,7 +48,7 @@ namespace WiFiManager
 
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
-                await mgr.GetActualCoordsAsync(mpv.SelectedNetwork);
+                await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
             }
             catch (Exception ex)
             {
@@ -63,7 +66,7 @@ namespace WiFiManager
 
         }
 
-        private void ConnDisconn_Clicked(object sender, EventArgs e)
+        async void ConnDisconn_Clicked(object sender, EventArgs e)
         {
             try
             {
@@ -74,13 +77,13 @@ namespace WiFiManager
 
                 var mpv = this.BindingContext as MainPageVM;
                 var nw = mpv.SelectedNetwork;
-                var bres = mgr.Connect(nw.BssID,  nw.Name,nw.Password);
-                if (!bres)
-                {
-                    Device.BeginInvokeOnMainThread(() => {
-                        DisplayAlert("Error", "Can't connect", "OK");
-                    });
-                }
+                await mgr.ConnectAsync(nw.BssID,  nw.Name,nw.Password);
+                //if (!bres)
+                //{
+                //    Device.BeginInvokeOnMainThread(() => {
+                //        DisplayAlert("Error", "Can't connect", "OK");
+                //    });
+                //}
             }
             catch(Exception ex)
             {
@@ -97,7 +100,7 @@ namespace WiFiManager
             }
         }
 
-        private async void RefreshNetworks_Clicked(object sender, EventArgs e)
+        async void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
             try
             {

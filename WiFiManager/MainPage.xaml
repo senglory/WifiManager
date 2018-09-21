@@ -109,7 +109,7 @@
             >
         </ListView>
         <StackLayout Grid.Row="2" x:Name="DetailsArea" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
-            <Frame HasShadow="False" Padding="1"  BorderColor="#F69927">
+            <Frame HasShadow="False" Padding="1"  BorderColor="Maroon">
                 <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start">
                     <Grid>
                         <Grid.RowDefinitions>

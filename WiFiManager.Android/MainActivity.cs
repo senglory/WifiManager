@@ -39,12 +39,16 @@ namespace WiFiManager.Droid
 "/storage/sdcard0/DCIM"
 , "WIFINETWORKS.JSON");
 
+        System.Timers.Timer timeForCheckingConnection = new System.Timers.Timer();
+
         protected override void OnCreate(Bundle bundle)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(bundle);
+            timeForCheckingConnection.Interval = 1000;
+            timeForCheckingConnection.Elapsed += CheckingConnection_Elapsed; 
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -134,7 +138,12 @@ namespace WiFiManager.Droid
 
 
 
-        public bool Connect(string bssid, string ssid, string password)
+        public async Task ConnectAsync(string bssid, string ssid, string password)
+        {
+            await Task.Run(() => Connect(bssid, ssid,  password));
+        }
+
+        void Connect(string bssid, string ssid, string password)
         {
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
@@ -144,53 +153,28 @@ namespace WiFiManager.Droid
                 Bssid = bssid,
                 Ssid = formattedSsid,
                 PreSharedKey = formattedPassword,
-                Priority=10000
+                Priority = 10000
             };
 
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-            var connManager =  (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
-            var ni1=connManager.ActiveNetworkInfo;
-            
-            if (ni1!=null && ni1.IsConnected && ni1.Type==ConnectivityType.Wifi)
+            var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
+            var ni1 = connManager.ActiveNetworkInfo;
+
+            if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
             {
                 var wifiInfo = wifiManager.ConnectionInfo;
                 var bdi = wifiManager.Disconnect();
-                var brr=wifiManager.RemoveNetwork(wifiInfo.NetworkId);
-
-                return true;
+                var brr = wifiManager.RemoveNetwork(wifiInfo.NetworkId);
             }
             else
             {
-                //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.WpaPsk);
-                //var connectivityManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
-                //var mobileState = connectivityManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
-                //if (mobileState != NetworkInfo.State.Connected)
-                //{
-                //    var mawifi = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-                //    mawifi.SetWifiEnabled(true);
-                //}
-
                 wifiManager.SetWifiEnabled(true);
                 var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
                 var bd = wifiManager.Disconnect();
                 var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
                 var brc = wifiManager.Reconnect();
 
-                //foreach (var n in wifiManager.ConfiguredNetworks)
-                //{
-                //    System.Diagnostics.Debug.WriteLine(n.Bssid);
-                //}
-                //var network = wifiManager.ConfiguredNetworks
-                //     .FirstOrDefault(n => n.NetworkId == addNetwork);
-                //var bd = wifiManager.Disconnect();
-                //var enableNetwork = wifiManager.EnableNetwork(network.NetworkId, true);
-
-                var wifiInfo = wifiManager.ConnectionInfo;
-                //var current = Xamarin.esse;
-                //var bd2 = wifiManager.Reconnect();
-                //wifiManager.UpdateNetwork(wifiConfig);
-                var finalState = connManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
-                return finalState == NetworkInfo.State.Connected;
+                timeForCheckingConnection.Start();
             }
         }
 
@@ -267,7 +251,7 @@ namespace WiFiManager.Droid
             return vm;
         }
 
-        public async Task GetActualCoordsAsync(WifiNetworkDto network) {
+        public async Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network) {
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             wifiManager.StartScan();
             var networks = wifiManager.ConfiguredNetworks;
@@ -300,6 +284,21 @@ namespace WiFiManager.Droid
                 });
             }
 
+        }
+
+        void CheckingConnection_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
+            var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
+            var wifiInfo = wifiManager.ConnectionInfo;
+            //var current = Xamarin.esse;
+            //var bd2 = wifiManager.Reconnect();
+            //wifiManager.UpdateNetwork(wifiConfig);
+            var finalState = connManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
+            if ( finalState == NetworkInfo.State.Connected)
+            {
+                timeForCheckingConnection.Stop();
+            }
         }
     }
 }

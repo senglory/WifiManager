@@ -16,7 +16,7 @@ namespace WiFiManager.Common
 
         Task<Tuple<double, double, double>> GetCoordsAsync();
 
-        Task GetActualCoordsAsync(WifiNetworkDto network);
-        bool Connect(string bssid, string ssid,string password);
+        Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);
+        Task ConnectAsync(string bssid, string ssid,string password);
     }
 }
