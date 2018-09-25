@@ -9,14 +9,25 @@ using WiFiManager.Common.BusinessObjects;
 
 namespace WiFiManager.Common
 {
+    public delegate void ConnectionSTateHandler(string connectionState);
+
     public interface IWifiOperations
     {
-        MainPageVM GetActiveWifiNetworks();
-        Task<MainPageVM> GetActiveWifiNetworksAsync();
+        List<WifiNetworkDto> GetActiveWifiNetworks();
+        List<WifiNetworkDto> GetWifiNetworksFromCSV( );
+
+        void SaveToCSV(List<WifiNetworkDto> wifiNetworks);
+        void SaveToJSON(List<WifiNetworkDto> wifiNetworks);
+
+        bool CanLoadFromFile();
+
+        Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync();
 
         Task<Tuple<double, double, double>> GetCoordsAsync();
 
         Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);
         Task ConnectAsync(string bssid, string ssid,string password);
+
+        event ConnectionSTateHandler ConnectionStateChanged;
     }
 }

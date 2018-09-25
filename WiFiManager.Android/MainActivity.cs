@@ -23,7 +23,7 @@ using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
 using Android.Net;
 using Xamarin.Forms;
-
+using AutoMapper;
 
 
 namespace WiFiManager.Droid
@@ -41,14 +41,29 @@ namespace WiFiManager.Droid
 
         System.Timers.Timer timeForCheckingConnection = new System.Timers.Timer();
 
+        public event ConnectionSTateHandler ConnectionStateChanged;
+
+        static  MapperConfiguration config;
+        static  IMapper mapper;
+
         protected override void OnCreate(Bundle bundle)
         {
+            config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
+                cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
+                cfg.IgnoreUnmapped();
+            });
+            config.AssertConfigurationIsValid();
+            mapper = config.CreateMapper();
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(bundle);
+
             timeForCheckingConnection.Interval = 1000;
-            timeForCheckingConnection.Elapsed += CheckingConnection_Elapsed; 
+            timeForCheckingConnection.Elapsed += CheckingConnection_Elapsed;
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -73,11 +88,11 @@ namespace WiFiManager.Droid
             return new Tuple<double, double, double>(t.Latitude, t.Longitude, t.Altitude);
         }
 
-        public MainPageVM GetActiveWifiNetworks()
+        public List<WifiNetworkDto> GetActiveWifiNetworks()
         {
             //bool b1 = locator.IsGeolocationAvailable;
             //bool b2 = locator.IsGeolocationEnabled;
-            
+
             //coords.Add(new CoordsAndPower
             //{
             //    Lat = position.Latitude,
@@ -105,38 +120,76 @@ namespace WiFiManager.Droid
                         Name = n.Ssid,
                         NetworkType = n.Capabilities,
                         Level = n.Level,
-                        IsEnabled=true 
+                        IsEnabled = true
                     };
                     wifiNetworks.Add(netw);
                 }
                 catch (Exception ex)
                 {
-                    Device.BeginInvokeOnMainThread(() => {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
                         //DisplayAlert("Error", ex.Message, "OK");
                     });
                 }
             }
 
-            var vm = new MainPageVM(wifiNetworks, filePathCSV, filePathJSON);
-            try
-            {
-                var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
-                var hasPermission = t.Result;
-                if (hasPermission)
-                    vm.AppendNetworksFromCSV(filePathCSV);
-                vm.SortList();
-            }
-            catch (Exception ex)
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    //DisplayAlert("Error", ex.Message, "OK");
-                });
-            }
-
-            return vm;
+            return wifiNetworks;
         }
 
+        public List<WifiNetworkDto> GetWifiNetworksFromCSV( )
+        {
+            var res = new List<WifiNetworkDto>();
 
+            if (!File.Exists(filePathCSV))
+                return res;
+            using (var fs = new FileStream(filePathCSV, FileMode.Open))
+            {
+                using (var fr = new StreamReader(fs))
+                {
+                    fr.ReadLine();
+                    while (!fr.EndOfStream)
+                    {
+                        var s = fr.ReadLine();
+                        var arrs = s.Split(new char[] { ';' });
+                        var nw = new WifiNetwork
+                        {
+                            BssID = arrs[1].ToUpper(),
+                            Name = arrs[0],
+                            Password = arrs[2],
+                            IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                            NetworkType = arrs[4],
+                            Provider = arrs[5]
+                        };
+                        var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+                        res.Add(wifiDtoFromFile);
+                    }
+                }
+            }
+
+            return res;
+        }
+        public void SaveToCSV(List<WifiNetworkDto> wifiNetworks)
+        {
+            using (var fs = new FileStream(filePathCSV, FileMode.Create))
+            {
+                using (var fw = new StreamWriter(fs))
+                {
+                    fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
+                    foreach (var nw in wifiNetworks)
+                    {
+                        var isBanned = nw.IsEnabled ? 0 : 1;
+                        fw.WriteLine($"{nw.Name};{nw.BssID};{nw.Password};{isBanned};{nw.NetworkType};{nw.Provider}");
+                    }
+                }
+            }
+        }
+
+        public void SaveToJSON(List<WifiNetworkDto> wifiNetworks)
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string str = JsonConvert.SerializeObject(wifiNetworks, settings);
+            File.WriteAllText(filePathJSON, str);
+        }
 
         public async Task ConnectAsync(string bssid, string ssid, string password)
         {
@@ -174,12 +227,12 @@ namespace WiFiManager.Droid
                 var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
                 var brc = wifiManager.Reconnect();
 
-                timeForCheckingConnection.Start();
+                //timeForCheckingConnection.Start();
             }
         }
 
 
-        public async Task<MainPageVM> GetActiveWifiNetworksAsync()
+        public async Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync()
         {
             var locator = CrossGeolocator.Current;
             locator.DesiredAccuracy = 1;
@@ -232,23 +285,23 @@ namespace WiFiManager.Droid
                     });
                 }
             }
-            var vm = new MainPageVM(wifiNetworks, filePathCSV, filePathJSON);
+
+            return wifiNetworks ;
+        }
+
+        public bool CanLoadFromFile()
+        {
             try
             {
                 var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
                 var hasPermission = t.Result;
-                if (hasPermission)
-                {
-                    vm.AppendNetworksFromCSV(filePathCSV);
-                }
-                vm.SortList();
+                return hasPermission;
             }
             catch (Exception ex)
             {
 
                 throw;
             }
-            return vm;
         }
 
         public async Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network) {
@@ -295,6 +348,9 @@ namespace WiFiManager.Droid
             //var bd2 = wifiManager.Reconnect();
             //wifiManager.UpdateNetwork(wifiConfig);
             var finalState = connManager.GetNetworkInfo(ConnectivityType.Wifi).GetState();
+
+            ConnectionStateChanged?.Invoke(finalState.ToString());
+
             if ( finalState == NetworkInfo.State.Connected)
             {
                 timeForCheckingConnection.Stop();

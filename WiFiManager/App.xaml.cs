@@ -24,7 +24,10 @@ namespace WiFiManager
 
         protected void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
         {
-            var qq = "";
+            if (e.IsConnected)
+            {
+                (MainPage as MainPage).WifiConnectNotify();
+            }
         }
 
         protected override void OnSleep ()

@@ -19,18 +19,37 @@ namespace WiFiManager
         public MainPage(IWifiOperations mgr)
         {
             this.mgr = mgr;
+            this.BindingContext = new MainPageVM(mgr);
+            RefreshAvailableNetworks();
             InitializeComponent();
-            DoRefreshAvailableNetworks();
+            mgr.ConnectionStateChanged += Mgr_ConnectionStateChanged;
+        }
+
+        private void Mgr_ConnectionStateChanged(string connectionState)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
+            });
+        }
+
+        public void WifiConnectNotify()
+        {
+            var mpv = this.BindingContext as MainPageVM;
+            mpv.IsConnected = true;
         }
 
         void Refresh_Clicked(object sender, EventArgs e)
         {
-            DoRefreshAvailableNetworks();
+            RefreshAvailableNetworks();
         }
 
-        void DoRefreshAvailableNetworks()
+        void RefreshAvailableNetworks()
         {
-            this.BindingContext = mgr.GetActiveWifiNetworks();
+            var mpv = this.BindingContext as MainPageVM;
+            mpv.DoRefreshNetworks();
+            //this.BindingContext = mgr.GetActiveWifiNetworks();
         }
 
         async void RefreshCoords_Clicked(object sender, EventArgs e)
@@ -58,10 +77,7 @@ namespace WiFiManager
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
+
             }
 
         }
@@ -76,6 +92,7 @@ namespace WiFiManager
                 });
 
                 var mpv = this.BindingContext as MainPageVM;
+                mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
                 await mgr.ConnectAsync(nw.BssID,  nw.Name,nw.Password);
                 //if (!bres)

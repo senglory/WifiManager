@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -11,8 +10,6 @@ using WiFiManager.Common.BusinessObjects;
 
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration;
-using Newtonsoft.Json;
-using AutoMapper;
 
 
 
@@ -20,10 +17,9 @@ namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
-        string filePathJSON;
-        string filePathCSV;
+        IWifiOperations mgr;
 
-
+        #region Properties
         ObservableCollection<WifiNetworkDto> _WifiNetworks;
         public ObservableCollection<WifiNetworkDto> WifiNetworks
         {
@@ -34,12 +30,12 @@ namespace WiFiManager.Common
             set
             {
                 _WifiNetworks = value;
-                _allrecsQuickSearch.Clear();
+                AllRecordsQuickSearch.Clear();
                 foreach (var nw in _WifiNetworks)
                 {
                     if (string.IsNullOrEmpty(nw.BssID))
                         continue;
-                    _allrecsQuickSearch.Add(nw.BssID, nw);
+                    AllRecordsQuickSearch.Add(nw.BssID, nw);
                 }
                 SetProperty(ref _WifiNetworks, value, "WifiNetworks");
             }
@@ -81,106 +77,99 @@ namespace WiFiManager.Common
             }
         }
 
+        bool isConnected;
+        public bool IsConnected
+        {
+            get { return isConnected; }
+            set
+            {
+                if (isConnected == value)
+                    return;
+
+                isConnected = value;
+                OnPropertyChanged("IsConnected");
+            }
+        } 
+        #endregion
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        static readonly MapperConfiguration config;
-        static readonly IMapper mapper;
 
-        static MainPageVM()
-        {
-            config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
-                cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
-                cfg.IgnoreUnmapped();
-            });
-            config.AssertConfigurationIsValid();
-            mapper = config.CreateMapper();
-        }
 
-        public MainPageVM(List<WifiNetworkDto> networks, string filePathCSV, string filePathJSON)
-        {
-            this.filePathCSV = filePathCSV;
-            this.filePathJSON = filePathJSON;
-            WifiNetworks = new ObservableCollection<WifiNetworkDto>(networks);
+        public MainPageVM(IWifiOperations mgr) {
+            this.mgr = mgr;
+
             SaveCommand = new Command(DoSave);
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
-            RefreshNetworksCommand= new Command(DoRefreshNetworks);
+            RefreshNetworksCommand = new Command(DoRefreshNetworks);
         }
+
 
         public void SortList()
         {
-            var lst1 = WifiNetworks.OrderByDescending(nw => nw.IsInCSVList).OrderBy(nw => nw.IsEnabled).OrderBy(nw => nw.Name).ToList();
+            var lst1 = WifiNetworks.OrderByDescending(nw => nw.IsInCSVList);
+            var lst2 = lst1.OrderBy(nw => nw.IsEnabled).OrderBy(nw => nw.Name).ToList();
             WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
         }
 
-        void DoRefreshNetworks()
+        public void DoRefreshNetworks()
         {
+            var lst1 = mgr.GetActiveWifiNetworks();
+            WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
 
-
-        }
-
-
-        void DoSave(object parameter)
-        {
-            SaveToCSV();
-        }
-        void DoSaveJson(object parameter)
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-            string str = JsonConvert.SerializeObject(WifiNetworks, settings);
-            File.WriteAllText(filePathJSON, str);
-        }
-
-        public void AppendNetworksFromCSV( string csvFilePath)
-        {
-            if (!File.Exists(csvFilePath))
-                return;
-            using (var fs = new FileStream(csvFilePath, FileMode.Open))
+            if (mgr.CanLoadFromFile())
             {
-                using (var fr = new StreamReader(fs))
+                var lst2 = mgr.GetWifiNetworksFromCSV( );
+                foreach (var wifiDtoFromFile in lst2)
                 {
-                    fr.ReadLine();
-                    while (!fr.EndOfStream)
+                    var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
+                    var isInCSVList = existingWifi != null;
+                    wifiDtoFromFile.IsInCSVList = isInCSVList;
+                    if (isInCSVList 
+                        && AllRecordsQuickSearch .ContainsKey(existingWifi.BssID))
                     {
-                        var s = fr.ReadLine();
-                        var arrs = s.Split(new char[] { ';' });
-                        var nw = new WifiNetwork
-                        {
-                            BssID = arrs[1].ToUpper(),
-                            Name = arrs[0],
-                            Password = arrs[2],
-                            IsEnabled = !Convert.ToBoolean(int.Parse ( arrs[3])),
-                            NetworkType = arrs[4],
-                            Provider = arrs[5]
-                        };
-                        var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
-                        var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
-                        var isInCSVList = existingWifi != null;
-                        wifiDtoFromFile.IsInCSVList = isInCSVList;
-                        if (isInCSVList)
-                        {
-                            // update existing Wifi info from file
-                            AllRecordsQuickSearch[nw.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
-                            AllRecordsQuickSearch[nw.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
-                            AllRecordsQuickSearch[nw.BssID].Password = wifiDtoFromFile.Password;
-                            AllRecordsQuickSearch[nw.BssID].Provider = wifiDtoFromFile.Provider;
-                        }
-                        else
-                        {
-                            // wifi not in CSV list - add it
-                            WifiNetworks.Add(wifiDtoFromFile);
-                        }
+                        // update existing Wifi info from file
+                        AllRecordsQuickSearch[existingWifi.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
+                        AllRecordsQuickSearch[existingWifi.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
+                        AllRecordsQuickSearch[existingWifi.BssID].Password = wifiDtoFromFile.Password;
+                        AllRecordsQuickSearch[existingWifi.BssID].Provider = wifiDtoFromFile.Provider;
+                    }
+                    else
+                    {
+                        // wifi not in CSV list - add it
+                        WifiNetworks.Add(wifiDtoFromFile);
+                        if (!AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
+                            AllRecordsQuickSearch.Add(wifiDtoFromFile.BssID, wifiDtoFromFile);
                     }
                 }
             }
+            SortList();
         }
+
+        void ExecuteConnectDisconnectCommand(object parameter)
+        {
+
+        }
+
+        void DoSave(object parameter)
+        {
+            var lst = new List<WifiNetworkDto>(WifiNetworks);
+            mgr.SaveToCSV(lst);
+        }
+
+        void DoSaveJson(object parameter)
+        {
+            var lst = new List<WifiNetworkDto>(WifiNetworks);
+            mgr.SaveToJSON(lst);
+        }
+
 
         WifiNetworkDto GetExistingWifiDto(WifiNetworkDto wifiDtoFromFile)
         {
             if (string.IsNullOrEmpty(wifiDtoFromFile.BssID))
             {
-                return WifiNetworks.FirstOrDefault(r => r.Name == wifiDtoFromFile.Name);
+                var foundByName = WifiNetworks.FirstOrDefault(r => r.Name == wifiDtoFromFile.Name);
+                return foundByName;
             }
             if (AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
             {
@@ -192,26 +181,8 @@ namespace WiFiManager.Common
             }
         }
 
-        void SaveToCSV()
-        {
-            using (var fs = new FileStream(filePathCSV, FileMode.Create))
-            {
-                using (var fw = new StreamWriter(fs))
-                {
-                    fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
-                    foreach (var nw in WifiNetworks)
-                    {
-                        var isBanned = nw.IsEnabled ? 0 : 1;
-                        fw.WriteLine($"{nw.Name};{nw.BssID};{nw.Password};{isBanned};{nw.NetworkType};{nw.Provider}");
-                    }
-                }
-            }
-        }
 
-        void ExecuteConnectDisconnectCommand(object parameter)
-        {
 
-        }
 
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
