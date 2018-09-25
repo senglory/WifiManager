@@ -7,8 +7,7 @@ using Xamarin.Forms.PlatformConfiguration;
 
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
-
-
+using System.Threading.Tasks;
 
 namespace WiFiManager
 {
@@ -67,7 +66,17 @@ namespace WiFiManager
 
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
-                await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+                var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+                //t1.Start();
+                var t2 = t1.ContinueWith( (www) => {
+
+                    Device.BeginInvokeOnMainThread(() => {
+                        pleaseWait.IsVisible = false;
+                        pleaseWait.IsRunning = false;
+                    });
+
+                });
+
             }
             catch (Exception ex)
             {
