@@ -114,36 +114,49 @@ namespace WiFiManager.Common
 
         public void DoRefreshNetworks()
         {
-            var lst1 = mgr.GetActiveWifiNetworks();
-            WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
+            WifiNetworks = new ObservableCollection<WifiNetworkDto>();
+        }
 
-            if (mgr.CanLoadFromFile())
+        public void DoRefreshNetworks2()
+        {
+            try
             {
-                var lst2 = mgr.GetWifiNetworksFromCSV( );
-                foreach (var wifiDtoFromFile in lst2)
+                IsBusy = true;
+                var lst1 = mgr.GetActiveWifiNetworks();
+                WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
+
+                if (mgr.CanLoadFromFile())
                 {
-                    var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
-                    var isInCSVList = existingWifi != null;
-                    wifiDtoFromFile.IsInCSVList = isInCSVList;
-                    if (isInCSVList 
-                        && AllRecordsQuickSearch .ContainsKey(existingWifi.BssID))
+                    var lst2 = mgr.GetWifiNetworksFromCSV();
+                    foreach (var wifiDtoFromFile in lst2)
                     {
-                        // update existing Wifi info from file
-                        AllRecordsQuickSearch[existingWifi.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
-                        AllRecordsQuickSearch[existingWifi.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
-                        AllRecordsQuickSearch[existingWifi.BssID].Password = wifiDtoFromFile.Password;
-                        AllRecordsQuickSearch[existingWifi.BssID].Provider = wifiDtoFromFile.Provider;
-                    }
-                    else
-                    {
-                        // wifi not in CSV list - add it
-                        WifiNetworks.Add(wifiDtoFromFile);
-                        if (!AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
-                            AllRecordsQuickSearch.Add(wifiDtoFromFile.BssID, wifiDtoFromFile);
+                        var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
+                        var isInCSVList = existingWifi != null;
+                        wifiDtoFromFile.IsInCSVList = isInCSVList;
+                        if (isInCSVList
+                            && AllRecordsQuickSearch.ContainsKey(existingWifi.BssID))
+                        {
+                            // update existing Wifi info from file
+                            AllRecordsQuickSearch[existingWifi.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
+                            AllRecordsQuickSearch[existingWifi.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
+                            AllRecordsQuickSearch[existingWifi.BssID].Password = wifiDtoFromFile.Password;
+                            AllRecordsQuickSearch[existingWifi.BssID].Provider = wifiDtoFromFile.Provider;
+                        }
+                        else
+                        {
+                            // wifi not in CSV list - add it
+                            WifiNetworks.Add(wifiDtoFromFile);
+                            if (!AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
+                                AllRecordsQuickSearch.Add(wifiDtoFromFile.BssID, wifiDtoFromFile);
+                        }
                     }
                 }
+                SortList();
             }
-            SortList();
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         void ExecuteConnectDisconnectCommand(object parameter)

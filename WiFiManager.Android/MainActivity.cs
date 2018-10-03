@@ -10,6 +10,7 @@ using Android.Content.PM;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Android.Util;
 using Android.OS;
 using Android.Net.Wifi;
 using Android.Locations;
@@ -24,7 +25,7 @@ using WiFiManager.Common;
 using Android.Net;
 using Xamarin.Forms;
 using AutoMapper;
-
+using System.Text;
 
 namespace WiFiManager.Droid
 {
@@ -151,17 +152,37 @@ namespace WiFiManager.Droid
                     {
                         var s = fr.ReadLine();
                         var arrs = s.Split(new char[] { ';' });
-                        var nw = new WifiNetwork
+                        try
                         {
-                            BssID = arrs[1].ToUpper(),
-                            Name = arrs[0],
-                            Password = arrs[2],
-                            IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
-                            NetworkType = arrs[4],
-                            Provider = arrs[5]
-                        };
-                        var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
-                        res.Add(wifiDtoFromFile);
+                            var bssidRaw = arrs[1].ToUpper();
+                            var bssid = bssidRaw;
+                            if (!bssidRaw.Contains(':'))
+                            {
+                                var sb = new StringBuilder();
+                                bssid = sb.AppendFormat("{0}:{0}:{0}:{0}:{0}:{0}",
+                                    bssidRaw.Substring(0, 2),
+                                    bssidRaw.Substring(3, 2),
+                                    bssidRaw.Substring(6, 2),
+                                    bssidRaw.Substring(9, 2),
+                                    bssidRaw.Substring(12, 2),
+                                    bssidRaw.Substring(15, 2)).ToString ();
+                            }
+                            var nw = new WifiNetwork
+                            {
+                                BssID = bssid,
+                                Name = arrs[0],
+                                Password = arrs[2],
+                                IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                                NetworkType = arrs[4],
+                                Provider = arrs[5]
+                            };
+                            var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+                            res.Add(wifiDtoFromFile);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("ReadCSV", "", ex.Message);
+                        }
                     }
                 }
             }
@@ -280,9 +301,7 @@ namespace WiFiManager.Droid
                 }
                 catch (Exception ex)
                 {
-                    Device.BeginInvokeOnMainThread(() => {
-                        //DisplayAlert("Error", ex.Message, "OK");
-                    });
+                    Log.Error("GetActiveWifiNetworksAsync", "", ex.Message);
                 }
             }
 

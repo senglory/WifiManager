@@ -39,15 +39,10 @@ namespace WiFiManager
             mpv.IsConnected = true;
         }
 
-        void Refresh_Clicked(object sender, EventArgs e)
-        {
-            RefreshAvailableNetworks();
-        }
-
         void RefreshAvailableNetworks()
         {
             var mpv = this.BindingContext as MainPageVM;
-            mpv.DoRefreshNetworks();
+            mpv.DoRefreshNetworks2();
             //this.BindingContext = mgr.GetActiveWifiNetworks();
         }
 
