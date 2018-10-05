@@ -29,13 +29,16 @@ namespace WiFiManager.Common
             }
             set
             {
-                _WifiNetworks = value;
                 AllRecordsQuickSearch.Clear();
-                foreach (var nw in _WifiNetworks)
+                if (_WifiNetworks != null)
                 {
-                    if (string.IsNullOrEmpty(nw.BssID))
-                        continue;
-                    AllRecordsQuickSearch.Add(nw.BssID, nw);
+                    foreach (var nw in _WifiNetworks)
+                    {
+                        if (string.IsNullOrEmpty(nw.BssID))
+                            continue;
+                        if (!AllRecordsQuickSearch.ContainsKey(nw.BssID))
+                            AllRecordsQuickSearch.Add(nw.BssID, nw);
+                    }
                 }
                 SetProperty(ref _WifiNetworks, value, "WifiNetworks");
             }
@@ -51,7 +54,6 @@ namespace WiFiManager.Common
             }
             set
             {
-                _selectedNetwork = value;
                 SetProperty(ref _selectedNetwork, value, "SelectedNetwork");
             }
         }
@@ -107,17 +109,12 @@ namespace WiFiManager.Common
 
         public void SortList()
         {
-            var lst1 = WifiNetworks.OrderByDescending(nw => nw.IsInCSVList);
-            var lst2 = lst1.OrderBy(nw => nw.IsEnabled).OrderBy(nw => nw.Name).ToList();
+            var lst1 = WifiNetworks.OrderBy(nw => Math.Abs( nw.Level));
+            //var lst1 = WifiNetworks.OrderBy(nw => nw.Name).ThenByDescending(nw => Math.Abs( nw.Level));
             WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
         }
 
         public void DoRefreshNetworks()
-        {
-            WifiNetworks = new ObservableCollection<WifiNetworkDto>();
-        }
-
-        public void DoRefreshNetworks2()
         {
             try
             {

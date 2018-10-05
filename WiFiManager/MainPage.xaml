@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:shapes="clr-namespace:Stormlion.ShapeControl;assembly=Stormlion.ShapeControl"
-             x:Class="WiFiManager.MainPage">
+             x:Class="WiFiManager.MainPage"
+             x:Name="MainPageMain">
 
     <ContentPage.Resources>
 
@@ -30,7 +31,7 @@
                             </Style.Triggers>
                         </Style>
                     </StackLayout.Resources>
-                    <Grid>
+                    <Grid RowSpacing="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25"/>
                             <RowDefinition Height="25"/>
@@ -39,8 +40,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="10"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="25" />
-                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding BssID}"  HeightRequest="25" />
+                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="20" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding BssID}"  HeightRequest="20" />
                         <BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="10"  >
                             <BoxView.Style>
                                 <Style TargetType="BoxView">
@@ -124,7 +125,7 @@
                     x:Name="lstNetworks"
                     Grid.Row="1"
                     SeparatorColor="Beige"
-                    ItemsSource="{Binding WifiNetworks}"
+                    ItemsSource="{Binding  WifiNetworks}"
                     SelectedItem="{Binding SelectedNetwork}"
                     ItemTemplate="{StaticResource viewInListTemplateSelector}"
                     >

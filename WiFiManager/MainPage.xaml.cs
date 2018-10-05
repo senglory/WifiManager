@@ -8,6 +8,8 @@ using Xamarin.Forms.PlatformConfiguration;
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace WiFiManager
 {
@@ -17,11 +19,11 @@ namespace WiFiManager
 
         public MainPage(IWifiOperations mgr)
         {
+            InitializeComponent();
             this.mgr = mgr;
+            this.mgr.ConnectionStateChanged += Mgr_ConnectionStateChanged;
             this.BindingContext = new MainPageVM(mgr);
             RefreshAvailableNetworks();
-            InitializeComponent();
-            mgr.ConnectionStateChanged += Mgr_ConnectionStateChanged;
         }
 
         private void Mgr_ConnectionStateChanged(string connectionState)
@@ -42,8 +44,7 @@ namespace WiFiManager
         void RefreshAvailableNetworks()
         {
             var mpv = this.BindingContext as MainPageVM;
-            mpv.DoRefreshNetworks2();
-            //this.BindingContext = mgr.GetActiveWifiNetworks();
+            mpv.DoRefreshNetworks();
         }
 
         async void RefreshCoords_Clicked(object sender, EventArgs e)
@@ -121,14 +122,23 @@ namespace WiFiManager
             }
         }
 
-        async void RefreshNetworks_Clicked(object sender, EventArgs e)
+        public  async void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
             try
             {
-                pleaseWait.IsVisible = true;
-                pleaseWait.IsRunning = true;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
 
-                this.BindingContext = await mgr.GetActiveWifiNetworksAsync(); 
+                //await Task.Run(() => {
+                    //this.BindingContext = new MainPageVM(mgr);
+                    var vm = this.BindingContext as MainPageVM;
+                vm.WifiNetworks = new ObservableCollection<WifiNetworkDto>(await mgr.GetActiveWifiNetworksAsync());
+                    vm.SelectedNetwork = null;
+
+                //});
+
             }
             catch (Exception ex)
             {
@@ -136,8 +146,10 @@ namespace WiFiManager
             }
             finally
             {
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = false ;
+                    pleaseWait.IsRunning = false ;
+                });
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Xamarin.Forms;
+using WiFiManager.Common;
 
 namespace WiFiManager
 {
@@ -31,7 +32,7 @@ namespace WiFiManager
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Math.Abs(System.Convert.ToDecimal( value)) > Operand;
+            return Constants.NO_SIGNAL_LEVEL - Math.Abs(System.Convert.ToDecimal( value)) > Operand;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

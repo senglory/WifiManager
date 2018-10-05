@@ -39,5 +39,10 @@ namespace WiFiManager.Common.BusinessObjects
         {
 
         }
+
+        public override string ToString()
+        {
+            return BssID + " " + Name + " " +  Math.Abs(Level).ToString ();
+        }
     }
 }

@@ -91,19 +91,6 @@ namespace WiFiManager.Droid
 
         public List<WifiNetworkDto> GetActiveWifiNetworks()
         {
-            //bool b1 = locator.IsGeolocationAvailable;
-            //bool b2 = locator.IsGeolocationEnabled;
-
-            //coords.Add(new CoordsAndPower
-            //{
-            //    Lat = position.Latitude,
-            //    Long = position.Longitude,
-            //    Alt = position.Altitude
-            //});
-
-
-
-
             var wifiNetworks = new List<WifiNetworkDto>();
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
 
@@ -174,7 +161,8 @@ namespace WiFiManager.Droid
                                 Password = arrs[2],
                                 IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
                                 NetworkType = arrs[4],
-                                Provider = arrs[5]
+                                Provider = arrs[5],
+                                Level = -1 * Constants.NO_SIGNAL_LEVEL
                             };
                             var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
                             res.Add(wifiDtoFromFile);
@@ -262,16 +250,7 @@ namespace WiFiManager.Droid
             var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
             bool b1 = locator.IsGeolocationAvailable;
             bool b2 = locator.IsGeolocationEnabled;
-            if (position == null)
-            {
-                //return;
-            }
-            //coords.Add(new CoordsAndPower
-            //{
-            //    Lat = position.Latitude,
-            //    Long = position.Longitude,
-            //    Alt = position.Altitude
-            //});
+
 
             var wifiNetworks = new List<WifiNetworkDto>();
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
@@ -288,15 +267,11 @@ namespace WiFiManager.Droid
                         BssID = n.Bssid.ToUpper(),
                         Name = n.Ssid,
                         NetworkType = n.Capabilities,
+                        Level = n.Level,
                         IsEnabled = true
                     };
                     wifiNetworks.Add(netw);
-                    //netw.CoordsAndPower.Add(new CoordsAndPower
-                    //{
-                    //    Lat = 11.3,
-                    //    Long = 54.7888,
-                    //    Alt = 122
-                    //});
+
                     System.Diagnostics.Debug.WriteLine(n.Level);
                 }
                 catch (Exception ex)
