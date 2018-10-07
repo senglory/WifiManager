@@ -29,7 +29,5 @@ namespace WiFiManager.Common
         Task ConnectAsync(string bssid, string ssid,string password);
 
         Task DisConnectAsync();
-
-        event ConnectionSTateHandler ConnectionStateChanged;
     }
 }

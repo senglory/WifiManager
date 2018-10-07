@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,20 +13,22 @@ using Android.Views;
 using Android.Widget;
 using Android.Util;
 using Android.OS;
+using Android.Net;
 using Android.Net.Wifi;
 using Android.Locations;
 using Plugin.Permissions;
 using Plugin.Geolocator;
 using Plugin.Connectivity;
 using Plugin.Geolocator.Abstractions;
-using Newtonsoft.Json;
-
+using Plugin.Permissions.Abstractions;
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
-using Android.Net;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+using Newtonsoft.Json;
 using AutoMapper;
-using System.Text;
+
+
 
 namespace WiFiManager.Droid
 {
@@ -39,8 +42,6 @@ namespace WiFiManager.Droid
         string filePathTemplateJSON = Path.Combine(
 "/storage/sdcard0/DCIM"
 , "WIFINETWORKS-{0}.JSON");
-
-        public event ConnectionSTateHandler ConnectionStateChanged;
 
         static  MapperConfiguration config;
         static  IMapper mapper;
@@ -67,19 +68,23 @@ namespace WiFiManager.Droid
             LoadApplication(new App(this));
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
         public async Task<Tuple<double, double, double>> GetCoordsAsync()
         {
+            var hasPermission = await Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Location);
+            if (!hasPermission)
+                return null;
+
             var locator = CrossGeolocator.Current;
             locator.DesiredAccuracy = 1;
 
             var includeHeading = true;
 
-            var t = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
+            var t = await locator.GetPositionAsync(TimeSpan.FromSeconds(Constants.GPS_TIMEOUT), null, includeHeading);
 
             return new Tuple<double, double, double>(t.Latitude, t.Longitude, t.Altitude);
         }
@@ -216,7 +221,7 @@ namespace WiFiManager.Droid
                 Bssid = bssid,
                 Ssid = formattedSsid,
                 PreSharedKey = formattedPassword,
-                Priority = 10000
+                Priority = Constants.WIFI_CONFIG_PRIORITY
             };
 
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);

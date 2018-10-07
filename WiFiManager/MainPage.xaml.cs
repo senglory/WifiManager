@@ -10,9 +10,11 @@ using WiFiManager.Common;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using Xamarin.Forms.Xaml;
 
 namespace WiFiManager
 {
+    [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : ContentPage
     {
         IWifiOperations mgr;
@@ -21,18 +23,8 @@ namespace WiFiManager
         {
             InitializeComponent();
             this.mgr = mgr;
-            this.mgr.ConnectionStateChanged += Mgr_ConnectionStateChanged;
             this.BindingContext = new MainPageVM(mgr);
             RefreshAvailableNetworks();
-        }
-
-        private void Mgr_ConnectionStateChanged(string connectionState)
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
-            });
         }
 
         public void WifiConnectNotify()
@@ -49,30 +41,27 @@ namespace WiFiManager
 
         async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
-            var hasPermission = await Utils.CheckPermissions(Permission.Location);
-            if (!hasPermission)
-                return;
-
             try
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
+                //Device.BeginInvokeOnMainThread(() => {
+                //    pleaseWait.IsVisible = true;
+                //    pleaseWait.IsRunning = true;
+                //});
 
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
-                var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+                //var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+
+                await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
                 //t1.Start();
-                var t2 = t1.ContinueWith( (www) => {
+                //var t2 = t1.ContinueWith( (www) => {
 
-                    Device.BeginInvokeOnMainThread(() => {
-                        pleaseWait.IsVisible = false;
-                        pleaseWait.IsRunning = false;
-                    });
+                //    Device.BeginInvokeOnMainThread(() => {
+                //        pleaseWait.IsVisible = false;
+                //        pleaseWait.IsRunning = false;
+                //    });
 
-                });
-
+                //});
             }
             catch (Exception ex)
             {

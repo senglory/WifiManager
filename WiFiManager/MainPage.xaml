@@ -9,6 +9,8 @@
     <ContentPage.Resources>
 
         <local:GreaterThan x:Key="GreaterThanCvt"  />
+        <local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
+         
         
         <!-- Default DataTemplate -->
         <DataTemplate x:Key="DefaultDataTemplate">
@@ -42,17 +44,21 @@
                             <ColumnDefinition Width="10"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="20" />
-                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding BssID}"  HeightRequest="20" />
+                        <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
+                            <Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
+                            <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" />
+                        </StackLayout>
+
                         <BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="10"  >
-                            <!--<BoxView.Style>
+                            <BoxView.Style>
                                 <Style TargetType="BoxView">
                                     <Style.Triggers >
-                                        <DataTrigger TargetType="BoxView" Binding="{Binding Level, Converter={StaticResource GreaterThanCvt}, ConverterParameter=0}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="Green" />
+                                        <DataTrigger TargetType="BoxView" Binding="{Binding NetworkType, Converter={StaticResource WEPNetworkCvt}}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="Yellow" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </BoxView.Style>-->
+                            </BoxView.Style>
                         </BoxView>
                         <BoxView Grid.RowSpan="2" Grid.Column="2" WidthRequest="10"  >
                             <BoxView.Style>
@@ -66,17 +72,6 @@
                             </BoxView.Style>
                         </BoxView>
                     </Grid>
-                </StackLayout>
-            </ViewCell>
-        </DataTemplate>
-        <DataTemplate x:Key="EditNoteDataTemplate">
-            <ViewCell>
-                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill">
-                    <Entry Text="{Binding Name}" />
-                    <StackLayout Orientation="Horizontal"  HorizontalOptions="Fill">
-                        <Entry Text="{Binding BssID}" />
-                        <Entry Text="{Binding NetworkType}" />
-                    </StackLayout>
                 </StackLayout>
             </ViewCell>
         </DataTemplate>
@@ -174,9 +169,9 @@
                                     </Grid.ColumnDefinitions>
                                     <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" MinimumHeightRequest="25"></Label>
                                     <Switch Grid.Row="0" Grid.Column="1"  x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}"  MinimumHeightRequest="25"/>
-                                    <Label Grid.Row="1" Grid.Column="0" Text="Password"></Label>
+                                    <Label Grid.Row="1" Grid.Column="0" Text="Pwd:" WidthRequest="50"></Label>
                                     <StackLayout Grid.Row="1" Grid.Column="1" BackgroundColor="DarkGray" Padding="1"  MinimumHeightRequest="30">
-                                        <Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand" WidthRequest="100" BackgroundColor="Black" FontSize="Large"></Entry>
+                                        <Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand" WidthRequest="100" BackgroundColor="Black" FontSize="Large" ></Entry>
                                     </StackLayout>
                                 </Grid>
                             </StackLayout>
