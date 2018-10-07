@@ -20,7 +20,7 @@ namespace WiFiManager.Common
         IWifiOperations mgr;
 
         #region Properties
-        ObservableCollection<WifiNetworkDto> _WifiNetworks;
+        ObservableCollection<WifiNetworkDto> _WifiNetworks=new ObservableCollection<WifiNetworkDto> ();
         public ObservableCollection<WifiNetworkDto> WifiNetworks
         {
             get
@@ -29,17 +29,6 @@ namespace WiFiManager.Common
             }
             set
             {
-                AllRecordsQuickSearch.Clear();
-                if (_WifiNetworks != null)
-                {
-                    foreach (var nw in _WifiNetworks)
-                    {
-                        if (string.IsNullOrEmpty(nw.BssID))
-                            continue;
-                        if (!AllRecordsQuickSearch.ContainsKey(nw.BssID))
-                            AllRecordsQuickSearch.Add(nw.BssID, nw);
-                    }
-                }
                 SetProperty(ref _WifiNetworks, value, "WifiNetworks");
             }
         }
@@ -59,7 +48,7 @@ namespace WiFiManager.Common
         }
 
         Dictionary<string, WifiNetworkDto> _allrecsQuickSearch = new Dictionary<string, WifiNetworkDto>();
-        public Dictionary<string, WifiNetworkDto> AllRecordsQuickSearch
+        protected Dictionary<string, WifiNetworkDto> AllRecordsQuickSearch
         {
             get { return _allrecsQuickSearch; }
         }
@@ -102,8 +91,10 @@ namespace WiFiManager.Common
             this.mgr = mgr;
 
             SaveCommand = new Command(DoSave);
+            SaveJsonCommand = new Command(DoSaveJson);
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
+            DeleteNetworkCommand = new Command(DoDeleteNetwork);
         }
 
 
@@ -119,41 +110,58 @@ namespace WiFiManager.Common
             try
             {
                 IsBusy = true;
+                AllRecordsQuickSearch.Clear();
+
                 var lst1 = mgr.GetActiveWifiNetworks();
-                WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
+                // for quick search
+                Dictionary<string, WifiNetworkDto> allrecsQuickSearch = new Dictionary<string, WifiNetworkDto>();
+                foreach (var item in lst1)
+                {
+                    allrecsQuickSearch.Add (item.BssID, item);
+                }
+
 
                 if (mgr.CanLoadFromFile())
                 {
                     var lst2 = mgr.GetWifiNetworksFromCSV();
                     foreach (var wifiDtoFromFile in lst2)
                     {
-                        var existingWifi = GetExistingWifiDto(wifiDtoFromFile);
-                        var isInCSVList = existingWifi != null;
-                        wifiDtoFromFile.IsInCSVList = isInCSVList;
-                        if (isInCSVList
-                            && AllRecordsQuickSearch.ContainsKey(existingWifi.BssID))
+                        var existingWifi = GetExistingWifiDto(lst1, allrecsQuickSearch,  wifiDtoFromFile);
+                        var isOnAir = existingWifi != null;
+                        wifiDtoFromFile.IsInCSVList = isOnAir;
+                        if (isOnAir)
                         {
-                            // update existing Wifi info from file
-                            AllRecordsQuickSearch[existingWifi.BssID].IsInCSVList = wifiDtoFromFile.IsInCSVList;
-                            AllRecordsQuickSearch[existingWifi.BssID].IsEnabled = wifiDtoFromFile.IsEnabled;
-                            AllRecordsQuickSearch[existingWifi.BssID].Password = wifiDtoFromFile.Password;
-                            AllRecordsQuickSearch[existingWifi.BssID].Provider = wifiDtoFromFile.Provider;
+                            // update existing Wifi info from file (except for BSSID)
+                            existingWifi.IsInCSVList = wifiDtoFromFile.IsInCSVList;
+                            existingWifi.IsEnabled = wifiDtoFromFile.IsEnabled;
+                            existingWifi.Password = wifiDtoFromFile.Password;
+                            existingWifi.Provider = wifiDtoFromFile.Provider;
                         }
                         else
                         {
-                            // wifi not in CSV list - add it
-                            WifiNetworks.Add(wifiDtoFromFile);
-                            if (!AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
+                            // wifi not on the air but in CSV list - add it
+                            lst1.Add(wifiDtoFromFile);
+                            // and for quicksearch purposes
+                            if (!AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID)
+                                && !string .IsNullOrEmpty (wifiDtoFromFile.BssID))
                                 AllRecordsQuickSearch.Add(wifiDtoFromFile.BssID, wifiDtoFromFile);
                         }
                     }
                 }
+                WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
                 SortList();
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        public void DoDeleteNetwork(object networkToDelete)
+        {
+            var dto = networkToDelete as WifiNetworkDto;
+            WifiNetworks.Remove(dto);
+            AllRecordsQuickSearch.Remove(dto.BssID);
         }
 
         void ExecuteConnectDisconnectCommand(object parameter)
@@ -174,16 +182,16 @@ namespace WiFiManager.Common
         }
 
 
-        WifiNetworkDto GetExistingWifiDto(WifiNetworkDto wifiDtoFromFile)
+        WifiNetworkDto GetExistingWifiDto(List<WifiNetworkDto> lst1, Dictionary<string, WifiNetworkDto> allrecsQuickSearch, WifiNetworkDto wifiDtoFromFile)
         {
             if (string.IsNullOrEmpty(wifiDtoFromFile.BssID))
             {
-                var foundByName = WifiNetworks.FirstOrDefault(r => r.Name == wifiDtoFromFile.Name);
+                var foundByName = lst1.FirstOrDefault(r => r.Name == wifiDtoFromFile.Name);
                 return foundByName;
             }
-            if (AllRecordsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
+            if (allrecsQuickSearch.ContainsKey(wifiDtoFromFile.BssID))
             {
-                return AllRecordsQuickSearch[wifiDtoFromFile.BssID];
+                return allrecsQuickSearch[wifiDtoFromFile.BssID];
             }
             else
             {
@@ -217,8 +225,10 @@ namespace WiFiManager.Common
         }
 
         public Command SaveCommand { get; set; }
+        public Command SaveJsonCommand { get; set; }
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectDisconnectCommand { get; set; }
+        public Command DeleteNetworkCommand { get; set; }
 
 
         //private Command loadTweetsCommand;

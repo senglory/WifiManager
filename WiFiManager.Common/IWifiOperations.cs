@@ -28,6 +28,8 @@ namespace WiFiManager.Common
         Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);
         Task ConnectAsync(string bssid, string ssid,string password);
 
+        Task DisConnectAsync();
+
         event ConnectionSTateHandler ConnectionStateChanged;
     }
 }
