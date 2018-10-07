@@ -198,7 +198,7 @@ namespace WiFiManager.Droid
         {
             JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
             string str = JsonConvert.SerializeObject(wifiNetworks, settings);
-            var filePathJSON = string.Format(filePathTemplateJSON, DateTime.Now.ToString("yyyyMMdd-HH:mm"));
+            var filePathJSON = string.Format(filePathTemplateJSON, DateTime.Now.ToString("yyyyMMdd-HHmm"));
             File.WriteAllText(filePathJSON, str);
         }
 

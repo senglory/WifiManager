@@ -157,23 +157,15 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <StackLayout Grid.Row="0" HorizontalOptions="FillAndExpand">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="40" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" MinimumHeightRequest="25"></Label>
-                                    <Switch Grid.Row="0" Grid.Column="1"  x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}"  MinimumHeightRequest="25"/>
-                                    <Label Grid.Row="1" Grid.Column="0" Text="Pwd:" WidthRequest="50"></Label>
-                                    <StackLayout Grid.Row="1" Grid.Column="1" BackgroundColor="DarkGray" Padding="1"  MinimumHeightRequest="30">
-                                        <Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand" WidthRequest="100" BackgroundColor="Black" FontSize="Large" ></Entry>
-                                    </StackLayout>
-                                </Grid>
+                            <StackLayout Grid.Row="0">
+                                <StackLayout Orientation="Horizontal">
+                                    <Label  Text="{Binding Name}" HorizontalOptions="Start"/>
+                                    <Switch   x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand"/>
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal">
+                                    <Label Text="Pwd:" HorizontalOptions="Start" />
+                                    <Entry Text="{Binding Password}"  BackgroundColor="Black" FontSize="Large" HorizontalOptions="FillAndExpand"/>
+                                </StackLayout>
                             </StackLayout>
                             <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}"  RowHeight="25" >
                                 <ListView.ItemTemplate>
