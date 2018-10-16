@@ -54,11 +54,13 @@ namespace WiFiManager.Common
             get { return isBusy; }
             set
             {
-                if (isBusy == value)
-                    return;
+                SetProperty(ref isBusy, value, "IsBusy");
 
-                isBusy = value;
-                OnPropertyChanged("IsBusy");
+                //if (isBusy == value)
+                //    return;
+
+                //isBusy = value;
+                //OnPropertyChanged("IsBusy");
             }
         }
 
@@ -68,11 +70,12 @@ namespace WiFiManager.Common
             get { return isConnected; }
             set
             {
-                if (isConnected == value)
-                    return;
+                SetProperty(ref isConnected, value, "IsConnected");
+                //if (isConnected == value)
+                //    return;
 
-                isConnected = value;
-                OnPropertyChanged("IsConnected");
+                //isConnected = value;
+                //OnPropertyChanged("IsConnected");
             }
         } 
         #endregion
@@ -95,7 +98,7 @@ namespace WiFiManager.Common
         }
 
 
-        public void SortList()
+        public void SortListByLevel()
         {
             var lst1 = WifiNetworks.OrderBy(nw => Math.Abs( nw.Level));
             //var lst1 = WifiNetworks.OrderBy(nw => nw.Name).ThenByDescending(nw => Math.Abs( nw.Level));
@@ -135,7 +138,10 @@ namespace WiFiManager.Common
                     }
                 }
                 WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
-                SortList();
+                SortListByLevel();
+
+                IsConnected = mgr.IsConnected();
+                SelectedNetwork = null;
             }
             finally
             {

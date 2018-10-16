@@ -112,6 +112,9 @@ namespace WiFiManager.Droid
                     Level = n.Level,
                     IsEnabled = true
                 };
+                if (netw.Name == "Telekom_FON"
+                 || netw.Name == "Unitymedia WifiSpot")
+                    continue;
                 wifiNetworks.Add(netw);
             }
 
@@ -135,6 +138,9 @@ namespace WiFiManager.Droid
                         {
                             var s = fr.ReadLine();
                             WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
+                            if (wifiDtoFromFile.Name == "Telekom_FON"
+                                || wifiDtoFromFile.Name == "Unitymedia WifiSpot")
+                                continue;
                             res.Add(wifiDtoFromFile);
                         }
                     }
