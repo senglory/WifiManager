@@ -39,6 +39,10 @@ namespace WiFiManager.Droid
 "/storage/sdcard0/DCIM"
 , "WIFINETWORKS.csv");
 
+        string filePathCSVBAK = Path.Combine(
+"/storage/sdcard0/DCIM"
+, "WIFINETWORKS.bak");
+
         string filePathTemplateJSON = Path.Combine(
 "/storage/sdcard0/DCIM"
 , "WIFINETWORKS-{0}.JSON");
@@ -100,25 +104,15 @@ namespace WiFiManager.Droid
             var results = wifiManager.ScanResults;
             foreach (ScanResult n in results)
             {
-                try
+                var netw = new WifiNetworkDto()
                 {
-                    var netw = new WifiNetworkDto()
-                    {
-                        BssID = n.Bssid.ToUpper(),
-                        Name = n.Ssid,
-                        NetworkType = n.Capabilities,
-                        Level = n.Level,
-                        IsEnabled = true
-                    };
-                    wifiNetworks.Add(netw);
-                }
-                catch (Exception ex)
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        //DisplayAlert("Error", ex.Message, "OK");
-                    });
-                }
+                    BssID = n.Bssid.ToUpper(),
+                    Name = n.Ssid,
+                    NetworkType = n.Capabilities,
+                    Level = n.Level,
+                    IsEnabled = true
+                };
+                wifiNetworks.Add(netw);
             }
 
             return wifiNetworks;
@@ -128,69 +122,128 @@ namespace WiFiManager.Droid
         {
             var res = new List<WifiNetworkDto>();
 
-            if (!File.Exists(filePathCSV))
-                return res;
-            using (var fs = new FileStream(filePathCSV, FileMode.Open))
+            try
             {
-                using (var fr = new StreamReader(fs))
+                if (!File.Exists(filePathCSV))
+                    return res;
+                using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
                 {
-                    fr.ReadLine();
-                    while (!fr.EndOfStream)
+                    using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                     {
-                        var s = fr.ReadLine();
-                        var arrs = s.Split(new char[] { ';' });
-                        try
+                        var ss2=fr.ReadLine();
+                        while (!fr.EndOfStream)
                         {
-                            // parse potential BSSID value
-                            var bssidRaw = arrs[1].ToUpper().Trim();
-                            var bssid = bssidRaw;
-                            if (!bssidRaw.Contains(':'))
-                            {
-                                var sb = new StringBuilder();
-                                bssid = sb.AppendFormat("{0}:{0}:{0}:{0}:{0}:{0}",
-                                    bssidRaw.Substring(0, 2),
-                                    bssidRaw.Substring(3, 2),
-                                    bssidRaw.Substring(6, 2),
-                                    bssidRaw.Substring(9, 2),
-                                    bssidRaw.Substring(12, 2),
-                                    bssidRaw.Substring(15, 2)).ToString ();
-                            }
-                            var nw = new WifiNetwork
-                            {
-                                BssID = bssid,
-                                Name = arrs[0].Trim(),
-                                Password = arrs[2].Trim(),
-                                IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
-                                NetworkType = arrs[4],
-                                Provider = arrs[5],
-                                Level = -1 * Constants.NO_SIGNAL_LEVEL
-                            };
-                            var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+                            var s = fr.ReadLine();
+                            WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
                             res.Add(wifiDtoFromFile);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error("ReadCSV", "", ex.Message);
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Log.Error("ReadCSV", "", ex.Message);
+            }
 
             return res;
         }
-        public void SaveToCSV(List<WifiNetworkDto> wifiNetworks)
+
+        public bool IsConnected()
         {
-            using (var fs = new FileStream(filePathCSV, FileMode.Create))
+            var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
+            var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
+            var ni1 = connManager.ActiveNetworkInfo;
+
+            return (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi);
+        }
+
+        private static WifiNetworkDto GetWifiDtoFromString(string s)
+        {
+            var arrs = s.Split(new char[] { ';' });
+            // parse potential BSSID value
+            var bssidRaw = arrs[1].ToUpper().Trim();
+            var bssid = bssidRaw;
+            if (!string .IsNullOrEmpty (bssidRaw) && !bssidRaw.Contains(':'))
             {
-                using (var fw = new StreamWriter(fs))
+                var sb = new StringBuilder();
+                bssid = sb.AppendFormat("{0}:{0}:{0}:{0}:{0}:{0}",
+                    bssidRaw.Substring(0, 2),
+                    bssidRaw.Substring(3, 2),
+                    bssidRaw.Substring(6, 2),
+                    bssidRaw.Substring(9, 2),
+                    bssidRaw.Substring(12, 2),
+                    bssidRaw.Substring(15, 2)).ToString();
+            }
+            var nw = new WifiNetwork
+            {
+                BssID = bssid,
+                Name = arrs[0].Trim(),
+                Password = arrs[2].Trim(),
+                IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                NetworkType = arrs[4],
+                Provider = arrs[5],
+                Level = -1 * Constants.NO_SIGNAL_LEVEL
+            };
+            var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+            return wifiDtoFromFile;
+        }
+
+        public void SaveToCSV(List<WifiNetworkDto> wifiNetworksOnAir)
+        {
+            try
+            {
+                File.Copy(filePathCSV, filePathCSVBAK, true);
+                var alreadySaved = new List<WifiNetworkDto>();
+
+                using (var fs = new FileStream(filePathCSVBAK, FileMode.Open))
                 {
-                    fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
-                    foreach (var nw in wifiNetworks)
+                    using (var fsw = new FileStream(filePathCSV, FileMode.Create))
                     {
-                        var isBanned = nw.IsEnabled ? 0 : 1;
-                        fw.WriteLine($"{nw.Name};{nw.BssID};{nw.Password};{isBanned};{nw.NetworkType};{nw.Provider}");
+                        using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                        {
+                            // write header
+                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
+
+                            using (var sr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+                            {
+                                var s = sr.ReadLine();
+                                while (!sr.EndOfStream)
+                                {
+                                    s = sr.ReadLine();
+                                    WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
+
+                                    var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
+                                    if (wifiOnAir != null)
+                                    {
+                                        var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider}");
+                                        alreadySaved.Add(wifiOnAir);
+                                    }
+                                    else
+                                    {
+                                        fw.WriteLine(s);
+                                    }
+                                }
+                            }
+
+                            foreach (var wifiOnAir in wifiNetworksOnAir)
+                            {
+                                var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
+                                if (wifiAlreadySaved == null)
+                                {
+                                    var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
+                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider}");
+                                }
+                            }
+                        }
                     }
                 }
+
+                File.Delete(filePathCSVBAK);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("SaveToCSV", "", ex.Message);
             }
         }
 
@@ -307,7 +360,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-
+                Log.Error("CanLoadFromFile", ex.Message);
                 throw;
             }
         }

@@ -35,8 +35,29 @@ namespace WiFiManager
 
         void RefreshAvailableNetworks()
         {
-            var mpv = this.BindingContext as MainPageVM;
-            mpv.DoRefreshNetworks();
+            try
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
+                var mpv = this.BindingContext as MainPageVM;
+                mpv.DoRefreshNetworks();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            finally
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                });
+            }
         }
 
         async void RefreshCoords_Clicked(object sender, EventArgs e)
@@ -56,11 +77,6 @@ namespace WiFiManager
                 //t1.Start();
                 //var t2 = t1.ContinueWith( (www) => {
 
-                //    Device.BeginInvokeOnMainThread(() => {
-                //        pleaseWait.IsVisible = false;
-                //        pleaseWait.IsRunning = false;
-                //    });
-
                 //});
             }
             catch (Exception ex)
@@ -71,7 +87,10 @@ namespace WiFiManager
             }
             finally
             {
-
+                //    Device.BeginInvokeOnMainThread(() => {
+                //        pleaseWait.IsVisible = false;
+                //        pleaseWait.IsRunning = false;
+                //    });
             }
 
         }
@@ -129,36 +148,6 @@ namespace WiFiManager
                 Device.BeginInvokeOnMainThread(() => {
                     pleaseWait.IsVisible = false;
                     pleaseWait.IsRunning = false;
-                });
-            }
-        }
-        public  async void RefreshNetworks_Clicked(object sender, EventArgs e)
-        {
-            try
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
-
-                //await Task.Run(() => {
-                    //this.BindingContext = new MainPageVM(mgr);
-                    var vm = this.BindingContext as MainPageVM;
-                vm.WifiNetworks = new ObservableCollection<WifiNetworkDto>(await mgr.GetActiveWifiNetworksAsync());
-                    vm.SelectedNetwork = null;
-
-                //});
-
-            }
-            catch (Exception ex)
-            {
-                int rr = 0;
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false ;
-                    pleaseWait.IsRunning = false ;
                 });
             }
         }

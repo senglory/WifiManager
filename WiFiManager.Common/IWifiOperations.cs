@@ -21,6 +21,8 @@ namespace WiFiManager.Common
 
         bool CanLoadFromFile();
 
+        bool IsConnected();
+
         Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync();
 
         Task<Tuple<double, double, double>> GetCoordsAsync();

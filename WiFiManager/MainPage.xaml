@@ -115,21 +115,21 @@
     </ContentPage.Resources>
     <StackLayout>
         <ActivityIndicator x:Name="pleaseWait"
-                           IsRunning="False"
-                           IsVisible="False"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
                            VerticalOptions="Center" 
                            BackgroundColor="Black"
                            />
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
-                <RowDefinition Height="200" />
+                <RowDefinition Height="270" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <StackLayout Grid.Row="0" HorizontalOptions="Fill" Orientation="Horizontal">
                 <Button Text="Save" Command="{Binding SaveCommand}"  FontSize="Micro" WidthRequest="60"></Button>
                 <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-                <Button Text="Disconn" Command="{Binding SaveCommand}"  FontSize="Micro" WidthRequest="60"></Button>
+                <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
                 <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"  FontSize="Micro" WidthRequest="60"></Button>
             </StackLayout>
 
@@ -183,7 +183,12 @@
                             <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
                                 <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
                                 <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
-                                <Button Text="Delete" BindingContext="{x:Reference Name=ctlIsEnabled}" IsEnabled="{Binding IsEnabled}" Command="{Binding DeleteCommand}" CommandParameter="{Binding}" FontSize="Micro" />
+                                <Button Text="Delete"  FontSize="Micro"
+                                        IsEnabled="{Binding IsEnabled}" 
+                                        Command="{Binding DeleteCommand}" 
+                                        BindingContext="{Binding  Source={x:Reference lstNetworks}, Path=BindingContext}"
+                                        CommandParameter="{Binding Source={x:Reference Name=lstNetworks}, Path=SelectedItem }" 
+                                         />
                             </StackLayout>
                         </Grid>
                     </StackLayout>
