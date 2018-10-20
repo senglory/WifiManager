@@ -9,7 +9,12 @@ namespace WiFiManager
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return System.Convert.ToString (value ).Contains("[WEP]") ;
+            if (System.Convert.ToString(value).Contains("[WEP]"))
+                return "WEP";
+            else
+                if (System.Convert.ToString(value).Contains("[WPS]"))
+                return "WPS";
+            else return "";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -55,12 +55,6 @@ namespace WiFiManager.Common
             set
             {
                 SetProperty(ref isBusy, value, "IsBusy");
-
-                //if (isBusy == value)
-                //    return;
-
-                //isBusy = value;
-                //OnPropertyChanged("IsBusy");
             }
         }
 
@@ -71,11 +65,6 @@ namespace WiFiManager.Common
             set
             {
                 SetProperty(ref isConnected, value, "IsConnected");
-                //if (isConnected == value)
-                //    return;
-
-                //isConnected = value;
-                //OnPropertyChanged("IsConnected");
             }
         } 
         #endregion
@@ -100,8 +89,7 @@ namespace WiFiManager.Common
 
         public void SortListByLevel()
         {
-            var lst1 = WifiNetworks.OrderBy(nw => Math.Abs( nw.Level));
-            //var lst1 = WifiNetworks.OrderBy(nw => nw.Name).ThenByDescending(nw => Math.Abs( nw.Level));
+            var lst1 = WifiNetworks.OrderBy (nw => nw.IsInCSVList).ThenBy(nw => Math.Abs( nw.Level));
             WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
         }
 
@@ -173,7 +161,7 @@ namespace WiFiManager.Common
             }
         }
 
-        void DoSave(object parameter)
+        public void DoSave( )
         {
             var lst = new List<WifiNetworkDto>(WifiNetworks);
             mgr.SaveToCSV(lst);
@@ -218,51 +206,5 @@ namespace WiFiManager.Common
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
         public Command DeleteNetworkCommand { get; set; }
-
-
-        //private Command loadTweetsCommand;
-
-        //public Command LoadTweetsCommand
-        //{
-        //    get
-        //    {
-        //        return loadTweetsCommand ?? (loadTweetsCommand = new Command(ExecuteLoadTweetsCommand, () =>
-        //        {
-        //            return !IsBusy;
-        //        }));
-        //    }
-        //}
-
-        //private async void ExecuteLoadTweetsCommand()
-        //{
-        //    if (IsBusy)
-        //        return;
-
-        //    IsBusy = true;
-        //    LoadTweetsCommand.ChangeCanExecute();
-
-        //    //DoStuff
-
-        //    IsBusy = false;
-        //    LoadTweetsCommand.ChangeCanExecute();
-        //}
-
-        //private Command _ConnectDisconnectCommand;
-        //public const string ConnectDisconnectCommandPropertyName = "ConnectDisconnectCommand";
-
-        //public Command ConnectDisconnectCommand
-        //{
-        //    get
-        //    {
-        //        /*the false returned in second constructor parameter will mean that button bound to this command 
-        //        will alwasy be disabled; please change to your logic eg IsBusy view model property*/
-
-        //        return _ConnectDisconnectCommand ?? (_ConnectDisconnectCommand =
-        //            new Command(
-        //                async () => await ExecuteConnectDisconnectCommand(),
-        //                () => false)
-        //            );
-        //    } 
-        //}
     }
 }

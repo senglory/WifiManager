@@ -112,13 +112,21 @@ namespace WiFiManager.Droid
                     Level = n.Level,
                     IsEnabled = true
                 };
-                if (netw.Name == "Telekom_FON"
-                 || netw.Name == "Unitymedia WifiSpot")
+                if (IsIgnoredNetwork(netw))
                     continue;
                 wifiNetworks.Add(netw);
             }
 
             return wifiNetworks;
+        }
+
+        bool IsIgnoredNetwork(WifiNetworkDto netw)
+        {
+            return netw.Name == "Telekom_FON"
+                   || netw.Name == "Unitymedia WifiSpot"
+                   || netw.Name == "MT_FREE"
+                   || netw.Name == "AndroidAP"
+                   || netw.Name == "CPPK_Free";
         }
 
         public List<WifiNetworkDto> GetWifiNetworksFromCSV( )
@@ -138,8 +146,7 @@ namespace WiFiManager.Droid
                         {
                             var s = fr.ReadLine();
                             WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
-                            if (wifiDtoFromFile.Name == "Telekom_FON"
-                                || wifiDtoFromFile.Name == "Unitymedia WifiSpot")
+                            if (IsIgnoredNetwork(wifiDtoFromFile))
                                 continue;
                             res.Add(wifiDtoFromFile);
                         }
@@ -180,16 +187,43 @@ namespace WiFiManager.Droid
                     bssidRaw.Substring(12, 2),
                     bssidRaw.Substring(15, 2)).ToString();
             }
-            var nw = new WifiNetwork
+            WifiNetwork nw = null;
+            // legacy
+            if (arrs.Length == 6)
             {
-                BssID = bssid,
-                Name = arrs[0].Trim(),
-                Password = arrs[2].Trim(),
-                IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
-                NetworkType = arrs[4],
-                Provider = arrs[5],
-                Level = -1 * Constants.NO_SIGNAL_LEVEL
-            };
+                nw = new WifiNetwork
+                {
+                    BssID = bssid,
+                    Name = arrs[0].Trim(),
+                    Password = arrs[2].Trim(),
+                    IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                    NetworkType = arrs[4],
+                    Provider = arrs[5],
+                    Level = -1 * Constants.NO_SIGNAL_LEVEL
+                };
+            }
+            // + extra info about connection
+            if (arrs.Length == 10)
+            {
+                nw = new WifiNetwork
+                {
+                    BssID = bssid,
+                    Name = arrs[0].Trim(),
+                    Password = arrs[2].Trim(),
+                    IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                    NetworkType = arrs[4],
+                    Provider = arrs[5],
+                    WpsPin = arrs[6],
+                    FirstConnectPublicIP = arrs[8],
+                    FirstConnectMac = arrs[9],
+                    Level = -1 * Constants.NO_SIGNAL_LEVEL
+                };
+                if (!string.IsNullOrEmpty(arrs[7]))
+                {
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7]);
+                }
+            }
+
             var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
             return wifiDtoFromFile;
         }
@@ -208,7 +242,7 @@ namespace WiFiManager.Droid
                         using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                         {
                             // write header
-                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider");
+                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac");
 
                             using (var sr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                             {
@@ -222,7 +256,7 @@ namespace WiFiManager.Droid
                                     if (wifiOnAir != null)
                                     {
                                         var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider}");
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                     else
@@ -238,7 +272,7 @@ namespace WiFiManager.Droid
                                 if (wifiAlreadySaved == null)
                                 {
                                     var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider}");
+                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
                                 }
                             }
                         }
@@ -261,16 +295,16 @@ namespace WiFiManager.Droid
             File.WriteAllText(filePathJSON, str);
         }
 
-        public async Task ConnectAsync(string bssid, string ssid, string password)
+        public async Task<WifiInfoInternal> ConnectAsync(string bssid, string ssid, string password)
         {
-            await Task.Run(() => Connect(bssid, ssid,  password));
+            return await Task.Run(() => Connect(bssid, ssid,  password));
         }
         public async Task DisConnectAsync()
         {
             await Task.Run(() => DisConnect());
         }
 
-        void Connect(string bssid, string ssid, string password)
+        WifiInfoInternal Connect(string bssid, string ssid, string password)
         {
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
@@ -289,6 +323,12 @@ namespace WiFiManager.Droid
 
             if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
             {
+                WifiInfoInternal info = new WifiInfoInternal
+                {
+                    MacAddress = wifiManager.ConnectionInfo.MacAddress,
+
+                };
+                return info;
             }
             else
             {
@@ -297,6 +337,11 @@ namespace WiFiManager.Droid
                 var bd = wifiManager.Disconnect();
                 var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
                 var brc = wifiManager.Reconnect();
+                WifiInfoInternal info2 = new WifiInfoInternal {
+                    MacAddress = wifiManager.ConnectionInfo.MacAddress ,
+
+                } ;
+                return info2;
             }
         }
 

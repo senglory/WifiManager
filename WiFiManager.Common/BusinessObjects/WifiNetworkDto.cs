@@ -15,6 +15,9 @@ namespace WiFiManager.Common.BusinessObjects
         public string NetworkType { get; set; }
         public string Password { get; set; }
         public string WpsPin { get; set; }
+        public DateTime? FirstConnectWhen { get; set; }
+        public string FirstConnectMac { get; set; }
+        public string FirstConnectPublicIP { get; set; }
         public int Level { get; set; }
         public string Provider { get; set; }
         public bool IsSelected{ get; set; }

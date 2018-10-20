@@ -28,6 +28,10 @@ namespace WiFiManager
             {
                 (MainPage as MainPage).WifiConnectNotify();
             }
+            else
+            {
+                (MainPage as MainPage).WifiDisConnectNotify();
+            }
         }
 
         protected override void OnSleep ()

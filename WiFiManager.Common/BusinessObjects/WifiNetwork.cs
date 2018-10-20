@@ -14,5 +14,8 @@ namespace WiFiManager.Common.BusinessObjects
         public int Level { get; set; }
         public string Provider { get; set; }
         public bool IsEnabled { get; set; }
+        public DateTime? FirstConnectWhen { get; set; }
+        public string FirstConnectMac { get; set; }
+        public string FirstConnectPublicIP { get; set; }
     }
 }
