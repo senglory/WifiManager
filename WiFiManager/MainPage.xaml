@@ -132,13 +132,8 @@
                            VerticalOptions="Center" 
                            BackgroundColor="Black"
                            />
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="200" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <StackLayout Grid.Row="0" HorizontalOptions="Fill" Orientation="Horizontal">
+
+            <StackLayout  HorizontalOptions="Fill" Orientation="Horizontal">
                 <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
                 <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
                 <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
@@ -147,7 +142,6 @@
 
                 <ListView
                     x:Name="lstNetworks"
-                    Grid.Row="1"
                     SeparatorColor="Beige"
                     ItemsSource="{Binding  WifiNetworks}"
                     SelectedItem="{Binding SelectedNetwork}"
@@ -155,7 +149,7 @@
                     >
                 </ListView>
 
-            <StackLayout Grid.Row="2" x:Name="DetailsArea" >
+            <StackLayout  x:Name="DetailsArea" >
                 <Frame HasShadow="False" Padding="1" >
                     <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start" 
                                  BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
@@ -174,7 +168,7 @@
                                     <Label  Text="{Binding Name}" HorizontalOptions="Start"/>
                                     <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
                                 </StackLayout>
-                                <StackLayout Orientation="Horizontal" HeightRequest="40">
+                                <StackLayout Orientation="Horizontal" HeightRequest="50">
                                     <Label Text="Pwd:" HorizontalOptions="Start" />
                                     <Entry Text="{Binding Password}"  BackgroundColor="Black" FontSize="Large" HorizontalOptions="FillAndExpand"/>
                                 </StackLayout>
@@ -225,7 +219,6 @@
                     </Frame.Style>
                 </Frame>
             </StackLayout>
-        </Grid>
     </StackLayout>
 
 </ContentPage>

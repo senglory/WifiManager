@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -172,7 +173,7 @@ namespace WiFiManager.Droid
 
         private static WifiNetworkDto GetWifiDtoFromString(string s)
         {
-            var arrs = s.Split(new char[] { ';' });
+            var arrs = s.Split(new char[] { ';' }, StringSplitOptions .None );
             // parse potential BSSID value
             var bssidRaw = arrs[1].ToUpper().Trim();
             var bssid = bssidRaw;
@@ -203,7 +204,7 @@ namespace WiFiManager.Droid
                 };
             }
             // + extra info about connection
-            if (arrs.Length == 10)
+            if (arrs.Length == 11)
             {
                 nw = new WifiNetwork
                 {
@@ -220,7 +221,8 @@ namespace WiFiManager.Droid
                 };
                 if (!string.IsNullOrEmpty(arrs[7]))
                 {
-                    nw.FirstConnectWhen = DateTime.Parse(arrs[7]);
+                    var cult = new CultureInfo("en-us");
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7],cult);
                 }
             }
 
