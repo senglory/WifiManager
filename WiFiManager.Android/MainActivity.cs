@@ -38,17 +38,11 @@ namespace WiFiManager.Droid
     [Activity(Label = "WiFiManager", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, IWifiOperations
     {
-        string filePathCSV = Path.Combine(
-"/storage/sdcard0/DCIM"
-, "WIFINETWORKS.csv");
+        string filePathCSV;
 
-        string filePathCSVBAK = Path.Combine(
-"/storage/sdcard0/DCIM"
-, "WIFINETWORKS.bak");
+        string filePathCSVBAK;
 
-        string filePathTemplateJSON = Path.Combine(
-"/storage/sdcard0/DCIM"
-, "WIFINETWORKS-{0}.JSON");
+        string filePathTemplateJSON;
 
         static  MapperConfiguration config;
         static  IMapper mapper;
@@ -63,6 +57,12 @@ namespace WiFiManager.Droid
             });
             config.AssertConfigurationIsValid();
             mapper = config.CreateMapper();
+
+            // get link to SDCard DCIM
+            var sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim);
+            filePathCSV = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS.csv");
+            filePathCSVBAK = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS.bak");
+            filePathTemplateJSON = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS-{0}.JSON");
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -424,7 +424,8 @@ namespace WiFiManager.Droid
             }
         }
 
-        public async Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network) {
+        public async Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network)
+        {
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             wifiManager.StartScan();
             var networks = wifiManager.ConfiguredNetworks;
@@ -457,9 +458,40 @@ namespace WiFiManager.Droid
                     When = DateTime.Now
                 });
             }
-
         }
 
+        /// <summary>
+        /// Taken from https://forums.xamarin.com/discussion/103478/how-to-get-path-to-external-sd-card
+        /// Returns path in 
+        /// </summary>
+        /// <param name="getSDPath"></param>
+        /// <returns></returns>
+        public static string GetBaseFolderPath(bool getSDPath = false)
+        {
+            string baseFolderPath = "";
+
+            try
+            {
+                var context = Android.App.Application.Context;
+                Java.IO.File[] dirs = context.GetExternalFilesDirs(null);
+
+                foreach (Java.IO.File folder in dirs)
+                {
+                    bool IsRemovable = Android.OS.Environment.InvokeIsExternalStorageRemovable(folder);
+                    bool IsEmulated = Android.OS.Environment.InvokeIsExternalStorageEmulated(folder);
+
+                    if (getSDPath ? IsRemovable && !IsEmulated : !IsRemovable && IsEmulated)
+                        baseFolderPath = folder.Path;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetBaseFolderPath caused the follwing exception: {0}", ex);
+            }
+
+            return baseFolderPath;
+        }
     }
 }
 
