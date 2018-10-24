@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using Xamarin.Forms.Xaml;
 using System.Net;
 using System.Text;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace WiFiManager
 {
@@ -130,6 +132,13 @@ namespace WiFiManager
                 {
                     nw.FirstConnectMac = wi.MacAddress;
                 }
+
+                // get internal IP
+                string ipaddress = DependencyService.Get<IIPAddressManager>().GetIPAddress();
+                {
+                    nw.InternalIP = ipaddress;
+                }
+                // get external IP (for the very first connection to the particular network)
                 if (string .IsNullOrEmpty ( nw.FirstConnectPublicIP ))
                 {
                     nw.FirstConnectPublicIP = getPublicIp();
@@ -151,16 +160,31 @@ namespace WiFiManager
             }
         }
 
-         string getPublicIp()
+
+        /// <summary>
+        /// Taken from https://forums.xamarin.com/discussion/2260/get-current-ip-address
+        /// </summary>
+        /// <returns></returns>
+        string getPublicIp()
         {
-            Encoding utf8 =  Encoding.UTF8;
+            // from https://www.c-sharpcorner.com/uploadfile/scottlysle/getting-an-external-ip-address-locally/
+            // and https://wtfismyip.com/text
+            //Encoding utf8 =  Encoding.UTF8;
 
-            WebClient webClient = new WebClient();
+            //WebClient webClient = new WebClient();
 
-            String externalIp = utf8.GetString(webClient.DownloadData(
+            //var ar = webClient.DownloadData("http://wtfismyip.com/text");
+            //String externalIp = utf8.GetString(ar);
 
-            "http://wtfismyip.com/text"));
+            var client = new HttpClient();
+            var t1 = Task.Run(() =>  client.GetAsync("https://api.ipify.org/?format=json"));
+            var response = t1.Result;
+            var t2 = Task.Run(() => response.Content.ReadAsStringAsync());
+             var resultString = t2.Result;
 
+            var result = JsonConvert.DeserializeObject<IpResult>(resultString);
+
+            var externalIp = result.Ip;
 
             return externalIp;
         }

@@ -22,6 +22,8 @@ using Plugin.Geolocator;
 using Plugin.Connectivity;
 using Plugin.Geolocator.Abstractions;
 using Plugin.Permissions.Abstractions;
+using Plugin.FilePicker;
+using Plugin.FilePicker.Abstractions;
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
 using Xamarin.Forms;
@@ -137,7 +139,11 @@ namespace WiFiManager.Droid
             try
             {
                 if (!File.Exists(filePathCSV))
+                {
+                    //var t1 = Task.Run(() => { return CrossFilePicker.Current.PickFile(); });
+                    //FileData filedata = t1.Result;
                     return res;
+                }
                 using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
                 {
                     using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))

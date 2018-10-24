@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace WiFiManager.Common.BusinessObjects
 {
-    public class WifiNetworkDto
+    public class WifiNetworkDto : INotifyPropertyChanged
     {
         public string Name { get; set; }
         public string BssID { get; set; }
@@ -17,7 +17,26 @@ namespace WiFiManager.Common.BusinessObjects
         public string WpsPin { get; set; }
         public DateTime? FirstConnectWhen { get; set; }
         public string FirstConnectMac { get; set; }
-        public string FirstConnectPublicIP { get; set; }
+
+        string firstConnectPublicIP;
+        public string FirstConnectPublicIP
+        {
+            get { return firstConnectPublicIP; }
+            set {
+                    SetProperty(ref firstConnectPublicIP, value, "FirstConnectPublicIP");
+            }
+        }
+
+        string internalIP;
+        public string InternalIP
+        {
+            get { return internalIP; }
+            set
+            {
+                SetProperty(ref internalIP, value, "InternalIP");
+            }
+        }
+
         public int Level { get; set; }
         public string Provider { get; set; }
         public bool IsSelected{ get; set; }
@@ -47,5 +66,32 @@ namespace WiFiManager.Common.BusinessObjects
         {
             return BssID + " " + Name + " " +  Math.Abs(Level).ToString ();
         }
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SetProperty<T>(ref T backingStore, T value,
+            [CallerMemberName]string propertyName = "",
+            Action onChanged = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(backingStore, value))
+                return false;
+
+            backingStore = value;
+            onChanged?.Invoke();
+            OnPropertyChanged(propertyName);
+            return true;
+            //if (Equals(backingStore, value)) return false;
+            //backingStore = value;
+            //OnPropertyChanged(propertyName);
+            //return true;
+        }
+
+        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
     }
 }

@@ -77,7 +77,7 @@
                                 <Style TargetType="BoxView">
                                     <Style.Triggers >
                                         <DataTrigger TargetType="BoxView" Binding="{Binding Password, Converter={StaticResource EmptyPwdCvt}}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="Green" />
+                                            <Setter Property="BackgroundColor" Value="LightGreen" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -125,7 +125,7 @@
 
         </ResourceDictionary>
     </ContentPage.Resources>
-    <StackLayout>
+    <StackLayout Spacing="0">
         <ActivityIndicator x:Name="pleaseWait"
                            IsRunning="{Binding IsBusy}"
                            IsVisible="{Binding IsBusy}"
@@ -133,92 +133,99 @@
                            BackgroundColor="Black"
                            />
 
-            <StackLayout  HorizontalOptions="Fill" Orientation="Horizontal">
-                <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
-                <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
-                <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-                <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"   FontSize="Micro"></Button>
-            </StackLayout>
+        <StackLayout  HorizontalOptions="FillAndExpand" Orientation="Horizontal" Spacing="0">
+            <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
+            <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
+            <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
+            <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"   FontSize="Micro"></Button>
+        </StackLayout>
 
-                <ListView
-                    x:Name="lstNetworks"
-                    SeparatorColor="Beige"
-                    ItemsSource="{Binding  WifiNetworks}"
-                    SelectedItem="{Binding SelectedNetwork}"
-                    ItemTemplate="{StaticResource viewInListTemplateSelector}"
-                    >
-                </ListView>
+        <ListView
+            x:Name="lstNetworks"
+            SeparatorColor="Beige"
+            ItemsSource="{Binding  WifiNetworks}"
+            SelectedItem="{Binding SelectedNetwork}"
+            ItemTemplate="{StaticResource viewInListTemplateSelector}"
+            HeightRequest="450"
+            >
+        </ListView>
 
-            <StackLayout  x:Name="DetailsArea" >
-                <Frame HasShadow="False" Padding="1" >
-                    <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start" 
-                                 BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition Height="35" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackLayout Grid.Row="0">
-                                <StackLayout Orientation="Horizontal" HeightRequest="30">
-                                    <Label  Text="{Binding Name}" HorizontalOptions="Start"/>
-                                    <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal" HeightRequest="50">
-                                    <Label Text="Pwd:" HorizontalOptions="Start" />
-                                    <Entry Text="{Binding Password}"  BackgroundColor="Black" FontSize="Large" HorizontalOptions="FillAndExpand"/>
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal"  HeightRequest="40">
-                                    <Label Text="Info:" HorizontalOptions="Start" />
-                                    <Entry Text="{Binding Provider}"  BackgroundColor="Black" FontSize="Micro" HorizontalOptions="FillAndExpand"/>
-                                </StackLayout>
+        <StackLayout  x:Name="DetailsArea"  Spacing="0">
+            <Frame HasShadow="False" Padding="3" >
+                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start" 
+                                BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
+                    <Grid HorizontalOptions="FillAndExpand">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition Height="35" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Grid.Row="0">
+                            <StackLayout Orientation="Horizontal" HeightRequest="30">
+                                <Label  Text="{Binding Name}" HorizontalOptions="Start"/>
+                                <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
                             </StackLayout>
-                            <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}"  RowHeight="25" >
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <ViewCell>
-                                            <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Black"  >
-                                                <StackLayout.Resources>
-                                                    <Style TargetType="Label">
-                                                        <Setter Property="FontSize" Value="Micro"></Setter>
-                                                    </Style>
-                                                </StackLayout.Resources>
-                                                <Label Text="{Binding Lat}"></Label>
-                                                <Label Text="{Binding Long}"></Label>
-                                                <Label Text="{Binding Power}"></Label>
-                                            </StackLayout>
-                                        </ViewCell>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                            <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
-                                <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
-                                <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
-                                <Button Text="Delete"  FontSize="Micro"
-                                        IsEnabled="{Binding IsEnabled}" 
-                                        Command="{Binding DeleteCommand}" 
-                                        BindingContext="{Binding  Source={x:Reference lstNetworks}, Path=BindingContext}"
-                                        CommandParameter="{Binding Source={x:Reference Name=lstNetworks}, Path=SelectedItem }" 
-                                         />
+                            <StackLayout Orientation="Horizontal" HeightRequest="50">
+                                <Label Text="Pwd:" HorizontalOptions="Start" />
+                                <Entry Text="{Binding Password}"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
-                        </Grid>
-                    </StackLayout>
-                    <Frame.Style>
-                        <Style TargetType="Frame">
-                            <Setter Property="BorderColor" Value="Maroon"></Setter>
-                            <Style.Triggers>
-                                <DataTrigger TargetType="Frame"  Binding="{Binding   IsConnected}" Value="True" >
-                                    <Setter Property="BorderColor" Value="Lime" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Frame.Style>
-                </Frame>
-            </StackLayout>
+                            <StackLayout Orientation="Horizontal" HeightRequest="30">
+                                <Label Text="Internal IP" HorizontalOptions="Start"></Label>
+                                <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
+                                <Label Text="Public IP" HorizontalOptions="Start"></Label>
+                                <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal"  HeightRequest="40">
+                                <Label Text="Info:" HorizontalOptions="Start" />
+                                <Entry Text="{Binding Provider}"  BackgroundColor="Black" FontSize="Micro" HorizontalOptions="FillAndExpand"/>
+                            </StackLayout>
+                        </StackLayout>
+                        <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}"  RowHeight="25" >
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ViewCell>
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Black"  >
+                                            <StackLayout.Resources>
+                                                <Style TargetType="Label">
+                                                    <Setter Property="FontSize" Value="Micro"></Setter>
+                                                </Style>
+                                            </StackLayout.Resources>
+                                            <Label Text="{Binding Lat}"></Label>
+                                            <Label Text="{Binding Long}"></Label>
+                                            <Label Text="{Binding Power}"></Label>
+                                        </StackLayout>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
+                            <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
+                            <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
+                            <Button Text="Delete"  FontSize="Micro"
+                                    IsEnabled="{Binding IsEnabled}" 
+                                    Command="{Binding DeleteCommand}" 
+                                    BindingContext="{Binding  Source={x:Reference lstNetworks}, Path=BindingContext}"
+                                    CommandParameter="{Binding Source={x:Reference Name=lstNetworks}, Path=SelectedItem }" 
+                                        />
+                        </StackLayout>
+                    </Grid>
+                </StackLayout>
+                <Frame.Style>
+                    <Style TargetType="Frame">
+                        <Setter Property="BorderColor" Value="Maroon"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Frame"  Binding="{Binding   IsConnected}" Value="True" >
+                                <Setter Property="BorderColor" Value="Lime" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Frame.Style>
+            </Frame>
+        </StackLayout>
     </StackLayout>
 
 </ContentPage>
