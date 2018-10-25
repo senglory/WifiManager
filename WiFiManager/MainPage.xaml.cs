@@ -15,6 +15,7 @@ using System.Net;
 using System.Text;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace WiFiManager
 {
@@ -56,9 +57,13 @@ namespace WiFiManager
                 });
                 mpv.DoRefreshNetworks();
             }
+            catch (InvalidDataException ex)
+            {
+                DisplayAlert("Alert", ex.Message, "OK");
+            }
             catch (Exception ex)
             {
-
+                DisplayAlert("Alert",ex.Message,"OK");
                 throw;
             }
             finally

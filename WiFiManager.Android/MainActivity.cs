@@ -36,7 +36,8 @@ using AutoMapper;
 namespace WiFiManager.Droid
 {
     [Activity(Label = "WiFiManager", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, IWifiOperations
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
+        IWifiOperations
     {
         string filePathCSV;
 
@@ -59,10 +60,10 @@ namespace WiFiManager.Droid
             mapper = config.CreateMapper();
 
             // get link to SDCard DCIM
-            var sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim);
-            filePathCSV = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS.csv");
-            filePathCSVBAK = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS.bak");
-            filePathTemplateJSON = Path.Combine(sdCardPathDCIM.AbsolutePath, "WIFINETWORKS-{0}.JSON");
+            var sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+            filePathCSV = Path.Combine(sdCardPathDCIM, "WIFINETWORKS.csv");
+            filePathCSVBAK = Path.Combine(sdCardPathDCIM, "WIFINETWORKS.bak");
+            filePathTemplateJSON = Path.Combine(sdCardPathDCIM, "WIFINETWORKS-{0}.JSON");
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -132,9 +133,11 @@ namespace WiFiManager.Droid
                    || netw.Name == "CPPK_Free";
         }
 
-        public List<WifiNetworkDto> GetWifiNetworksFromCSV( )
+        public List<WifiNetworkDto> GetWifiNetworksFromCSV( out string firstFailedLine)
         {
+            firstFailedLine = null;
             var res = new List<WifiNetworkDto>();
+            var lineFromCSV = "";
 
             try
             {
@@ -148,11 +151,12 @@ namespace WiFiManager.Droid
                 {
                     using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                     {
+                        // skip header
                         var ss2=fr.ReadLine();
                         while (!fr.EndOfStream)
                         {
-                            var s = fr.ReadLine();
-                            WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
+                            lineFromCSV = fr.ReadLine();
+                            WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
                             if (IsIgnoredNetwork(wifiDtoFromFile))
                                 continue;
                             res.Add(wifiDtoFromFile);
@@ -162,7 +166,8 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("ReadCSV", "", ex.Message);
+                Log.Error("WiFiManager", "ReadCSV" + ex.Message);
+                firstFailedLine= lineFromCSV;
             }
 
             return res;
@@ -186,13 +191,13 @@ namespace WiFiManager.Droid
             if (!string .IsNullOrEmpty (bssidRaw) && !bssidRaw.Contains(':'))
             {
                 var sb = new StringBuilder();
-                bssid = sb.AppendFormat("{0}:{0}:{0}:{0}:{0}:{0}",
+                bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
                     bssidRaw.Substring(0, 2),
-                    bssidRaw.Substring(3, 2),
+                    bssidRaw.Substring(2, 2),
+                    bssidRaw.Substring(4, 2),
                     bssidRaw.Substring(6, 2),
-                    bssidRaw.Substring(9, 2),
-                    bssidRaw.Substring(12, 2),
-                    bssidRaw.Substring(15, 2)).ToString();
+                    bssidRaw.Substring(8, 2),
+                    bssidRaw.Substring(10, 2)).ToString();
             }
             WifiNetwork nw = null;
             // legacy
@@ -291,7 +296,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("SaveToCSV", "", ex.Message);
+                Log.Error("WiFiManager", "SaveToCSV"+ ex.Message);
             }
         }
 
@@ -402,7 +407,7 @@ namespace WiFiManager.Droid
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("GetActiveWifiNetworksAsync", "", ex.Message);
+                    Log.Error("WiFiManager", "GetActiveWifiNetworksAsync "+ ex.Message);
                 }
             }
 
@@ -419,7 +424,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("CanLoadFromFile", ex.Message);
+                Log.Error("WiFiManager", "CanLoadFromFile "+ ex.Message);
                 throw;
             }
         }

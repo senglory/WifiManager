@@ -84,21 +84,13 @@ https://forums.xamarin.com/discussion/5402/connect-to-wifi-networks-programmatic
 
 https://github.com/ThanosFisherman/WifiUtils
 
-A616
----------
-SoC: MediaTek MT6732M
-CPU: ARM Cortex-A53, 1300 MHz, Cores: 4
-GPU: ARM Mali-T760 MP2, 500 MHz, Cores: 2
-RAM: 512 MB, 800 MHz
-Storage: 4 GB
-Memory cards: microSD, microSDHC
-Display: 5.5 in, IPS, 480 x 854 pixels, 24 bit
-Battery: 2250 mAh, Li-Ion
-OS: Android 4.4.4 KitKat
-Camera: 2592 x 1944 pixels, 1920 x 1080 pixels, 30 fps
-SIM card: Mini-SIM, Micro-SIM
-Wi-Fi: b, g, n, Wi-Fi Hotspot
-USB: 2.0, Micro USB
-Bluetooth: 4.0
-Positioning: GPS, A-GPS 
+
+
+How to build an APK from cmdline:
+This is a super easy script for building your android APK files with different versionCode, versionName, packadgeName and separated ABI
+https://github.com/JTOne123/OnePackagePerABI
+
+
+
+
 

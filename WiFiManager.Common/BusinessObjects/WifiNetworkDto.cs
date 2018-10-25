@@ -39,9 +39,69 @@ namespace WiFiManager.Common.BusinessObjects
 
         public int Level { get; set; }
         public string Provider { get; set; }
-        public bool IsSelected{ get; set; }
-        public bool IsEnabled { get; set; }
-        public bool IsInCSVList { get; set; }
+
+        // for coloring
+        bool isInCSVList;
+        public bool IsInCSVList
+        {
+            get
+            {
+                return isInCSVList;
+            }
+            set
+            {
+                SetProperty(ref isInCSVList, value, "IsInCSVList");
+                if (isInCSVList)
+                    DtoNetworkStateForColoring = DtoNetworkState.IsInCSVList;
+                else
+                    DtoNetworkStateForColoring = DtoNetworkState.Default;
+            }
+        }
+
+        bool isSelected;
+        public bool IsSelected
+        {
+            get
+            {
+                return isSelected;
+            }
+            set
+            {
+                SetProperty(ref isSelected, value, "IsSelected");
+                //if (isSelected)
+                //    DtoNetworkStateForColoring = DtoNetworkState.IsSelected;
+                //else
+                //    DtoNetworkStateForColoring = DtoNetworkState.Default;
+            }
+        }
+
+        bool isEnabled;
+        public bool IsEnabled
+        {
+            get
+            {
+                return isEnabled;
+            }
+            set
+            {
+                SetProperty(ref isEnabled, value, "IsEnabled");
+                //if (isEnabled)
+                //    DtoNetworkStateForColoring = DtoNetworkState.Default; 
+                //else
+                //    DtoNetworkStateForColoring = DtoNetworkState.IsDisabled;
+            }
+        }
+
+
+        DtoNetworkState dtoNetworkStateForColoring;
+        public DtoNetworkState DtoNetworkStateForColoring
+        {
+            get { return dtoNetworkStateForColoring; }
+            set
+            {
+                SetProperty(ref dtoNetworkStateForColoring, value, "DtoNetworkStateForColoring");
+            }
+        }
 
         public ObservableCollection<CoordsAndPower> CoordsAndPower { get; set; }
 
@@ -69,6 +129,7 @@ namespace WiFiManager.Common.BusinessObjects
 
 
 
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected bool SetProperty<T>(ref T backingStore, T value,
@@ -93,5 +154,6 @@ namespace WiFiManager.Common.BusinessObjects
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        #endregion
     }
 }

@@ -43,6 +43,10 @@ namespace WiFiManager.Common
             }
             set
             {
+                if (_selectedNetwork != null)
+                {
+                    _selectedNetwork.IsSelected = false;
+                }
                 SetProperty(ref _selectedNetwork, value, "SelectedNetwork");
             }
         }
@@ -108,9 +112,11 @@ namespace WiFiManager.Common
                 }
 
 
+                string firstFailedLine;
+
                 if (mgr.CanLoadFromFile())
                 {
-                    var lst2 = mgr.GetWifiNetworksFromCSV();
+                    var lst2 = mgr.GetWifiNetworksFromCSV(out firstFailedLine);
                     foreach (var existingWifi in lst1)
                     {
                         var wifiDtoFromFile = lst2.GetExistingWifiDto(existingWifi);

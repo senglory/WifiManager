@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:shapes="clr-namespace:Stormlion.ShapeControl;assembly=Stormlion.ShapeControl"
+             xmlns:common="clr-namespace:WiFiManager.Common"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain">
 
@@ -21,15 +22,63 @@
                     <StackLayout.Resources>
                         <Style TargetType="StackLayout">
                             <Style.Triggers>
-                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsInCSVList}" Value="True">
+
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
                                     <Setter Property="BackgroundColor" Value="Gray" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsSelected}" Value="True">
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
                                     <Setter Property="BackgroundColor" Value="OrangeRed" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="StackLayout" Binding="{Binding IsEnabled}" Value="False">
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
                                     <Setter Property="BackgroundColor" Value="DarkRed" />
-                                </DataTrigger>
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="DarkRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
                             </Style.Triggers>
                         </Style>
                     </StackLayout.Resources>
@@ -144,9 +193,10 @@
             x:Name="lstNetworks"
             SeparatorColor="Beige"
             ItemsSource="{Binding  WifiNetworks}"
-            SelectedItem="{Binding SelectedNetwork}"
+            SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
             ItemTemplate="{StaticResource viewInListTemplateSelector}"
             HeightRequest="450"
+            VerticalOptions="CenterAndExpand"
             >
         </ListView>
 
@@ -166,12 +216,12 @@
                         </Grid.ColumnDefinitions>
                         <StackLayout Grid.Row="0">
                             <StackLayout Orientation="Horizontal" HeightRequest="30">
-                                <Label  Text="{Binding Name}" HorizontalOptions="Start"/>
+                                <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
                                 <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal" HeightRequest="50">
                                 <Label Text="Pwd:" HorizontalOptions="Start" />
-                                <Entry Text="{Binding Password}"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
+                                <Entry Text="{Binding Password}" VerticalOptions="FillAndExpand"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
                             <StackLayout Orientation="Horizontal" HeightRequest="30">
                                 <Label Text="Internal IP" HorizontalOptions="Start"></Label>
