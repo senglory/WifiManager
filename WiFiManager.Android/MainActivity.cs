@@ -215,7 +215,7 @@ namespace WiFiManager.Droid
                 };
             }
             // + extra info about connection
-            if (arrs.Length == 11)
+            if (arrs.Length == 10 || arrs.Length == 11)
             {
                 nw = new WifiNetwork
                 {

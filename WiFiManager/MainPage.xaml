@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
-             xmlns:shapes="clr-namespace:Stormlion.ShapeControl;assembly=Stormlion.ShapeControl"
              xmlns:common="clr-namespace:WiFiManager.Common"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain">
@@ -11,6 +10,8 @@
 
         <local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
         <local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
+        <local:SafeGetCoordsConverter x:Key="SafeGetCoordsCvt"  />
+        
          
         
         <!-- Default DataTemplate -->
@@ -22,15 +23,6 @@
                     <StackLayout.Resources>
                         <Style TargetType="StackLayout">
                             <Style.Triggers>
-
-                                <MultiTrigger TargetType="StackLayout">
-                                    <MultiTrigger.Conditions>
-                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
-                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
-                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-                                    </MultiTrigger.Conditions>
-                                    <Setter Property="BackgroundColor" Value="Gray" />
-                                </MultiTrigger>
                                 <MultiTrigger TargetType="StackLayout">
                                     <MultiTrigger.Conditions>
                                         <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
@@ -38,6 +30,14 @@
                                         <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
                                     </MultiTrigger.Conditions>
                                     <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="Gray" />
                                 </MultiTrigger>
                                 <MultiTrigger TargetType="StackLayout">
                                     <MultiTrigger.Conditions>
@@ -170,8 +170,6 @@
             <Style TargetType="ListView">
                 <Setter Property="BackgroundColor" Value="Black" />
             </Style>
-
-
         </ResourceDictionary>
     </ContentPage.Resources>
     <StackLayout Spacing="0">
@@ -181,101 +179,102 @@
                            VerticalOptions="Center" 
                            BackgroundColor="Black"
                            />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80" />
+                <RowDefinition Height="40*"/>
+                <RowDefinition Height="30*"/>
+            </Grid.RowDefinitions>
 
-        <StackLayout  HorizontalOptions="FillAndExpand" Orientation="Horizontal" Spacing="0">
-            <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
-            <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
-            <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-            <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"   FontSize="Micro"></Button>
-        </StackLayout>
+            <StackLayout Grid.Row="0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Spacing="0">
+                <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
+                <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
+                <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
+                <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"   FontSize="Micro"></Button>
+            </StackLayout>
 
-        <ListView
-            x:Name="lstNetworks"
-            SeparatorColor="Beige"
-            ItemsSource="{Binding  WifiNetworks}"
-            SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
-            ItemTemplate="{StaticResource viewInListTemplateSelector}"
-            HeightRequest="450"
-            VerticalOptions="CenterAndExpand"
+            <ListView
+                Grid.Row="1"
+                x:Name="lstNetworks"
+                SeparatorColor="Beige"
+                ItemsSource="{Binding  WifiNetworks}"
+                SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
+                ItemTemplate="{StaticResource viewInListTemplateSelector}"
             >
-        </ListView>
+            </ListView>
 
-        <StackLayout  x:Name="DetailsArea"  Spacing="0">
-            <Frame HasShadow="False" Padding="3" >
-                <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="Start" 
-                                BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}">
-                    <Grid HorizontalOptions="FillAndExpand">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition Height="35" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackLayout Grid.Row="0">
-                            <StackLayout Orientation="Horizontal" HeightRequest="30">
-                                <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
-                                <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
+            <StackLayout  Grid.Row="2" x:Name="DetailsArea"  Spacing="0" 
+                      VerticalOptions="FillAndExpand"
+                          BackgroundColor="LightCoral">
+                <Frame HasShadow="False" Padding="3" >
+                    <StackLayout BackgroundColor="Black" >
+                        <Grid   
+                            BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}"
+                            >
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition Height="35" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackLayout Grid.Row="0" Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
+                                <StackLayout Orientation="Horizontal" HeightRequest="30">
+                                    <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
+                                    <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal" HeightRequest="50">
+                                    <Label Text="Pwd:" HorizontalOptions="Start" />
+                                    <Entry Text="{Binding Password}" VerticalOptions="FillAndExpand"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal">
+                                    <Label Text="Internal IP" HorizontalOptions="Start"></Label>
+                                    <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
+                                    <Label Text="Public IP" HorizontalOptions="Start"></Label>
+                                    <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal">
+                                    <Label Text="Info:" HorizontalOptions="Start" />
+                                    <Entry Text="{Binding Provider}"  BackgroundColor="Black" FontSize="Micro" HorizontalOptions="FillAndExpand"/>
+                                </StackLayout>
                             </StackLayout>
-                            <StackLayout Orientation="Horizontal" HeightRequest="50">
-                                <Label Text="Pwd:" HorizontalOptions="Start" />
-                                <Entry Text="{Binding Password}" VerticalOptions="FillAndExpand"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
+                            <StackLayout Grid.Row="1" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                <StackLayout.Resources>
+                                    <Style TargetType="Label">
+                                        <Setter Property="FontSize" Value="Micro"></Setter>
+                                    </Style>
+                                </StackLayout.Resources>
+                                <Label Text="{Binding Lat}"></Label>
+                                <Label Text="{Binding Long}"></Label>
+                                <Label Text="{Binding Power}"></Label>
                             </StackLayout>
-                            <StackLayout Orientation="Horizontal" HeightRequest="30">
-                                <Label Text="Internal IP" HorizontalOptions="Start"></Label>
-                                <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
-                                <Label Text="Public IP" HorizontalOptions="Start"></Label>
-                                <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
-                            </StackLayout>
-                            <StackLayout Orientation="Horizontal"  HeightRequest="40">
-                                <Label Text="Info:" HorizontalOptions="Start" />
-                                <Entry Text="{Binding Provider}"  BackgroundColor="Black" FontSize="Micro" HorizontalOptions="FillAndExpand"/>
-                            </StackLayout>
-                        </StackLayout>
-                        <ListView Grid.Row="1" x:Name="lstCoords" ItemsSource="{Binding CoordsAndPower}"  RowHeight="25" >
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <ViewCell>
-                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" BackgroundColor="Black"  >
-                                            <StackLayout.Resources>
-                                                <Style TargetType="Label">
-                                                    <Setter Property="FontSize" Value="Micro"></Setter>
-                                                </Style>
-                                            </StackLayout.Resources>
-                                            <Label Text="{Binding Lat}"></Label>
-                                            <Label Text="{Binding Long}"></Label>
-                                            <Label Text="{Binding Power}"></Label>
-                                        </StackLayout>
-                                    </ViewCell>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                        <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="Fill">
-                            <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
-                            <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
-                            <Button Text="Delete"  FontSize="Micro"
+                            <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
+                                <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
+                                <Button Text="Delete"  FontSize="Micro"
                                     IsEnabled="{Binding IsEnabled}" 
                                     Command="{Binding DeleteCommand}" 
                                     BindingContext="{Binding  Source={x:Reference lstNetworks}, Path=BindingContext}"
                                     CommandParameter="{Binding Source={x:Reference Name=lstNetworks}, Path=SelectedItem }" 
                                         />
-                        </StackLayout>
-                    </Grid>
-                </StackLayout>
-                <Frame.Style>
-                    <Style TargetType="Frame">
-                        <Setter Property="BorderColor" Value="Maroon"></Setter>
-                        <Style.Triggers>
-                            <DataTrigger TargetType="Frame"  Binding="{Binding   IsConnected}" Value="True" >
-                                <Setter Property="BorderColor" Value="Lime" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Frame.Style>
-            </Frame>
-        </StackLayout>
+                            </StackLayout>
+                        </Grid>
+                    </StackLayout>
+                    <Frame.Style>
+                        <Style TargetType="Frame">
+                            <Setter Property="BorderColor" Value="Maroon"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Frame"  Binding="{Binding IsConnected}" Value="True" >
+                                    <Setter Property="BorderColor" Value="Lime" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Frame.Style>
+                </Frame>
+            </StackLayout>
+        </Grid>
     </StackLayout>
 
 </ContentPage>
