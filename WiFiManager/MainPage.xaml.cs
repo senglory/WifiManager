@@ -82,34 +82,29 @@ namespace WiFiManager
         {
             try
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
+                pleaseWait.IsVisible = true;
+                pleaseWait.IsRunning = true;
 
                 var mpv = this.BindingContext as MainPageVM;
                 var coords = mpv.SelectedNetwork.CoordsAndPower;
-                //var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+                var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
 
                 //await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
-                //t1.Start();
-                //var t2 = t1.ContinueWith( (www) => {
-
-                //});
+                var t2 = t1.ContinueWith((www) =>
+                {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                    var coords2 = mpv.SelectedNetwork.CoordsAndPower;
+                });
             }
             catch (Exception ex)
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    DisplayAlert("Error", ex.Message, "OK");
-                });
+                DisplayAlert("Error", ex.Message, "OK");
             }
             finally
             {
-                //    Device.BeginInvokeOnMainThread(() => {
-                //        pleaseWait.IsVisible = false;
-                //        pleaseWait.IsRunning = false;
-                //    });
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
             }
 
         }
