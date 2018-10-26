@@ -88,13 +88,13 @@ namespace WiFiManager.Droid
                 return null;
 
             var locator = CrossGeolocator.Current;
-            locator.DesiredAccuracy = 1;
+            locator.DesiredAccuracy = Constants.GPS_ACCURACY;
 
             var includeHeading = true;
 
-            var t = await locator.GetPositionAsync(TimeSpan.FromSeconds(Constants.GPS_TIMEOUT), null, includeHeading);
+            var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(Constants.GPS_TIMEOUT), null, includeHeading);
 
-            return new Tuple<double, double, double>(t.Latitude, t.Longitude, t.Altitude);
+            return new Tuple<double, double, double>(position.Latitude, position.Longitude, position.Altitude);
         }
 
         public List<WifiNetworkDto> GetActiveWifiNetworks()
@@ -130,7 +130,8 @@ namespace WiFiManager.Droid
                    || netw.Name == "Unitymedia WifiSpot"
                    || netw.Name == "MT_FREE"
                    || netw.Name == "AndroidAP"
-                   || netw.Name == "CPPK_Free";
+                   || netw.Name == "CPPK_Free"
+                   || netw.Name == "Metropolis_FREE";
         }
 
         public List<WifiNetworkDto> GetWifiNetworksFromCSV( out string firstFailedLine)
@@ -217,12 +218,6 @@ namespace WiFiManager.Droid
             // + extra info about connection
             if (arrs.Length == 10 || arrs.Length == 11)
             {
-
-                if (arrs[0].Trim() == "Keenetic-7139")
-                {
-                    var ttt = 0;
-                }
-
                 nw = new WifiNetwork
                 {
                     BssID = bssid,

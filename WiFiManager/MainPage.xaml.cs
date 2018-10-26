@@ -61,8 +61,7 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             mpv.IsConnected = false ;
             // stop 'please wait'
-            pleaseWait.IsVisible = false;
-            pleaseWait.IsRunning = false;
+            mpv.IsBusy =false ;
         }
 
         void RefreshAvailableNetworks()
@@ -70,12 +69,7 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    //pleaseWait.IsVisible = true;
-                    //pleaseWait.IsRunning = true;
-                    mpv.IsBusy = true;
-                });
+                mpv.IsBusy = true;
                 mpv.DoRefreshNetworks();
             }
             catch (InvalidDataException ex)
@@ -89,57 +83,35 @@ namespace WiFiManager
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    //pleaseWait.IsVisible = false ;
-                    //pleaseWait.IsRunning = false ;
-                    mpv.IsBusy = false;
-                });
+                mpv.IsBusy = false;
             }
         }
 
 
-        void RefreshCoords_Clicked(object sender, EventArgs e)
+        async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
+            var mpv = this.BindingContext as MainPageVM;
             try
             {
-                pleaseWait.IsVisible = true;
-                pleaseWait.IsRunning = true;
-
-                var mpv = this.BindingContext as MainPageVM;
-                var coords = mpv.SelectedNetwork.CoordsAndPower;
-                var t1 = mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
-
-                //await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
-                var t2 = t1.ContinueWith((www) =>
-                {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                    var coords2 = mpv.SelectedNetwork.CoordsAndPower;
-                });
+                mpv.IsBusy = true;
+                await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
             }
             catch (Exception ex)
             {
-                DisplayAlert("Error", ex.Message, "OK");
+                await DisplayAlert("Error", ex.Message, "OK");
             }
             finally
             {
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
+                mpv.IsBusy = false;
             }
-
         }
 
         async void Conn_Clicked(object sender, EventArgs e)
         {
+            var mpv = this.BindingContext as MainPageVM;
             try
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
-
-                var mpv = this.BindingContext as MainPageVM;
+                mpv.IsBusy = true;
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
                 var wi = await mgr.ConnectAsync(nw.BssID,  nw.Name,nw.Password);
@@ -157,8 +129,7 @@ namespace WiFiManager
             catch(Exception ex)
             {
                 await DisplayAlert("Error", ex.Message, "OK");
-                pleaseWait.IsVisible = false;
-                pleaseWait.IsRunning = false;
+                mpv.IsBusy = false;
             }
         }
 

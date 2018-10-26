@@ -15,7 +15,7 @@ namespace WiFiManager
         {
             var castedVal = (ObservableCollection<CoordsAndPower>)value;
             if (castedVal.Count > 0)
-                return castedVal[0];
+                return castedVal[castedVal.Count - 1];
             else
                 return null;
         }

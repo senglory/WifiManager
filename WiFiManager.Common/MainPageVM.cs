@@ -48,6 +48,15 @@ namespace WiFiManager.Common
                     _selectedNetwork.IsSelected = false;
                 }
                 SetProperty(ref _selectedNetwork, value, "SelectedNetwork");
+                //if (_selectedNetwork != null)
+                //    _selectedNetwork.CoordsAndPower.Add(new CoordsAndPower
+                //{
+                //    Lat = 111,
+                //    Long = 222,
+                //    Alt = 333,
+                //    Power = 3.7,
+                //    When = DateTime.Now
+                //});
             }
         }
 

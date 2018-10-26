@@ -103,7 +103,17 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        public ObservableCollection<CoordsAndPower> CoordsAndPower { get; set; }
+        ObservableCollection<CoordsAndPower> _CoordsAndPower=new ObservableCollection<CoordsAndPower>();
+        public ObservableCollection<CoordsAndPower> CoordsAndPower {
+            get
+            {
+                return _CoordsAndPower;
+            }
+            set
+            {
+                SetProperty(ref _CoordsAndPower, value, "CoordsAndPower");
+            }
+        }
 
 
         public bool IsVulnerable

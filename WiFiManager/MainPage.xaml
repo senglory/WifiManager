@@ -249,10 +249,10 @@
                                 <Label Text="Public IP" HorizontalOptions="Start"></Label>
                                 <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
                             </StackLayout>
-                            <StackLayout Grid.Row="4" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                            <StackLayout Grid.Row="4" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}, Mode=OneWay}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                 <StackLayout.Resources>
                                     <Style TargetType="Label">
-                                        <Setter Property="FontSize" Value="Micro"></Setter>
+                                        <Setter Property="FontSize" Value="Default"></Setter>
                                     </Style>
                                 </StackLayout.Resources>
                                 <Label Text="{Binding Lat}"></Label>
