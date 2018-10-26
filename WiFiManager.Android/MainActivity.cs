@@ -217,6 +217,12 @@ namespace WiFiManager.Droid
             // + extra info about connection
             if (arrs.Length == 10 || arrs.Length == 11)
             {
+
+                if (arrs[0].Trim() == "Keenetic-7139")
+                {
+                    var ttt = 0;
+                }
+
                 nw = new WifiNetwork
                 {
                     BssID = bssid,
@@ -230,10 +236,19 @@ namespace WiFiManager.Droid
                     FirstConnectMac = arrs[9],
                     Level = -1 * Constants.NO_SIGNAL_LEVEL
                 };
+
                 if (!string.IsNullOrEmpty(arrs[7]))
                 {
-                    var cult = new CultureInfo("en-us");
-                    nw.FirstConnectWhen = DateTime.Parse(arrs[7],cult);
+                    try
+                    {
+                        var cultUS = new CultureInfo("en-us");
+                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], cultUS);
+                    }
+                    catch (Exception)
+                    {
+                        var cultRU = new CultureInfo("ru-ru");
+                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], cultRU);
+                    }
                 }
             }
 
@@ -245,6 +260,7 @@ namespace WiFiManager.Droid
         {
             try
             {
+                var cult = new CultureInfo("en-us");
                 File.Copy(filePathCSV, filePathCSVBAK, true);
                 var alreadySaved = new List<WifiNetworkDto>();
 
@@ -269,7 +285,8 @@ namespace WiFiManager.Droid
                                     if (wifiOnAir != null)
                                     {
                                         var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
+                                        var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue? wifiOnAir.FirstConnectWhen.Value.ToString(cult) :"";
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                     else

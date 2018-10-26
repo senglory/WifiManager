@@ -96,7 +96,18 @@
                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="20" />
                         <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
                             <Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
-                            <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" />
+                            <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro">
+                                <Label.Style>
+                                    <Style TargetType="Label">
+                                        <Style.Triggers >
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsVulnerable}" Value="True">
+                                                <Setter Property="IsVisible" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                            <BoxView IsVisible="{Binding IsVulnerable}" BackgroundColor="Azure" />
                         </StackLayout>
 
                         <BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="5"  >
@@ -183,7 +194,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="60" />
                 <RowDefinition Height="30*"/>
-                <RowDefinition Height="50*"/>
+                <RowDefinition Height="30*"/>
             </Grid.RowDefinitions>
 
             <StackLayout Grid.Row="0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Spacing="0">
@@ -204,43 +215,41 @@
             </ListView>
 
             <StackLayout  Grid.Row="2" x:Name="DetailsArea"  Spacing="0" 
-                      VerticalOptions="FillAndExpand"
-                          BackgroundColor="LightCoral">
+                      VerticalOptions="StartAndExpand"
+                          BackgroundColor="DarkKhaki">
                 <Frame HasShadow="False" Padding="3" >
-                    <StackLayout BackgroundColor="Black" >
-                        <Grid   
+                    <StackLayout BackgroundColor="Black" VerticalOptions="StartAndExpand">
+                        <Grid  RowSpacing="0" ColumnSpacing="0" 
                             BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}"
                             >
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="35" />
+                                <RowDefinition Height="50"/>
+                                <RowDefinition Height="35" />
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition Height="35" />
                             </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackLayout Grid.Row="0" Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
-                                <StackLayout Orientation="Horizontal" HeightRequest="30">
-                                    <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
-                                    <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal" HeightRequest="50">
-                                    <Label Text="Pwd:" HorizontalOptions="Start" />
-                                    <Entry Text="{Binding Password}" VerticalOptions="FillAndExpand"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" HorizontalOptions="FillAndExpand"/>
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal">
-                                    <Label Text="Internal IP" HorizontalOptions="Start"></Label>
-                                    <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
-                                    <Label Text="Public IP" HorizontalOptions="Start"></Label>
-                                    <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
-                                </StackLayout>
-                                <StackLayout Orientation="Horizontal">
-                                    <Label Text="Info:" HorizontalOptions="Start" />
-                                    <Entry Text="{Binding Provider}"  BackgroundColor="Black" FontSize="Micro" HorizontalOptions="FillAndExpand"/>
-                                </StackLayout>
+
+                            <StackLayout Grid.Row="0" Orientation="Horizontal">
+                                <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
+                                <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand"/>
                             </StackLayout>
-                            <StackLayout Grid.Row="1" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                            <StackLayout Grid.Row="1" Orientation="Horizontal" HeightRequest="50">
+                                <Label Text="Pwd:" HorizontalOptions="Start" />
+                                <Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand"  BackgroundColor="Black" FontAttributes="Bold" FontSize="Large" />
+                            </StackLayout>
+                            <StackLayout Grid.Row="2" Orientation="Horizontal">
+                                <Label Text="Info:" HorizontalOptions="Start" />
+                                <Entry Text="{Binding Provider}"  HorizontalOptions="FillAndExpand" BackgroundColor="Black" FontSize="Micro"/>
+                            </StackLayout>
+                            <StackLayout Grid.Row="3" Orientation="Horizontal">
+                                <Label Text="Internal IP" HorizontalOptions="Start"></Label>
+                                <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
+                                <Label Text="Public IP" HorizontalOptions="Start"></Label>
+                                <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
+                            </StackLayout>
+                            <StackLayout Grid.Row="4" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                 <StackLayout.Resources>
                                     <Style TargetType="Label">
                                         <Setter Property="FontSize" Value="Micro"></Setter>
@@ -250,7 +259,7 @@
                                 <Label Text="{Binding Long}"></Label>
                                 <Label Text="{Binding Power}"></Label>
                             </StackLayout>
-                            <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                            <StackLayout Grid.Row="5" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                 <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
                                 <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
                                 <Button Text="Delete"  FontSize="Micro"

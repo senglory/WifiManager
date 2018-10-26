@@ -117,17 +117,15 @@ namespace WiFiManager.Common
                 if (mgr.CanLoadFromFile())
                 {
                     var lst2 = mgr.GetWifiNetworksFromCSV(out firstFailedLine);
-                    foreach (var existingWifi in lst1)
+                    foreach (var existingWifiDto in lst1)
                     {
-                        var wifiDtoFromFile = lst2.GetExistingWifiDto(existingWifi);
+                        var wifiDtoFromFile = lst2.GetExistingWifiDto(existingWifiDto);
                         var isOnAir = wifiDtoFromFile != null;
                         if (isOnAir)
                         {
                             // update existing Wifi info from file (except for BSSID)
-                            existingWifi.IsInCSVList = isOnAir;
-                            existingWifi.IsEnabled = wifiDtoFromFile.IsEnabled;
-                            existingWifi.Password = wifiDtoFromFile.Password;
-                            existingWifi.Provider = wifiDtoFromFile.Provider;
+                            existingWifiDto.IsInCSVList = isOnAir;
+                            wifiDtoFromFile.CopyTo(existingWifiDto);
                         }
                     }
                 }

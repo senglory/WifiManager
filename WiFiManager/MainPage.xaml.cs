@@ -37,11 +37,32 @@ namespace WiFiManager
         {
             var mpv = this.BindingContext as MainPageVM;
             mpv.IsConnected = true;
+
+            var nw = mpv.SelectedNetwork;
+            if (nw == null)
+                return;
+            // get internal IP
+            string ipaddress = DependencyService.Get<IIPAddressManager>().GetIPAddress();
+            {
+                nw.InternalIP = ipaddress;
+            }
+            // get external IP (for the very first connection to the particular network)
+            if (string.IsNullOrEmpty(nw.FirstConnectPublicIP))
+            {
+                nw.FirstConnectPublicIP = getPublicIp();
+            }
+            // stop 'please wait'
+            pleaseWait.IsVisible = false;
+            pleaseWait.IsRunning = false;
         }
+
         public void WifiDisConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
             mpv.IsConnected = false ;
+            // stop 'please wait'
+            pleaseWait.IsVisible = false;
+            pleaseWait.IsRunning = false;
         }
 
         void RefreshAvailableNetworks()
@@ -132,31 +153,12 @@ namespace WiFiManager
                 {
                     nw.FirstConnectMac = wi.MacAddress;
                 }
-
-                // get internal IP
-                string ipaddress = DependencyService.Get<IIPAddressManager>().GetIPAddress();
-                {
-                    nw.InternalIP = ipaddress;
-                }
-                // get external IP (for the very first connection to the particular network)
-                if (string .IsNullOrEmpty ( nw.FirstConnectPublicIP ))
-                {
-                    nw.FirstConnectPublicIP = getPublicIp();
-                }
-
             }
             catch(Exception ex)
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    DisplayAlert("Error", ex.Message, "OK");
-                });
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
+                await DisplayAlert("Error", ex.Message, "OK");
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
             }
         }
 
@@ -207,13 +209,8 @@ namespace WiFiManager
                 Device.BeginInvokeOnMainThread(() => {
                     DisplayAlert("Error", ex.Message, "OK");
                 });
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
+                pleaseWait.IsVisible = false;
+                pleaseWait.IsRunning = false;
             }
         }
 
