@@ -35,7 +35,11 @@ using AutoMapper;
 
 namespace WiFiManager.Droid
 {
-    [Activity(Label = "WiFiManager", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "WiFiManager", 
+        Icon = "@mipmap/icon", 
+        Theme = "@style/MainTheme", 
+        MainLauncher = true, 
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
         IWifiOperations
     {
@@ -67,6 +71,8 @@ namespace WiFiManager.Droid
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
+
+            RequestedOrientation = ScreenOrientation.Portrait;
 
             base.OnCreate(bundle);
 
@@ -101,7 +107,8 @@ namespace WiFiManager.Droid
         {
             var wifiNetworks = new List<WifiNetworkDto>();
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-
+            //wifiManager.SetWifiEnabled(false);
+            //wifiManager.SetWifiEnabled(true);
             wifiManager.StartScan();
             //var networks = wifiManager.ConfiguredNetworks;
             //var connectionInfo = wifiManager.ConnectionInfo;
@@ -131,7 +138,12 @@ namespace WiFiManager.Droid
                    || netw.Name == "MT_FREE"
                    || netw.Name == "AndroidAP"
                    || netw.Name == "CPPK_Free"
-                   || netw.Name == "Metropolis_FREE";
+                   || netw.Name == "Metropolis_FREE"
+                   || netw.Name == "Mosinter"
+                   || netw.Name == "Beeline_WiFi_FREE"
+                   || netw.Name == "Starbucks_Beeline_Free"
+                   || netw.Name == "Moscow_WiFi_Free"
+                   || netw.Name == "Shokoladniza-Guest";
         }
 
         public List<WifiNetworkDto> GetWifiNetworksFromCSV( out string firstFailedLine)
@@ -216,7 +228,7 @@ namespace WiFiManager.Droid
                 };
             }
             // + extra info about connection
-            if (arrs.Length == 10 || arrs.Length == 11)
+            if (arrs.Length >= 10)
             {
                 nw = new WifiNetwork
                 {
@@ -231,7 +243,12 @@ namespace WiFiManager.Droid
                     FirstConnectMac = arrs[9],
                     Level = -1 * Constants.NO_SIGNAL_LEVEL
                 };
+                if (!string.IsNullOrEmpty (arrs[10]))
+                    nw.FirstCoordLat = Convert.ToDouble(arrs[10]);
+                if (!string.IsNullOrEmpty(arrs[11]))
+                    nw.FirstCoordLong = Convert.ToDouble(arrs[11]);
 
+                // get first connection date
                 if (!string.IsNullOrEmpty(arrs[7]))
                 {
                     try
@@ -266,7 +283,7 @@ namespace WiFiManager.Droid
                         using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                         {
                             // write header
-                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac");
+                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;");
 
                             using (var sr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                             {
@@ -281,7 +298,7 @@ namespace WiFiManager.Droid
                                     {
                                         var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
                                         var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue? wifiOnAir.FirstConnectWhen.Value.ToString(cult) :"";
-                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                     else
@@ -297,7 +314,7 @@ namespace WiFiManager.Droid
                                 if (wifiAlreadySaved == null)
                                 {
                                     var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac}");
+                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong}");
                                 }
                             }
                         }
@@ -474,6 +491,15 @@ namespace WiFiManager.Droid
                     Power = signalLevel,
                     When = DateTime.Now
                 });
+
+                if (!network.FirstCoordLat.HasValue)
+                {
+                    network.FirstCoordLat = coords2.Item1;
+                }
+                if (!network.FirstCoordLong.HasValue)
+                {
+                    network.FirstCoordLong = coords2.Item2;
+                }
             }
         }
 

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:common="clr-namespace:WiFiManager.Common"
+             xmlns:behaviorsPack="clr-namespace:Xamarin.Forms.BehaviorsPack;assembly=Xamarin.Forms.BehaviorsPack"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain">
 
@@ -96,7 +97,7 @@
                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="20" />
                         <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
                             <Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
-                            <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro">
+                            <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" TextColor="Black">
                                 <Label.Style>
                                     <Style TargetType="Label">
                                         <Style.Triggers >
@@ -107,7 +108,9 @@
                                     </Style>
                                 </Label.Style>
                             </Label>
-                            <BoxView IsVisible="{Binding IsVulnerable}" BackgroundColor="Azure" />
+                            <BoxView IsVisible="{Binding IsVulnerable}" BackgroundColor="LimeGreen" />
+                            <BoxView IsVisible="{Binding IsOpen}" BackgroundColor="Wheat" />
+                            <BoxView IsVisible="{Binding IsWithVPN}" BackgroundColor="DodgerBlue" />
                         </StackLayout>
 
                         <BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="5"  >
@@ -201,17 +204,22 @@
                 <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
                 <Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>
                 <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-                <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"   FontSize="Micro"></Button>
+                <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"   FontSize="Micro"></Button>
             </StackLayout>
 
             <ListView
                 Grid.Row="1"
                 x:Name="lstNetworks"
                 SeparatorColor="Beige"
+                SelectionMode="Single"
                 ItemsSource="{Binding  WifiNetworks}"
                 SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
                 ItemTemplate="{StaticResource viewInListTemplateSelector}"
             >
+                <!--<ListView.Behaviors>
+                    <behaviorsPack:EventToCommandBehavior EventName="ItemSelected" Command="{Binding DeleteNetworkCommand}"
+                                  EventArgsPropertyPath="Item" />
+                </ListView.Behaviors>-->
             </ListView>
 
             <StackLayout  Grid.Row="2" x:Name="DetailsArea"  Spacing="0" 
@@ -249,7 +257,7 @@
                                 <Label Text="Public IP" HorizontalOptions="Start"></Label>
                                 <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
                             </StackLayout>
-                            <StackLayout Grid.Row="4" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}, Mode=OneWay}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                            <StackLayout Grid.Row="4" BindingContext="{Binding CoordsAndPower, Converter={StaticResource SafeGetCoordsCvt}, Mode=TwoWay}" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                 <StackLayout.Resources>
                                     <Style TargetType="Label">
                                         <Setter Property="FontSize" Value="Default"></Setter>

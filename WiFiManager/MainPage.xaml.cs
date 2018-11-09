@@ -33,6 +33,7 @@ namespace WiFiManager
             RefreshAvailableNetworks();
         }
 
+
         public void WifiConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
@@ -52,8 +53,9 @@ namespace WiFiManager
                 nw.FirstConnectPublicIP = getPublicIp();
             }
             // stop 'please wait'
-            pleaseWait.IsVisible = false;
-            pleaseWait.IsRunning = false;
+            mpv.IsBusy = false;
+            //pleaseWait.IsVisible = false;
+            //pleaseWait.IsRunning = false;
         }
 
         public void WifiDisConnectNotify()
@@ -64,26 +66,35 @@ namespace WiFiManager
             mpv.IsBusy =false ;
         }
 
-        void RefreshAvailableNetworks()
+        async void RefreshAvailableNetworks()
         {
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-                mpv.IsBusy = true;
-                mpv.DoRefreshNetworks();
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    //pleaseWait.IsVisible = true;
+                    //pleaseWait.IsRunning = true;
+                    mpv.DoRefreshNetworks();
+                });
+                
             }
             catch (InvalidDataException ex)
             {
-                DisplayAlert("Alert", ex.Message, "OK");
+                await DisplayAlert("Alert", ex.Message, "OK");
             }
             catch (Exception ex)
             {
-                DisplayAlert("Alert",ex.Message,"OK");
+                await DisplayAlert("Alert",ex.Message,"OK");
                 throw;
             }
             finally
             {
-                mpv.IsBusy = false;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    //pleaseWait.IsVisible = false;
+                    //pleaseWait.IsRunning = false ;
+                });
             }
         }
 
@@ -166,10 +177,10 @@ namespace WiFiManager
         {
             try
             {
-                Device.BeginInvokeOnMainThread(() => {
+//                Device.BeginInvokeOnMainThread(() => {
                     pleaseWait.IsVisible = true;
                     pleaseWait.IsRunning = true;
-                });
+//                });
 
                 var mpv = this.BindingContext as MainPageVM;
                 mpv.IsConnected = false;
@@ -177,9 +188,9 @@ namespace WiFiManager
             }
             catch (Exception ex)
             {
-                Device.BeginInvokeOnMainThread(() => {
+//                Device.BeginInvokeOnMainThread(() => {
                     DisplayAlert("Error", ex.Message, "OK");
-                });
+//                });
                 pleaseWait.IsVisible = false;
                 pleaseWait.IsRunning = false;
             }
@@ -212,7 +223,7 @@ namespace WiFiManager
             }
         }
 
-        private void RefreshNetworks_Clicked(object sender, EventArgs e)
+        void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
             RefreshAvailableNetworks();
         }

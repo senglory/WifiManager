@@ -92,6 +92,32 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
+        double? firstCoordLat;
+        public double? FirstCoordLat
+        {
+            get
+            {
+                return firstCoordLat;
+            }
+            set
+            {
+                SetProperty(ref firstCoordLat, value, "FirstCoordLat");
+            }
+        }
+
+        double? firstCoordLong;
+        public double? FirstCoordLong
+        {
+            get
+            {
+                return firstCoordLong;
+            }
+            set
+            {
+                SetProperty(ref firstCoordLong, value, "FirstCoordLong");
+            }
+        }
+
 
         DtoNetworkState dtoNetworkStateForColoring;
         public DtoNetworkState DtoNetworkStateForColoring
@@ -226,6 +252,24 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("00:0E:8F")
                     );
+            }
+        }
+
+        public bool IsOpen
+        {
+            get
+            {
+                return NetworkType == "[ESS]" || NetworkType == "[WPS][ESS]";
+            }
+        }
+
+        public bool IsWithVPN
+        {
+            get
+            {
+                return BssID.StartsWith("38:2C:4A")
+                    ||
+                       BssID.StartsWith("AC:9E:17");
             }
         }
 
