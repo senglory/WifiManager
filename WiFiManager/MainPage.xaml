@@ -148,6 +148,11 @@
                         </BoxView>
                     </Grid>
                 </StackLayout>
+
+                <ViewCell.ContextActions>
+                    <MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
+                                          Text="Delete" IsDestructive="True" />
+                </ViewCell.ContextActions>
             </ViewCell>
         </DataTemplate>
 
@@ -220,6 +225,9 @@
                     <behaviorsPack:EventToCommandBehavior EventName="ItemSelected" Command="{Binding DeleteNetworkCommand}"
                                   EventArgsPropertyPath="Item" />
                 </ListView.Behaviors>-->
+                <!--<ListView.GestureRecognizers>
+                    <PinchGestureRecognizer PinchUpdated="PinchGestureRecognizer_PinchUpdated"></PinchGestureRecognizer>
+                </ListView.GestureRecognizers>-->
             </ListView>
 
             <StackLayout  Grid.Row="2" x:Name="DetailsArea"  Spacing="0" 
@@ -270,12 +278,6 @@
                             <StackLayout Grid.Row="5" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                 <Button Text="Refresh Coords" Clicked="RefreshCoords_Clicked" FontSize="Micro"  />
                                 <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
-                                <Button Text="Delete"  FontSize="Micro"
-                                    IsEnabled="{Binding IsEnabled}" 
-                                    Command="{Binding DeleteCommand}" 
-                                    BindingContext="{Binding  Source={x:Reference lstNetworks}, Path=BindingContext}"
-                                    CommandParameter="{Binding Source={x:Reference Name=lstNetworks}, Path=SelectedItem }" 
-                                        />
                             </StackLayout>
                         </Grid>
                     </StackLayout>

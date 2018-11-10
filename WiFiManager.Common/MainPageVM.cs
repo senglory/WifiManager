@@ -189,8 +189,15 @@ namespace WiFiManager.Common
 
 
 
+        public Command SaveCommand { get; set; }
+        public Command SaveJsonCommand { get; set; }
+        public Command RefreshNetworksCommand { get; set; }
+        public Command ConnectCommand { get; set; }
+        public Command DisconnectCommand { get; set; }
+        public Command DeleteNetworkCommand { get; set; }
 
 
+        #region INotifyPropertyChanged
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
             Action onChanged = null)
@@ -213,11 +220,6 @@ namespace WiFiManager.Common
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Command SaveCommand { get; set; }
-        public Command SaveJsonCommand { get; set; }
-        public Command RefreshNetworksCommand { get; set; }
-        public Command ConnectCommand { get; set; }
-        public Command DisconnectCommand { get; set; }
-        public Command DeleteNetworkCommand { get; set; }
+        #endregion
     }
 }

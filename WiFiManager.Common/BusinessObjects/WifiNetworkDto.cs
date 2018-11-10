@@ -278,8 +278,11 @@ namespace WiFiManager.Common.BusinessObjects
             CoordsAndPower = new ObservableCollection<CoordsAndPower>();
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
             RefeshCoordsCommand = new Command(DoRefeshCoordsCommand);
+            DeleteNetworkCommand = new Command(DoDeleteNetworkCommand);
         }
         public Command ConnectDisconnectCommand { get; set; }
+        public Command DeleteNetworkCommand { get; set; }
+
         void ExecuteConnectDisconnectCommand(object parameter)
         {
 
@@ -289,6 +292,12 @@ namespace WiFiManager.Common.BusinessObjects
         {
 
         }
+
+        void DoDeleteNetworkCommand(object parameter)
+        {
+
+        }
+
 
         public override string ToString()
         {

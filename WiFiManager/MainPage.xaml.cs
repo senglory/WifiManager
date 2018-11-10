@@ -73,8 +73,8 @@ namespace WiFiManager
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    //pleaseWait.IsVisible = true;
-                    //pleaseWait.IsRunning = true;
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
                     mpv.DoRefreshNetworks();
                 });
                 
@@ -92,8 +92,8 @@ namespace WiFiManager
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    //pleaseWait.IsVisible = false;
-                    //pleaseWait.IsRunning = false ;
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false ;
                 });
             }
         }
@@ -226,6 +226,15 @@ namespace WiFiManager
         void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
             RefreshAvailableNetworks();
+        }
+ 
+
+        private void MenuItem_DeleteNetwork_Clicked(object sender, EventArgs e)
+        {
+            var bo = sender as BindableObject;
+            var mpv = this.BindingContext as MainPageVM;
+            var n = bo.BindingContext as WifiNetworkDto;
+            mpv.WifiNetworks.Remove(n);
         }
     }
 }
