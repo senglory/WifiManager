@@ -77,7 +77,9 @@ namespace WiFiManager
                     pleaseWait.IsRunning = true;
                     mpv.DoRefreshNetworks();
                 });
-                
+                if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV)) {
+                    await DisplayAlert("Alert", mpv.FirstFailedLineInCSV, "OK");
+                }
             }
             catch (InvalidDataException ex)
             {

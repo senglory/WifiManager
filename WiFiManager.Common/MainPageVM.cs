@@ -79,10 +79,13 @@ namespace WiFiManager.Common
             {
                 SetProperty(ref isConnected, value, "IsConnected");
             }
-        } 
+        }
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string FirstFailedLineInCSV;
+
+
 
 
 
@@ -111,6 +114,7 @@ namespace WiFiManager.Common
             try
             {
                 IsBusy = true;
+                FirstFailedLineInCSV = null;
 
                 var lst1 = mgr.GetActiveWifiNetworks();
                 // for quick search
@@ -121,11 +125,9 @@ namespace WiFiManager.Common
                 }
 
 
-                string firstFailedLine;
-
                 if (mgr.CanLoadFromFile())
                 {
-                    var lst2 = mgr.GetWifiNetworksFromCSV(out firstFailedLine);
+                    var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
                     foreach (var existingWifiDto in lst1)
                     {
                         var wifiDtoFromFile = lst2.GetExistingWifiDto(existingWifiDto);
@@ -198,6 +200,8 @@ namespace WiFiManager.Common
 
 
         #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
             Action onChanged = null)

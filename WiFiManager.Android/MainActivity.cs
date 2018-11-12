@@ -151,6 +151,7 @@ namespace WiFiManager.Droid
             firstFailedLine = null;
             var res = new List<WifiNetworkDto>();
             var lineFromCSV = "";
+            HashSet<string> allBSSIDs = new HashSet<string>();
 
             try
             {
@@ -172,7 +173,14 @@ namespace WiFiManager.Droid
                             WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
                             if (IsIgnoredNetwork(wifiDtoFromFile))
                                 continue;
+                            if (!string.IsNullOrEmpty(wifiDtoFromFile.BssID) && allBSSIDs.Contains(wifiDtoFromFile.BssID)) {
+                                break;
+                            }
                             res.Add(wifiDtoFromFile);
+                            if (!string.IsNullOrEmpty(wifiDtoFromFile.BssID))
+                            {
+                                allBSSIDs.Add(wifiDtoFromFile.BssID);
+                            }
                         }
                     }
                 }
