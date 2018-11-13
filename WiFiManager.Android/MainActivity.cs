@@ -135,14 +135,19 @@ namespace WiFiManager.Droid
         {
             return netw.Name == "Telekom_FON"
                    || netw.Name == "Unitymedia WifiSpot"
+                   || netw.Name == "Globus_Gast"
                    || netw.Name == "MT_FREE"
                    || netw.Name == "AndroidAP"
+                   || netw.Name == "TSUM Discount"
                    || netw.Name == "CPPK_Free"
                    || netw.Name == "Metropolis_FREE"
                    || netw.Name == "Mosinter"
                    || netw.Name == "Beeline_WiFi_FREE"
+                   || netw.Name == "Beeline_WiFi_Starbucks_FREE"
                    || netw.Name == "Starbucks_Beeline_Free"
                    || netw.Name == "Moscow_WiFi_Free"
+                   || netw.Name == "MetropolisNew-WiFi_FREE"
+                   || netw.Name == "Aeroexpress_iras"
                    || netw.Name == "Shokoladniza-Guest";
         }
 
@@ -174,6 +179,7 @@ namespace WiFiManager.Droid
                             if (IsIgnoredNetwork(wifiDtoFromFile))
                                 continue;
                             if (!string.IsNullOrEmpty(wifiDtoFromFile.BssID) && allBSSIDs.Contains(wifiDtoFromFile.BssID)) {
+                                firstFailedLine = lineFromCSV;
                                 break;
                             }
                             res.Add(wifiDtoFromFile);

@@ -148,6 +148,14 @@ namespace WiFiManager.Common.BusinessObjects
             {
                 return !string.IsNullOrWhiteSpace(BssID) && 
                     (
+                    BssID.StartsWith("00:0E:8F")
+                    ||
+                    BssID.StartsWith("00:1F:CE")
+                    ||
+                    BssID.StartsWith("00:18:E7")
+                    ||
+                    BssID.StartsWith("00:0E:8F")
+                    ||
                     BssID.StartsWith("F8:C0:91")
                     ||
                     BssID.StartsWith("EE:43:F6")
@@ -166,6 +174,8 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("E0:3F:49")
                     ||
+                    BssID.StartsWith("D8:50:E6") // ASUS
+                    ||
                     BssID.StartsWith("D8:EB:97")
                     ||
                     BssID.StartsWith("D4:BF:7F")
@@ -178,7 +188,7 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("C8:6C:87")
                     ||
-                    BssID.StartsWith("C8:60:00")
+                    BssID.StartsWith("C8:60:00") // ASUS
                     ||
                     BssID.StartsWith("C8:3A:35")
                     ||
@@ -186,7 +196,7 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("B4:75:0E")
                     ||
-                    BssID.StartsWith("B0:B2:DC")
+                    BssID.StartsWith("B0:B2:DC") // Keenetic
                     ||
                     BssID.StartsWith("B0:4E:26")
                     ||
@@ -206,13 +216,15 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("60:31:97")
                     ||
+                    BssID.StartsWith("60:A4:4C") // ASUS
+                    ||
                     BssID.StartsWith("5C:F4:AB")
                     ||
                     BssID.StartsWith("50:67:F0")
                     ||
                     BssID.StartsWith("50:67:F0")
                     ||
-                    BssID.StartsWith("50:46:5D")
+                    BssID.StartsWith("50:46:5D") // ASUS
                     ||
                     BssID.StartsWith("4E:5D:4E")
                     ||
@@ -224,9 +236,11 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("38:2C:4A") // ASUS
                     ||
+                    BssID.StartsWith("38:D5:47") // ASUS
+                    ||
                     BssID.StartsWith("28:C6:8E") // Keenetic
                     ||
-                    BssID.StartsWith("28:28:5D")
+                    BssID.StartsWith("28:28:5D") // Keenetic
                     ||
                     BssID.StartsWith("1C:B7:2C")
                     ||
@@ -243,14 +257,6 @@ namespace WiFiManager.Common.BusinessObjects
                     BssID.StartsWith("08:C6:B3")
                     ||
                     BssID.StartsWith("04:BF:6D")
-                    ||
-                    BssID.StartsWith("00:0E:8F")
-                    ||
-                    BssID.StartsWith("00:1F:CE")
-                    ||
-                    BssID.StartsWith("00:18:E7")
-                    ||
-                    BssID.StartsWith("00:0E:8F")
                     );
             }
         }

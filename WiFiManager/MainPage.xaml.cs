@@ -75,8 +75,8 @@ namespace WiFiManager
                 {
                     pleaseWait.IsVisible = true;
                     pleaseWait.IsRunning = true;
-                    mpv.DoRefreshNetworks();
                 });
+                mpv.DoRefreshNetworks();
                 if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV)) {
                     await DisplayAlert("Alert", mpv.FirstFailedLineInCSV, "OK");
                 }
@@ -106,7 +106,11 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-                mpv.IsBusy = true;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
                 await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
             }
             catch (Exception ex)
@@ -115,7 +119,11 @@ namespace WiFiManager
             }
             finally
             {
-                mpv.IsBusy = false;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                });
             }
         }
 
