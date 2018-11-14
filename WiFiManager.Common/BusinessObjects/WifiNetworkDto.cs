@@ -118,7 +118,6 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-
         DtoNetworkState dtoNetworkStateForColoring;
         public DtoNetworkState DtoNetworkStateForColoring
         {
@@ -284,10 +283,10 @@ namespace WiFiManager.Common.BusinessObjects
             CoordsAndPower = new ObservableCollection<CoordsAndPower>();
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
             RefeshCoordsCommand = new Command(DoRefeshCoordsCommand);
-            DeleteNetworkCommand = new Command(DoDeleteNetworkCommand);
         }
+
         public Command ConnectDisconnectCommand { get; set; }
-        public Command DeleteNetworkCommand { get; set; }
+
 
         void ExecuteConnectDisconnectCommand(object parameter)
         {
@@ -299,9 +298,22 @@ namespace WiFiManager.Common.BusinessObjects
 
         }
 
-        void DoDeleteNetworkCommand(object parameter)
+        public void TryUpdateCoords(Tuple<double, double, double> coords2)
         {
+            CoordsAndPower.Add(new CoordsAndPower
+            {
+                Lat = coords2.Item1,
+                Long = coords2.Item2,
+                Alt = coords2.Item3,
+                Level = Level,
+                When = DateTime.Now
+            });
 
+            if (!FirstCoordLat.HasValue)
+            {
+                FirstCoordLat = coords2.Item1;
+                FirstCoordLong = coords2.Item2;
+            }
         }
 
 
@@ -347,6 +359,8 @@ namespace WiFiManager.Common.BusinessObjects
             dtoDst.FirstConnectWhen = FirstConnectWhen;
             dtoDst.FirstConnectPublicIP = FirstConnectPublicIP;
             dtoDst.FirstConnectMac = FirstConnectMac;
+            dtoDst.FirstCoordLat = FirstCoordLat;
+            dtoDst.FirstCoordLong = FirstCoordLong;
         }
     }
 }

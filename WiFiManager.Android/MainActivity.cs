@@ -502,7 +502,7 @@ namespace WiFiManager.Droid
                     Lat = coords2.Item1,
                     Long = coords2.Item2,
                     Alt = coords2.Item3,
-                    Power = signalLevel,
+                    Level = signalLevel,
                     When = DateTime.Now
                 });
 

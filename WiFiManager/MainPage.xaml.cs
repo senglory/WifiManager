@@ -20,7 +20,7 @@ using System.IO;
 namespace WiFiManager
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MainPage : ContentPage
+    public partial class MainPage : TabbedPage
     {
         IWifiOperations mgr;
 
@@ -101,9 +101,12 @@ namespace WiFiManager
         }
 
 
-        async void RefreshCoords_Clicked(object sender, EventArgs e)
+        async void MenuItem2_RefreshCoords_Clicked(object sender, EventArgs e)
         {
+            var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
+            var n = bo.BindingContext as WifiNetworkDto;
+
             try
             {
                 Device.BeginInvokeOnMainThread(() =>
@@ -111,7 +114,7 @@ namespace WiFiManager
                     pleaseWait.IsVisible = true;
                     pleaseWait.IsRunning = true;
                 });
-                await mgr.ActualizeCoordsWifiNetworkAsync(mpv.SelectedNetwork);
+                await mgr.ActualizeCoordsWifiNetworkAsync(n);
             }
             catch (Exception ex)
             {
@@ -245,6 +248,33 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             var n = bo.BindingContext as WifiNetworkDto;
             mpv.WifiNetworks.Remove(n);
+        }
+
+        private void RefreshCoords_Clicked(object sender, EventArgs e)
+        {
+            try
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = true;
+                    pleaseWait.IsRunning = true;
+                });
+
+                var mpv = this.BindingContext as MainPageVM;
+                mpv.DoRefreshCoords();
+            }
+            catch (Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    DisplayAlert("Error", ex.Message, "OK");
+                });
+            }
+            finally
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    pleaseWait.IsVisible = false;
+                    pleaseWait.IsRunning = false;
+                });
+            }
         }
     }
 }

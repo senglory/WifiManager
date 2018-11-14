@@ -97,7 +97,7 @@ namespace WiFiManager.Common
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
-            DeleteNetworkCommand = new Command(DoDeleteNetwork);
+            RefreshCoordsCommand = new Command(DoRefreshCoords);
 
             IsConnected = mgr.IsConnected();
         }
@@ -152,10 +152,23 @@ namespace WiFiManager.Common
             }
         }
 
-        void DoDeleteNetwork(object networkToDelete)
+        public async void DoRefreshCoords()
         {
-            var dto = networkToDelete as WifiNetworkDto;
-            WifiNetworks.Remove(dto);
+            try
+            {
+                IsBusy = true;
+                var t = mgr.GetCoordsAsync();
+                await t.ContinueWith((r) => {
+                    foreach (var wifi in WifiNetworks)
+                    {
+                        wifi.TryUpdateCoords(r.Result);
+                    }
+                });
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         void ExecuteConnect(object parameter)
@@ -196,8 +209,7 @@ namespace WiFiManager.Common
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
-        public Command DeleteNetworkCommand { get; set; }
-
+        public Command RefreshCoordsCommand { get; set; }
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
