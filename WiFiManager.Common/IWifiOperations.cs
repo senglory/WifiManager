@@ -24,13 +24,17 @@ namespace WiFiManager.Common
 
         bool IsConnected();
 
+        void DeleteInfoAboutWifiNetworks();
+
         Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync();
 
         Task<Tuple<double, double, double>> GetCoordsAsync();
 
         Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);
-        Task<WifiInfoInternal>  ConnectAsync(string bssid, string ssid,string password);
+        Task<WifiConnectionInfo>  ConnectAsync(WifiNetworkDto nw);
 
         Task DisConnectAsync();
+
+        
     }
 }

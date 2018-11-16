@@ -95,7 +95,7 @@
                                 <ColumnDefinition  Width="5"/>
                                 <ColumnDefinition  Width="10"/>
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}"  HeightRequest="20" />
+                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="Lime" HeightRequest="20" />
                             <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
                                 <Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
                                 <Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" TextColor="Black">
@@ -277,11 +277,12 @@
                                             <Setter Property="FontSize" Value="Default"></Setter>
                                         </Style>
                                     </StackLayout.Resources>
-                                    <Label Text="{Binding FirstCoordLat}"></Label>
-                                    <Label Text="{Binding FirstCoordLong}"></Label>
+                                    <Label Text="{Binding LastCoordLat}"></Label>
+                                    <Label Text="{Binding LastCoordLong}"></Label>
+                                    <Label Text="{Binding LastCoordAlt}"></Label>
                                 </StackLayout>
                                 <StackLayout Grid.Row="5" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                    <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}"  FontSize="Micro"/>
+                                    <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" />
                                 </StackLayout>
                             </Grid>
                         </StackLayout>

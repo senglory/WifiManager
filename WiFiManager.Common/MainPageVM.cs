@@ -10,8 +10,7 @@ using WiFiManager.Common.BusinessObjects;
 
 using Xamarin.Forms;
 using Xamarin.Forms.PlatformConfiguration;
-
-
+using System.Threading.Tasks;
 
 namespace WiFiManager.Common
 {
@@ -97,7 +96,6 @@ namespace WiFiManager.Common
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
-            RefreshCoordsCommand = new Command(DoRefreshCoords);
 
             IsConnected = mgr.IsConnected();
         }
@@ -116,6 +114,7 @@ namespace WiFiManager.Common
                 IsBusy = true;
                 FirstFailedLineInCSV = null;
 
+                mgr.DeleteInfoAboutWifiNetworks();
                 var lst1 = mgr.GetActiveWifiNetworks();
                 // for quick search
                 var allrecsQuickSearch = new Dictionary<string, WifiNetworkDto>();
@@ -152,22 +151,22 @@ namespace WiFiManager.Common
             }
         }
 
-        public async void DoRefreshCoords()
+        public async Task DoRefreshCoords()
         {
             try
             {
-                IsBusy = true;
+                //IsBusy = true;
                 var t = mgr.GetCoordsAsync();
                 await t.ContinueWith((r) => {
                     foreach (var wifi in WifiNetworks)
                     {
-                        wifi.TryUpdateCoords(r.Result);
+                        wifi.TryUpdateRecentCoords(r.Result);
                     }
                 });
             }
             finally
             {
-                IsBusy = false;
+                //IsBusy = false;
             }
         }
 
@@ -209,7 +208,6 @@ namespace WiFiManager.Common
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
-        public Command RefreshCoordsCommand { get; set; }
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;

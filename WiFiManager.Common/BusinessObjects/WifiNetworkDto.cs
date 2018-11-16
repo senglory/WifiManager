@@ -92,6 +92,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
+        #region Coords
         double? firstCoordLat;
         public double? FirstCoordLat
         {
@@ -117,6 +118,61 @@ namespace WiFiManager.Common.BusinessObjects
                 SetProperty(ref firstCoordLong, value, "FirstCoordLong");
             }
         }
+
+        double? firstCoordAlt;
+        public double? FirstCoordAlt
+        {
+            get
+            {
+                return firstCoordAlt;
+            }
+            set
+            {
+                SetProperty(ref firstCoordAlt, value, "FirstCoordAlt");
+            }
+        }
+
+        double? lastCoordLat;
+        public double? LastCoordLat
+        {
+            get
+            {
+                return lastCoordLat;
+            }
+            set
+            {
+                SetProperty(ref lastCoordLat, value, "LastCoordLat");
+            }
+        }
+
+        double? lastCoordLong;
+        public double? LastCoordLong
+        {
+            get
+            {
+                return lastCoordLong;
+            }
+            set
+            {
+                SetProperty(ref lastCoordLong, value, "LastCoordLong");
+            }
+        }
+
+        double? lastCoordAlt;
+        public double? LastCoordAlt
+        {
+            get
+            {
+                return lastCoordAlt;
+            }
+            set
+            {
+                SetProperty(ref lastCoordAlt, value, "LastCoordAlt");
+            }
+        } 
+        #endregion
+
+
 
         DtoNetworkState dtoNetworkStateForColoring;
         public DtoNetworkState DtoNetworkStateForColoring
@@ -298,7 +354,7 @@ namespace WiFiManager.Common.BusinessObjects
 
         }
 
-        public void TryUpdateCoords(Tuple<double, double, double> coords2)
+        public void TryUpdateRecentCoords(Tuple<double, double, double> coords2)
         {
             CoordsAndPower.Add(new CoordsAndPower
             {
@@ -309,13 +365,34 @@ namespace WiFiManager.Common.BusinessObjects
                 When = DateTime.Now
             });
 
-            if (!FirstCoordLat.HasValue)
-            {
-                FirstCoordLat = coords2.Item1;
-                FirstCoordLong = coords2.Item2;
-            }
+            LastCoordLat = coords2.Item1;
+            LastCoordLong = coords2.Item2;
+            LastCoordAlt = coords2.Item3;
         }
 
+        public void TryUpdateFirstConnectionInfo(WifiConnectionInfo info2)
+        {
+            // write data about first connection only if it has not been written yet 
+            if (FirstConnectWhen == null)
+            {
+                FirstConnectWhen = info2.FirstConnectWhen;
+            }
+            if (string.IsNullOrEmpty(FirstConnectMac))
+            {
+                FirstConnectMac = info2.FirstConnectMac;
+            }
+            if (string.IsNullOrEmpty(FirstConnectPublicIP))
+            {
+
+            }
+
+            if (!FirstCoordLat.HasValue)
+            {
+                FirstCoordLat = info2.FirstCoordLat;
+                FirstCoordLong = info2.FirstCoordLong;
+                FirstCoordAlt = info2.FirstCoordAlt;
+            }
+        }
 
         public override string ToString()
         {
@@ -361,6 +438,10 @@ namespace WiFiManager.Common.BusinessObjects
             dtoDst.FirstConnectMac = FirstConnectMac;
             dtoDst.FirstCoordLat = FirstCoordLat;
             dtoDst.FirstCoordLong = FirstCoordLong;
+            dtoDst.FirstCoordAlt = FirstCoordAlt;
+            dtoDst.LastCoordLat = LastCoordLat;
+            dtoDst.LastCoordLong = LastCoordLong;
+            dtoDst.LastCoordAlt = LastCoordAlt;
         }
     }
 }

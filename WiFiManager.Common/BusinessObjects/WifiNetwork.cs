@@ -19,5 +19,9 @@ namespace WiFiManager.Common.BusinessObjects
         public string FirstConnectPublicIP { get; set; }
         public double? FirstCoordLat { get; set; }
         public double? FirstCoordLong { get; set; }
+        public double? FirstCoordAlt { get; set; }
+        public double? LastCoordLat { get; set; }
+        public double? LastCoordLong { get; set; }
+        public double? LastCoordAlt { get; set; }
     }
 }
