@@ -35,6 +35,6 @@ namespace WiFiManager.Common
 
         Task DisConnectAsync();
 
-        
+        bool UseExternalSD { get; set; }
     }
 }

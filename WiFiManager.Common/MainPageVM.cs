@@ -82,6 +82,17 @@ namespace WiFiManager.Common
         #endregion
 
 
+        public bool UseExternalSD
+        {
+            get { return mgr.UseExternalSD; }
+            set
+            {
+                bool useExternalSD = value;
+                mgr.UseExternalSD = useExternalSD;
+                SetProperty(ref useExternalSD, value, "UseExternalSD");
+            }
+        }
+
         public string FirstFailedLineInCSV;
 
 

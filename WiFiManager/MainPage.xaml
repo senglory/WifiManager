@@ -5,9 +5,10 @@
              xmlns:common="clr-namespace:WiFiManager.Common"
              xmlns:behaviorsPack="clr-namespace:Xamarin.Forms.BehaviorsPack;assembly=Xamarin.Forms.BehaviorsPack"
              x:Class="WiFiManager.MainPage"
-             x:Name="MainPageMain">
+             x:Name="MainPageMain"
+            >
 
-    <ContentPage Title="Main" >
+    <ContentPage Title="Main"  >
         <ContentPage.Resources>
 
             <local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
@@ -211,11 +212,11 @@
                 </Grid.RowDefinitions>
 
                 <StackLayout Grid.Row="0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Spacing="0">
-                    <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
+                    <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"   FontSize="Micro"></Button>
                     <!--<Button Text="SaveJSON" Command="{Binding SaveJsonCommand}"  FontSize="Micro" WidthRequest="60"  ></Button>-->
                     <Button Text="Get coords" Clicked="RefreshCoords_Clicked"  FontSize="Micro" WidthRequest="60"></Button>
                     <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-                    <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"   FontSize="Micro"></Button>
+                    <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}"></Button>
                 </StackLayout>
 
                 <ListView
@@ -302,7 +303,16 @@
         </StackLayout>
     </ContentPage>
 
-    <ContentPage Title="Page 2">
+    <ContentPage Title="Details">
+    </ContentPage>
+
+    <ContentPage Title="Settings">
+        <StackLayout Spacing="0">
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Use SD" />
+                <Switch IsToggled="{Binding Path=UseExternalSD}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+        </StackLayout>
     </ContentPage>
 
 </TabbedPage>

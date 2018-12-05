@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,8 +31,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Newtonsoft.Json;
 using AutoMapper;
-
-
+using System.Reflection;
 
 namespace WiFiManager.Droid
 {
@@ -43,31 +43,61 @@ namespace WiFiManager.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
         IWifiOperations
     {
-        string filePathCSV;
+        string filePathCSV
+        {
+            get {
+                var sdCardPathDCIM = "";
+                if (UseExternalSD)
+                    sdCardPathDCIM = ApiGetRemovableCacheDir();
+                else
+                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                return Path.Combine(sdCardPathDCIM, "WIFINETWORKS.csv");
+            }
+        }
 
-        string filePathCSVBAK;
+        string filePathCSVBAK
+        {
+            get
+            {
+                var sdCardPathDCIM = "";
+                if (UseExternalSD)
+                    sdCardPathDCIM = global::Android.OS.Environment.ExternalStorageDirectory.Path;
+                else
+                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                return Path.Combine(sdCardPathDCIM, "WIFINETWORKS.bak");
+            }
+        }
 
-        string filePathTemplateJSON;
+        string filePathTemplateJSON
+        {
+            get
+            {
+                var sdCardPathDCIM = "";
+                if (UseExternalSD)
+                    sdCardPathDCIM = global::Android.OS.Environment.ExternalStorageDirectory.Path;
+                else
+                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                return Path.Combine(sdCardPathDCIM, "WIFINETWORKS-{0}.JSON");
+            }
+        }
 
-        static  MapperConfiguration config;
-        static  IMapper mapper;
+        static  MapperConfiguration _config;
+        static  IMapper _mapper;
+        static  CultureInfo _cultUS;
+        static  CultureInfo _cultRU;
 
         protected override void OnCreate(Bundle bundle)
         {
-            config = new MapperConfiguration(cfg =>
+            _cultUS = new CultureInfo("en-us");
+            _cultRU = new CultureInfo("ru-ru");
+            _config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
                 cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
                 cfg.IgnoreUnmapped();
             });
-            config.AssertConfigurationIsValid();
-            mapper = config.CreateMapper();
-
-            // get link to SDCard DCIM
-            var sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
-            filePathCSV = Path.Combine(sdCardPathDCIM, "WIFINETWORKS.csv");
-            filePathCSVBAK = Path.Combine(sdCardPathDCIM, "WIFINETWORKS.bak");
-            filePathTemplateJSON = Path.Combine(sdCardPathDCIM, "WIFINETWORKS-{0}.JSON");
+            _config.AssertConfigurationIsValid();
+            _mapper = _config.CreateMapper();
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -86,6 +116,9 @@ namespace WiFiManager.Droid
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
+
+        public bool UseExternalSD { get; set; }
 
         public async Task<Tuple<double, double, double>> GetCoordsAsync()
         {
@@ -267,36 +300,34 @@ namespace WiFiManager.Droid
                     Level = -1 * Constants.NO_SIGNAL_LEVEL
                 };
                 if (!string.IsNullOrEmpty (arrs[10]))
-                    nw.FirstCoordLat = Convert.ToDouble(arrs[10]);
+                    nw.FirstCoordLat = Convert.ToDouble(arrs[10], _cultUS);
                 if (!string.IsNullOrEmpty(arrs[11]))
-                    nw.FirstCoordLong = Convert.ToDouble(arrs[11]);
+                    nw.FirstCoordLong = Convert.ToDouble(arrs[11], _cultUS);
                 if (!string.IsNullOrEmpty(arrs[12]))
-                    nw.FirstCoordAlt = Convert.ToDouble(arrs[12]);
+                    nw.FirstCoordAlt = Convert.ToDouble(arrs[12], _cultUS);
 
                 if (!string.IsNullOrEmpty(arrs[13]))
-                    nw.LastCoordLat = Convert.ToDouble(arrs[13]);
+                    nw.LastCoordLat = Convert.ToDouble(arrs[13], _cultUS);
                 if (!string.IsNullOrEmpty(arrs[14]))
-                    nw.LastCoordLong = Convert.ToDouble(arrs[14]);
+                    nw.LastCoordLong = Convert.ToDouble(arrs[14], _cultUS);
                 if (!string.IsNullOrEmpty(arrs[15]))
-                    nw.LastCoordAlt = Convert.ToDouble(arrs[15]);
+                    nw.LastCoordAlt = Convert.ToDouble(arrs[15], _cultUS);
 
                 // get first connection date
                 if (!string.IsNullOrEmpty(arrs[7]))
                 {
                     try
                     {
-                        var cultUS = new CultureInfo("en-us");
-                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], cultUS);
+                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultUS);
                     }
                     catch (Exception)
                     {
-                        var cultRU = new CultureInfo("ru-ru");
-                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], cultRU);
+                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
                     }
                 }
             }
 
-            var wifiDtoFromFile = mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+            var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
             return wifiDtoFromFile;
         }
 
@@ -304,7 +335,8 @@ namespace WiFiManager.Droid
         {
             try
             {
-                var cult = new CultureInfo("en-us");
+                Thread.CurrentThread.CurrentCulture = _cultUS;
+                Thread.CurrentThread.CurrentUICulture = _cultUS;
                 File.Copy(filePathCSV, filePathCSVBAK, true);
                 var alreadySaved = new List<WifiNetworkDto>();
 
@@ -329,7 +361,7 @@ namespace WiFiManager.Droid
                                     if (wifiOnAir != null)
                                     {
                                         var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                        var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue? wifiOnAir.FirstConnectWhen.Value.ToString(cult) :"";
+                                        var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) :"";
                                         fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
@@ -578,6 +610,61 @@ namespace WiFiManager.Droid
             }
 
             return baseFolderPath;
+        }
+
+        private string ApiGetRemovableCacheDir()
+        {
+            string path = null;
+
+            if (global::Android.OS.Environment.IsExternalStorageRemovable && Android.App.Application.Context.ExternalCacheDir.CanWrite())
+            {
+                path = Android.App.Application.Context.ExternalCacheDir.Path;
+                return path;
+            }
+
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
+            {
+                Java.IO.File[] files;
+                try
+                {
+                    files = Android.App.Application.Context.GetExternalCacheDirs();
+                    var files2 = Android.App.Application.Context.ApplicationInfo;
+                    var eee = Android.OS.Environment.ExternalStorageDirectory;
+                    var rrr= Android.OS.Environment.GetExternalStorageState(eee);
+                    var dirs = Android.App.Application.Context.GetExternalFilesDirs(null);
+                    if (files == null)
+                    {
+                        return path;
+                    }
+
+                    // идем с конца и смотрим доступные пути
+                    for (int i = files.Length - 1; i >= 0; i--)
+                    {
+                        if (!string.IsNullOrEmpty(files[i].Path) && files[i].CanWrite())
+                        {
+                            path = files[i].Path;
+
+                            if (path == null)
+                            {
+                                continue;
+                            }
+
+                            if (!string.IsNullOrEmpty(path))
+                            {
+                                return path;
+                            }
+
+                            path = null;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    path = null;
+                }
+            }
+
+            return path;
         }
     }
 }

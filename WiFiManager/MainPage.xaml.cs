@@ -26,6 +26,7 @@ namespace WiFiManager
 
         public MainPage(IWifiOperations mgr)
         {
+
             InitializeComponent();
             this.mgr = mgr;
             var vm = new MainPageVM(mgr);
