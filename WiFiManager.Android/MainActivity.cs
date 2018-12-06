@@ -46,11 +46,7 @@ namespace WiFiManager.Droid
         string filePathCSV
         {
             get {
-                var sdCardPathDCIM = "";
-                if (UseExternalSD)
-                    sdCardPathDCIM = ApiGetRemovableCacheDir();
-                else
-                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                var sdCardPathDCIM = GetSDCardDir();
                 return Path.Combine(sdCardPathDCIM, "WIFINETWORKS.csv");
             }
         }
@@ -59,11 +55,7 @@ namespace WiFiManager.Droid
         {
             get
             {
-                var sdCardPathDCIM = "";
-                if (UseExternalSD)
-                    sdCardPathDCIM = global::Android.OS.Environment.ExternalStorageDirectory.Path;
-                else
-                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                var sdCardPathDCIM = GetSDCardDir();
                 return Path.Combine(sdCardPathDCIM, "WIFINETWORKS.bak");
             }
         }
@@ -72,11 +64,7 @@ namespace WiFiManager.Droid
         {
             get
             {
-                var sdCardPathDCIM = "";
-                if (UseExternalSD)
-                    sdCardPathDCIM = global::Android.OS.Environment.ExternalStorageDirectory.Path;
-                else
-                    sdCardPathDCIM = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+                var sdCardPathDCIM = GetSDCardDir();
                 return Path.Combine(sdCardPathDCIM, "WIFINETWORKS-{0}.JSON");
             }
         }
@@ -118,7 +106,7 @@ namespace WiFiManager.Droid
         }
 
 
-        public bool UseExternalSD { get; set; }
+        public bool UsePhoneMemory { get; set; }
 
         public async Task<Tuple<double, double, double>> GetCoordsAsync()
         {
@@ -612,59 +600,12 @@ namespace WiFiManager.Droid
             return baseFolderPath;
         }
 
-        private string ApiGetRemovableCacheDir()
+        private string GetSDCardDir()
         {
-            string path = null;
-
-            if (global::Android.OS.Environment.IsExternalStorageRemovable && Android.App.Application.Context.ExternalCacheDir.CanWrite())
-            {
-                path = Android.App.Application.Context.ExternalCacheDir.Path;
-                return path;
-            }
-
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.Kitkat)
-            {
-                Java.IO.File[] files;
-                try
-                {
-                    files = Android.App.Application.Context.GetExternalCacheDirs();
-                    var files2 = Android.App.Application.Context.ApplicationInfo;
-                    var eee = Android.OS.Environment.ExternalStorageDirectory;
-                    var rrr= Android.OS.Environment.GetExternalStorageState(eee);
-                    var dirs = Android.App.Application.Context.GetExternalFilesDirs(null);
-                    if (files == null)
-                    {
-                        return path;
-                    }
-
-                    // идем с конца и смотрим доступные пути
-                    for (int i = files.Length - 1; i >= 0; i--)
-                    {
-                        if (!string.IsNullOrEmpty(files[i].Path) && files[i].CanWrite())
-                        {
-                            path = files[i].Path;
-
-                            if (path == null)
-                            {
-                                continue;
-                            }
-
-                            if (!string.IsNullOrEmpty(path))
-                            {
-                                return path;
-                            }
-
-                            path = null;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    path = null;
-                }
-            }
-
-            return path;
+            if (UsePhoneMemory)
+                return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath; 
+            else
+                return "/storage/sdcard1";
         }
     }
 }

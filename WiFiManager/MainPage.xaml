@@ -153,10 +153,12 @@
                     </StackLayout>
 
                     <ViewCell.ContextActions>
-                        <MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
-                                          Text="Refresh Coords" IsDestructive="False" />
                         <MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
                                           Text="Delete" IsDestructive="True" />
+                        <MenuItem Clicked="MenuItem_Hunt_Clicked"
+                                          Text="Hunt for" IsDestructive="False" />
+                        <MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
+                                          Text="Refresh Coords" IsDestructive="False" />
 
                     </ViewCell.ContextActions>
                 </ViewCell>
@@ -309,8 +311,27 @@
     <ContentPage Title="Settings">
         <StackLayout Spacing="0">
             <StackLayout Orientation="Horizontal">
-                <Label Text="Use SD" />
-                <Switch IsToggled="{Binding Path=UseExternalSD}" HorizontalOptions="FillAndExpand"/>
+                <Label Text="Use Phone Storage" />
+                <Switch IsToggled="{Binding Path=UsePhoneMemory}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <ListView
+                x:Name="lstNetworksHunt">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextCell Text="{Binding Name}"></TextCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Button Text="Stop hunting" Command="{Binding StopHuntingCommand}" >
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding Source={x:Reference lstNetworksHunt}, Path=ItemsSource.Count}" Value="0">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
             </StackLayout>
         </StackLayout>
     </ContentPage>

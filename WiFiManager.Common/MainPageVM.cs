@@ -79,19 +79,35 @@ namespace WiFiManager.Common
                 SetProperty(ref isConnected, value, "IsConnected");
             }
         }
+
+
+        public bool UsePhoneMemory
+        {
+            get { return mgr.UsePhoneMemory; }
+            set
+            {
+                bool usePhoneMem = value;
+                mgr.UsePhoneMemory = usePhoneMem;
+                SetProperty(ref usePhoneMem, value, "UsePhoneMemory");
+            }
+        }
+
+
+        ObservableCollection<WifiNetworkDto> _WifiNetworksHunting = new ObservableCollection<WifiNetworkDto>();
+        public ObservableCollection<WifiNetworkDto> WifiNetworksHunting
+        {
+            get
+            {
+                return _WifiNetworksHunting;
+            }
+            set
+            {
+                SetProperty(ref _WifiNetworksHunting, value, "WifiNetworksHunting");
+            }
+        }
         #endregion
 
 
-        public bool UseExternalSD
-        {
-            get { return mgr.UseExternalSD; }
-            set
-            {
-                bool useExternalSD = value;
-                mgr.UseExternalSD = useExternalSD;
-                SetProperty(ref useExternalSD, value, "UseExternalSD");
-            }
-        }
 
         public string FirstFailedLineInCSV;
 
@@ -107,6 +123,7 @@ namespace WiFiManager.Common
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
+            StopHuntingCommand = new Command(DoStopHunting);
 
             IsConnected = mgr.IsConnected();
         }
@@ -126,31 +143,40 @@ namespace WiFiManager.Common
                 FirstFailedLineInCSV = null;
 
                 mgr.DeleteInfoAboutWifiNetworks();
-                var lst1 = mgr.GetActiveWifiNetworks();
-                // for quick search
-                var allrecsQuickSearch = new Dictionary<string, WifiNetworkDto>();
-                foreach (var item in lst1)
+                var allOnAir = mgr.GetActiveWifiNetworks();
+
+                // in hunting mode leave only those who's in hunting list
+                if (WifiNetworksHunting.Count > 0)
                 {
-                    allrecsQuickSearch.Add (item.BssID, item);
+                    // inner join
+                    var results = from w1 in allOnAir
+                                  join t2 in WifiNetworksHunting on w1.BssID equals t2.BssID
+                                  select w1;
+                    allOnAir = results.ToList();
                 }
-
-
-                if (mgr.CanLoadFromFile())
+                else
                 {
-                    var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
-                    foreach (var existingWifiDto in lst1)
+                    if (mgr.CanLoadFromFile())
                     {
-                        var wifiDtoFromFile = lst2.GetExistingWifiDto(existingWifiDto);
-                        var isOnAir = wifiDtoFromFile != null;
-                        if (isOnAir)
+                        var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
+                        foreach (var wifiOnAir in allOnAir)
                         {
-                            // update existing Wifi info from file (except for BSSID)
-                            existingWifiDto.IsInCSVList = isOnAir;
-                            wifiDtoFromFile.CopyTo(existingWifiDto);
+                            var wifiDtoFromFile = lst2.GetExistingWifiDto(wifiOnAir);
+                            var isInFileAndOnAir = wifiDtoFromFile != null;
+                            if (isInFileAndOnAir)
+                            {
+                                // update existing Wifi info from file (except for BSSID)
+                                wifiOnAir.IsInCSVList = isInFileAndOnAir;
+                                var nameOnAir = wifiOnAir.Name;
+                                wifiDtoFromFile.CopyTo(wifiOnAir);
+                                // only Name is taken from air
+                                wifiOnAir.Name = nameOnAir;
+                            }
                         }
                     }
                 }
-                WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
+
+                WifiNetworks = new ObservableCollection<WifiNetworkDto>(allOnAir);
                 SortListByLevel();
 
                 IsConnected = mgr.IsConnected();
@@ -160,6 +186,11 @@ namespace WiFiManager.Common
             {
                 IsBusy = false;
             }
+        }
+
+        public void DoStopHunting()
+        {
+            WifiNetworksHunting.Clear();
         }
 
         public async Task DoRefreshCoords()
@@ -219,6 +250,7 @@ namespace WiFiManager.Common
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
+        public Command StopHuntingCommand { get; set; }
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;

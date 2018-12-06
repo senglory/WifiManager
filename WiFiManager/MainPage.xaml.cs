@@ -72,41 +72,41 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
+                //Device.BeginInvokeOnMainThread(() =>
+                //{
                     pleaseWait.IsVisible = true;
                     pleaseWait.IsRunning = true;
-                });
+                //});
                 mpv.DoRefreshNetworks();
                 if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV)) {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
+                    //Device.BeginInvokeOnMainThread(() =>
+                    //{
                         DisplayAlert("Alert", mpv.FirstFailedLineInCSV, "OK");
-                    });
+                    //});
                 }
             }
             catch (InvalidDataException ex)
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
+                //Device.BeginInvokeOnMainThread(() =>
+                //{
                     DisplayAlert("Alert", ex.Message, "OK");
-                });
+                //});
             }
             catch (Exception ex)
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
+                //Device.BeginInvokeOnMainThread(() =>
+                //{
                     DisplayAlert("Alert", ex.Message, "OK");
-                });
+                //});
                 throw;
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
+                //Device.BeginInvokeOnMainThread(() =>
+                //{
                     pleaseWait.IsVisible = false;
                     pleaseWait.IsRunning = false ;
-                });
+                //});
             }
         }
 
@@ -293,6 +293,15 @@ namespace WiFiManager
                     pleaseWait.IsRunning = false;
                 //});
             }
+        }
+
+        private void MenuItem_Hunt_Clicked(object sender, EventArgs e)
+        {
+            var bo = sender as BindableObject;
+            var mpv = this.BindingContext as MainPageVM;
+            var n = bo.BindingContext as WifiNetworkDto;
+
+            mpv.WifiNetworksHunting.Add(n);
         }
     }
 }
