@@ -378,6 +378,7 @@ namespace WiFiManager.Droid
             catch (Exception ex)
             {
                 Log.Error("WiFiManager", "SaveToCSV"+ ex.Message);
+                //throw ex;
             }
         }
 
@@ -603,9 +604,21 @@ namespace WiFiManager.Droid
         private string GetSDCardDir()
         {
             if (UsePhoneMemory)
-                return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath; 
+                return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
             else
-                return "/storage/sdcard1";
+            {
+                var context = Android.App.Application.Context;
+                var dirs = context.GetExternalCacheDirs();
+                foreach (Java.IO.File folder in dirs)
+                {
+                    bool IsRemovable = Android.OS.Environment.InvokeIsExternalStorageRemovable(folder);
+                    bool IsEmulated = Android.OS.Environment.InvokeIsExternalStorageEmulated(folder);
+
+                    if ( IsRemovable && !IsEmulated)
+                        return folder.Path;
+                }
+                return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+            }
         }
     }
 }

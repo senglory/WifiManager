@@ -200,27 +200,28 @@ namespace WiFiManager
             }
         }
 
-        async void SaveCommand_Clicked(object sender, EventArgs e)
+        void SaveCommand_Clicked(object sender, EventArgs e)
         {
-            await Task.Run(() => {
-                var mpv = this.BindingContext as MainPageVM;
+            var mpv = this.BindingContext as MainPageVM;
+            try
+            {
 
-                try
-                {
+                Task.Run(() => {
                     mpv.IsBusy = true;
                     mpv.DoSave();
                 }
-                catch (Exception ex)
-                {
-                    Device.BeginInvokeOnMainThread(() => {
-                        DisplayAlert("Error", ex.Message, "OK");
-                    });
-                }
-                finally
-                {
-                    mpv.IsBusy = false;
-                }
-            });
+                );
+            }
+            catch (Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    DisplayAlert("Error", ex.Message, "OK");
+                });
+            }
+            finally
+            {
+                mpv.IsBusy = false;
+            }
         }
 
         async void RefreshNetworks_Clicked(object sender, EventArgs e)

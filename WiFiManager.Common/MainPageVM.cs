@@ -154,24 +154,23 @@ namespace WiFiManager.Common
                                   select w1;
                     allOnAir = results.ToList();
                 }
-                else
+
+                // try to find info in CSV file
+                if (mgr.CanLoadFromFile())
                 {
-                    if (mgr.CanLoadFromFile())
+                    var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
+                    foreach (var wifiOnAir in allOnAir)
                     {
-                        var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
-                        foreach (var wifiOnAir in allOnAir)
+                        var wifiDtoFromFile = lst2.GetExistingWifiDto(wifiOnAir);
+                        var isInFileAndOnAir = wifiDtoFromFile != null;
+                        if (isInFileAndOnAir)
                         {
-                            var wifiDtoFromFile = lst2.GetExistingWifiDto(wifiOnAir);
-                            var isInFileAndOnAir = wifiDtoFromFile != null;
-                            if (isInFileAndOnAir)
-                            {
-                                // update existing Wifi info from file (except for BSSID)
-                                wifiOnAir.IsInCSVList = isInFileAndOnAir;
-                                var nameOnAir = wifiOnAir.Name;
-                                wifiDtoFromFile.CopyTo(wifiOnAir);
-                                // only Name is taken from air
-                                wifiOnAir.Name = nameOnAir;
-                            }
+                            // update existing Wifi info from file (except for BSSID)
+                            wifiOnAir.IsInCSVList = isInFileAndOnAir;
+                            var nameOnAir = wifiOnAir.Name;
+                            wifiDtoFromFile.CopyTo(wifiOnAir);
+                            // only Name is taken from air
+                            wifiOnAir.Name = nameOnAir;
                         }
                     }
                 }
@@ -217,12 +216,12 @@ namespace WiFiManager.Common
 
         }
 
-        async void DoDisconnect()
+        void DoDisconnect()
         {
             try
             {
                 IsBusy = true;
-                await mgr.DisConnectAsync();
+                Task.Run ( () =>  { mgr.DisConnectAsync(); });
             }
             finally
             {
