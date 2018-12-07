@@ -55,8 +55,6 @@ namespace WiFiManager
             }
             // stop 'please wait'
             mpv.IsBusy = false;
-            //pleaseWait.IsVisible = false;
-            //pleaseWait.IsRunning = false;
         }
 
         public void WifiDisConnectNotify()
@@ -70,43 +68,37 @@ namespace WiFiManager
         void RefreshAvailableNetworks()
         {
             var mpv = this.BindingContext as MainPageVM;
+
             try
             {
-                //Device.BeginInvokeOnMainThread(() =>
-                //{
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                //});
+                mpv.IsBusy = true;
                 mpv.DoRefreshNetworks();
-                if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV)) {
-                    //Device.BeginInvokeOnMainThread(() =>
-                    //{
+                if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV))
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
                         DisplayAlert("Alert", mpv.FirstFailedLineInCSV, "OK");
-                    //});
+                    });
                 }
             }
             catch (InvalidDataException ex)
             {
-                //Device.BeginInvokeOnMainThread(() =>
-                //{
+                Device.BeginInvokeOnMainThread(() =>
+                {
                     DisplayAlert("Alert", ex.Message, "OK");
-                //});
+                });
             }
             catch (Exception ex)
             {
-                //Device.BeginInvokeOnMainThread(() =>
-                //{
-                    DisplayAlert("Alert", ex.Message, "OK");
-                //});
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    DisplayAlert("Fatal", ex.Message, "OK");
+                });
                 throw;
             }
             finally
             {
-                //Device.BeginInvokeOnMainThread(() =>
-                //{
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false ;
-                //});
+                mpv.IsBusy = false;
             }
         }
 
@@ -119,11 +111,7 @@ namespace WiFiManager
 
             try
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
+                mpv.IsBusy = true;
                 await mgr.ActualizeCoordsWifiNetworkAsync(n);
             }
             catch (Exception ex)
@@ -132,41 +120,7 @@ namespace WiFiManager
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
-            }
-        }
-
-        async void Conn_Clicked(object sender, EventArgs e)
-        {
-            var mpv = this.BindingContext as MainPageVM;
-            try
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
-                mpv.IsBusy = true;
-                mpv.IsConnected = false;
-                var nw = mpv.SelectedNetwork;
-                var wi = await mgr.ConnectAsync(nw);
-
-                nw.TryUpdateFirstConnectionInfo(wi);
-            }
-            catch(Exception ex)
-            {
-                await DisplayAlert("Error", ex.Message, "OK");
                 mpv.IsBusy = false;
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
             }
         }
 
@@ -199,16 +153,38 @@ namespace WiFiManager
             return externalIp;
         }
 
-        async void Disconn_Clicked(object sender, EventArgs e)
+
+        async void Conn_Clicked(object sender, EventArgs e)
         {
+            var mpv = this.BindingContext as MainPageVM;
+
             try
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
+                mpv.IsBusy = true;
+                mpv.IsConnected = false;
+                var nw = mpv.SelectedNetwork;
+                var wi = await mgr.ConnectAsync(nw);
 
-                var mpv = this.BindingContext as MainPageVM;
+                nw.TryUpdateFirstConnectionInfo(wi);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", ex.Message, "OK");
+                mpv.IsBusy = false;
+            }
+            finally
+            {
+                mpv.IsBusy = false;
+            }
+        }
+
+        async void Disconn_Clicked(object sender, EventArgs e)
+        {
+            var mpv = this.BindingContext as MainPageVM;
+
+            try
+            {
+                mpv.IsBusy = true;
                 mpv.IsConnected = false;
                 await mgr.DisConnectAsync();
             }
@@ -220,43 +196,36 @@ namespace WiFiManager
             }
             finally
             {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
+                mpv.IsBusy = false;
             }
         }
 
-        private void SaveCommand_Clicked(object sender, EventArgs e)
+        async void SaveCommand_Clicked(object sender, EventArgs e)
         {
-            try
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                });
-
+            await Task.Run(() => {
                 var mpv = this.BindingContext as MainPageVM;
-                mpv.DoSave();
-            }
-            catch (Exception ex)
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    DisplayAlert("Error", ex.Message, "OK");
-                });
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                });
-            }
+
+                try
+                {
+                    mpv.IsBusy = true;
+                    mpv.DoSave();
+                }
+                catch (Exception ex)
+                {
+                    Device.BeginInvokeOnMainThread(() => {
+                        DisplayAlert("Error", ex.Message, "OK");
+                    });
+                }
+                finally
+                {
+                    mpv.IsBusy = false;
+                }
+            });
         }
 
-        void RefreshNetworks_Clicked(object sender, EventArgs e)
+        async void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
-            RefreshAvailableNetworks();
+            await Task.Run(() => RefreshAvailableNetworks());
         }
  
 
@@ -270,14 +239,12 @@ namespace WiFiManager
 
         async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
+            var mpv = this.BindingContext as MainPageVM;
+
             try
             {
-                //Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = true;
-                    pleaseWait.IsRunning = true;
-                //});
+                mpv.IsBusy = true;
 
-                var mpv = this.BindingContext as MainPageVM;
                 await mpv.DoRefreshCoords();
             }
             catch (Exception ex)
@@ -288,10 +255,7 @@ namespace WiFiManager
             }
             finally
             {
-                //Device.BeginInvokeOnMainThread(() => {
-                    pleaseWait.IsVisible = false;
-                    pleaseWait.IsRunning = false;
-                //});
+                mpv.IsBusy = false ;
             }
         }
 

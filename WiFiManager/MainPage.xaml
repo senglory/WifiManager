@@ -239,9 +239,12 @@
                 </ListView.GestureRecognizers>-->
                 </ListView>
 
-                <StackLayout  Grid.Row="2" x:Name="DetailsArea"  Spacing="0" 
-                      VerticalOptions="StartAndExpand"
-                          BackgroundColor="DarkKhaki">
+                <StackLayout 
+                    Grid.Row="2" 
+                    x:Name="DetailsArea"  
+                    Spacing="0" 
+                    VerticalOptions="StartAndExpand"
+                    BackgroundColor="DarkKhaki">
                     <Frame HasShadow="False" Padding="3" >
                         <StackLayout BackgroundColor="Black" VerticalOptions="StartAndExpand">
                             <Grid  RowSpacing="0" ColumnSpacing="0" 
@@ -268,13 +271,7 @@
                                     <Label Text="Info:" HorizontalOptions="Start" />
                                     <Entry Text="{Binding Provider}"  HorizontalOptions="FillAndExpand" BackgroundColor="Black" FontSize="Micro"/>
                                 </StackLayout>
-                                <StackLayout Grid.Row="3" Orientation="Horizontal">
-                                    <Label Text="Internal IP" HorizontalOptions="Start"></Label>
-                                    <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
-                                    <Label Text="Public IP" HorizontalOptions="Start"></Label>
-                                    <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
-                                </StackLayout>
-                                <StackLayout Grid.Row="4"  Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                     <StackLayout.Resources>
                                         <Style TargetType="Label">
                                             <Setter Property="FontSize" Value="Default"></Setter>
@@ -284,7 +281,13 @@
                                     <Label Text="{Binding LastCoordLong}"></Label>
                                     <Label Text="{Binding LastCoordAlt}"></Label>
                                 </StackLayout>
-                                <StackLayout Grid.Row="5" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                <StackLayout Grid.Row="4" Orientation="Horizontal" IsVisible="False" >
+                                    <Label Text="Internal IP" HorizontalOptions="Start"></Label>
+                                    <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
+                                    <Label Text="Public IP" HorizontalOptions="Start"></Label>
+                                    <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
+                                </StackLayout>
+                                <StackLayout Grid.Row="5" Orientation="Horizontal" HorizontalOptions="FillAndExpand" HeightRequest="30">
                                     <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" />
                                 </StackLayout>
                             </Grid>
@@ -316,7 +319,8 @@
             </StackLayout>
             <StackLayout Orientation="Horizontal">
                 <ListView
-                x:Name="lstNetworksHunt">
+                    x:Name="lstNetworksHunt"
+                    ItemsSource="{Binding  WifiNetworksHunting}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <TextCell Text="{Binding Name}"></TextCell>
