@@ -325,9 +325,9 @@ namespace WiFiManager.Droid
             {
                 Thread.CurrentThread.CurrentCulture = _cultUS;
                 Thread.CurrentThread.CurrentUICulture = _cultUS;
+                Android.Util.Log.Info("SaveToCSV", "Saving CSV in BAK as " + filePathCSVBAK);
                 File.Copy(filePathCSV, filePathCSVBAK, true);
                 var alreadySaved = new List<WifiNetworkDto>();
-
                 using (var fs = new FileStream(filePathCSVBAK, FileMode.Open))
                 {
                     using (var fsw = new FileStream(filePathCSV, FileMode.Create))
@@ -611,11 +611,19 @@ namespace WiFiManager.Droid
                 var dirs = context.GetExternalCacheDirs();
                 foreach (Java.IO.File folder in dirs)
                 {
-                    bool IsRemovable = Android.OS.Environment.InvokeIsExternalStorageRemovable(folder);
-                    bool IsEmulated = Android.OS.Environment.InvokeIsExternalStorageEmulated(folder);
+                    try
+                    {
+                        bool IsRemovable = Android.OS.Environment.InvokeIsExternalStorageRemovable(folder);
+                        bool IsEmulated = Android.OS.Environment.InvokeIsExternalStorageEmulated(folder);
 
-                    if ( IsRemovable && !IsEmulated)
-                        return folder.Path;
+                        if (IsRemovable && !IsEmulated)
+                            return folder.Path;
+                    }
+                    catch (Exception ex)
+                    {
+                        Android.Util.Log.Error("!!!",ex.Message );
+                        return "/storage/sdcard1/Android/data/WiFiManager.WiFiManager/cache";
+                    }
                 }
                 return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
             }
