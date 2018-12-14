@@ -15,7 +15,7 @@ namespace WiFiManager.Common
     public interface IWifiOperations
     {
         List<WifiNetworkDto> GetActiveWifiNetworks();
-        List<WifiNetworkDto> GetWifiNetworksFromCSV(out string firstFailedLine);
+        WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw );
 
         void SaveToCSV(List<WifiNetworkDto> wifiNetworks);
         void SaveToJSON(List<WifiNetworkDto> wifiNetworks);

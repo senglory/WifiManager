@@ -248,12 +248,6 @@ namespace WiFiManager
 
                 await mpv.DoRefreshCoords();
             }
-            catch (Exception ex)
-            {
-                Device.BeginInvokeOnMainThread(() => {
-                    DisplayAlert("Error", ex.Message, "OK");
-                });
-            }
             finally
             {
                 mpv.IsBusy = false ;

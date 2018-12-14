@@ -5,12 +5,14 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+using Plugin.Logging;
 
 using WiFiManager.Common.BusinessObjects;
 
-using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration;
-using System.Threading.Tasks;
+
 
 namespace WiFiManager.Common
 {
@@ -115,7 +117,8 @@ namespace WiFiManager.Common
 
 
 
-        public MainPageVM(IWifiOperations mgr) {
+        public MainPageVM(IWifiOperations mgr)
+        {
             this.mgr = mgr;
 
             SaveCommand = new Command(DoSave);
@@ -158,19 +161,20 @@ namespace WiFiManager.Common
                 // try to find info in CSV file
                 if (mgr.CanLoadFromFile())
                 {
-                    var lst2 = mgr.GetWifiNetworksFromCSV(out FirstFailedLineInCSV);
                     foreach (var wifiOnAir in allOnAir)
                     {
-                        var wifiDtoFromFile = lst2.GetExistingWifiDto(wifiOnAir);
+                        var wifiDtoFromFile = mgr.FindWifiInCSV (wifiOnAir );
                         var isInFileAndOnAir = wifiDtoFromFile != null;
                         if (isInFileAndOnAir)
                         {
                             // update existing Wifi info from file (except for BSSID)
                             wifiOnAir.IsInCSVList = isInFileAndOnAir;
                             var nameOnAir = wifiOnAir.Name;
+                            var bssidOnAir = wifiOnAir.BssID;
                             wifiDtoFromFile.CopyTo(wifiOnAir);
-                            // only Name is taken from air
+                            // only Name & BssID is taken from air
                             wifiOnAir.Name = nameOnAir;
+                            wifiOnAir.BssID = bssidOnAir;
                         }
                     }
                 }
@@ -196,18 +200,21 @@ namespace WiFiManager.Common
         {
             try
             {
-                //IsBusy = true;
                 var t = mgr.GetCoordsAsync();
-                await t.ContinueWith((r) => {
-                    foreach (var wifi in WifiNetworks)
+                await t.ContinueWith(t2 =>
+                {
+                    if (!t2.IsFaulted)
                     {
-                        wifi.TryUpdateRecentCoords(r.Result);
+                        foreach (var wifi in WifiNetworks)
+                        {
+                            wifi.TryUpdateRecentCoords(t2.Result);
+                        }
                     }
                 });
             }
-            finally
+            catch (Exception ex)
             {
-                //IsBusy = false;
+                Logging.Error("DoRefreshCoords", ex);
             }
         }
 
