@@ -92,6 +92,7 @@ namespace WiFiManager
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    lblLastError.Text = ex.Message;
                     DisplayAlert("Fatal", ex.Message, "OK");
                 });
                 throw;
@@ -113,9 +114,11 @@ namespace WiFiManager
             {
                 mpv.IsBusy = true;
                 await mgr.ActualizeCoordsWifiNetworkAsync(n);
+                lblLastError.Text = "";
             }
             catch (Exception ex)
             {
+                lblLastError.Text = ex.Message;
                 await DisplayAlert("Error", ex.Message, "OK");
             }
             finally
@@ -170,6 +173,7 @@ namespace WiFiManager
             catch (Exception ex)
             {
                 await DisplayAlert("Error", ex.Message, "OK");
+                lblLastError.Text = ex.Message;
                 mpv.IsBusy = false;
             }
             finally

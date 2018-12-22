@@ -316,12 +316,23 @@
                 <Switch IsToggled="{Binding Path=UsePhoneMemory}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
+                <Label Text="WEP only" />
+                <Switch IsToggled="{Binding Path=WEPOnly}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label x:Name="lblLastError" TextColor="Red"></Label>
+                <Label x:Name="lblSysInfo" FontSize="Micro"></Label>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
                 <ListView
                     x:Name="lstNetworksHunt"
                     ItemsSource="{Binding  WifiNetworksHunting}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextCell Text="{Binding Name}"></TextCell>
+                            <StackLayout>
+                                <Label Text="{Binding Name}"></Label>
+                                <Label Text="{Binding BssID}"></Label>
+                            </StackLayout>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

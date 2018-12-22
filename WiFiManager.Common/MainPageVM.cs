@@ -94,6 +94,16 @@ namespace WiFiManager.Common
             }
         }
 
+        bool useWEPonly;
+        public bool WEPOnly
+        {
+            get { return useWEPonly; }
+            set
+            {
+                SetProperty(ref useWEPonly, value, "WEPOnly");
+            }
+        }
+
 
         ObservableCollection<WifiNetworkDto> _WifiNetworksHunting = new ObservableCollection<WifiNetworkDto>();
         public ObservableCollection<WifiNetworkDto> WifiNetworksHunting
@@ -177,6 +187,11 @@ namespace WiFiManager.Common
                             wifiOnAir.BssID = bssidOnAir;
                         }
                     }
+                }
+
+                if (WEPOnly)
+                {
+                    allOnAir = allOnAir.Where(x => x.NetworkType.Contains("WEP")).ToList();
                 }
 
                 WifiNetworks = new ObservableCollection<WifiNetworkDto>(allOnAir);

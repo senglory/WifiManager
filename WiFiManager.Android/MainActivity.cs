@@ -349,6 +349,7 @@ namespace WiFiManager.Droid
 
         public void SaveToCSV(List<WifiNetworkDto> wifiNetworksOnAir)
         {
+            FileStream fsBAK = null;
             try
             {
                 Thread.CurrentThread.CurrentCulture = _cultUS;
@@ -360,49 +361,50 @@ namespace WiFiManager.Droid
                     File.Copy(filePathCSV, filePathCSVBAK, true);
                 }
                 var alreadySaved = new List<WifiNetworkDto>();
-                using (var fsBAK = new FileStream(filePathCSVBAK, FileMode.Open))
+                if (csvAlreadyExists)
                 {
-                    using (var fsw = new FileStream(filePathCSV, FileMode.Create))
+                    fsBAK = new FileStream(filePathCSVBAK, FileMode.Open);
+                }
+                using (var fsw = new FileStream(filePathCSV, FileMode.Create))
+                {
+                    using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                     {
-                        using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                        // write header
+                        fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;FirstCoordAlt;LastCoordLat;LastCoordLong;LastCoordAlt;");
+
+                        if (csvAlreadyExists)
                         {
-                            // write header
-                            fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;FirstCoordAlt;LastCoordLat;LastCoordLong;LastCoordAlt;");
-
-                            if (csvAlreadyExists)
+                            using (var sr = new StreamReader(fsBAK, Constants.UNIVERSAL_ENCODING))
                             {
-                                using (var sr = new StreamReader(fsBAK, Constants.UNIVERSAL_ENCODING))
+                                var s = sr.ReadLine();
+                                while (!sr.EndOfStream)
                                 {
-                                    var s = sr.ReadLine();
-                                    while (!sr.EndOfStream)
-                                    {
-                                        s = sr.ReadLine();
-                                        WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
+                                    s = sr.ReadLine();
+                                    WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
 
-                                        var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
-                                        if (wifiOnAir != null)
-                                        {
-                                            var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                            var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
-                                            fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
-                                            alreadySaved.Add(wifiOnAir);
-                                        }
-                                        else
-                                        {
-                                            fw.WriteLine(s);
-                                        }
+                                    var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
+                                    if (wifiOnAir != null)
+                                    {
+                                        var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
+                                        var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                        alreadySaved.Add(wifiOnAir);
+                                    }
+                                    else
+                                    {
+                                        fw.WriteLine(s);
                                     }
                                 }
                             }
+                        }
 
-                            foreach (var wifiOnAir in wifiNetworksOnAir)
+                        foreach (var wifiOnAir in wifiNetworksOnAir)
+                        {
+                            var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
+                            if (wifiAlreadySaved == null)
                             {
-                                var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
-                                if (wifiAlreadySaved == null)
-                                {
-                                    var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                    fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
-                                }
+                                var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
+                                fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                             }
                         }
                     }
@@ -414,6 +416,11 @@ namespace WiFiManager.Droid
             {
                 Log.Error("WiFiManager", "SaveToCSV "+ ex.Message);
                 //throw ex;
+            }
+            finally
+            {
+                fsBAK?.Close();
+                fsBAK?.Dispose();
             }
         }
 
