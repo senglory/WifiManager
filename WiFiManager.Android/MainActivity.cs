@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
 using Android.App;
 using Android.Content.PM;
@@ -18,6 +19,9 @@ using Android.OS;
 using Android.Net;
 using Android.Net.Wifi;
 using Android.Locations;
+using Android;
+using Android.Support.Design.Widget;
+using Android.Support.V7.App;
 using Plugin.Permissions;
 using Plugin.Geolocator;
 using Plugin.Connectivity;
@@ -25,13 +29,17 @@ using Plugin.Geolocator.Abstractions;
 using Plugin.Permissions.Abstractions;
 using Plugin.FilePicker;
 using Plugin.FilePicker.Abstractions;
-using WiFiManager.Common.BusinessObjects;
-using WiFiManager.Common;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Java.IO;
+
 using Newtonsoft.Json;
 using AutoMapper;
-using System.Reflection;
+
+using WiFiManager.Common.BusinessObjects;
+using WiFiManager.Common;
+
+
 
 namespace WiFiManager.Droid
 {
@@ -43,6 +51,12 @@ namespace WiFiManager.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
         IWifiOperations
     {
+        const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
+        const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
+        const int RC_DELETE_STORAGE_FILE = 1200;
+        static readonly string TAG = "WiFiManager";
+        static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
+
         delegate bool FindDelegate(WifiNetworkDto nw, WifiNetworkDto nw2);
 
         string filePathCSV
@@ -96,6 +110,7 @@ namespace WiFiManager.Droid
 
             base.OnCreate(bundle);
 
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -105,6 +120,8 @@ namespace WiFiManager.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
 
@@ -227,7 +244,7 @@ namespace WiFiManager.Droid
 
             try
             {
-                if (!File.Exists(filePathCSV))
+                if (!System.IO.File.Exists(filePathCSV))
                 {
                     return null;
                 }
@@ -347,18 +364,28 @@ namespace WiFiManager.Droid
             return wifiDtoFromFile;
         }
 
-        public void SaveToCSV(List<WifiNetworkDto> wifiNetworksOnAir)
+        public async void SaveToCSV(List<WifiNetworkDto> wifiNetworksOnAir)
         {
             FileStream fsBAK = null;
+
             try
             {
+                //await RequestStorageWritePermission();
+                //var newStatus = await CrossPermissions.Current.RequestPermissionsAsync(Plugin.Permissions.Abstractions.Permission.Storage);
+                //var br = RequestExternalStoragePermissionIfNecessary(RC_WRITE_EXTERNAL_STORAGE_PERMISSION);
+
+                var hasPermission = await Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
+                if (!hasPermission)
+                    return;
+                //RequestPermissions(PERMISSIONS_TO_REQUEST, requestCode);
+
                 Thread.CurrentThread.CurrentCulture = _cultUS;
                 Thread.CurrentThread.CurrentUICulture = _cultUS;
                 Android.Util.Log.Info("SaveToCSV", "Saving CSV in BAK as " + filePathCSVBAK);
-                var csvAlreadyExists = File.Exists(filePathCSV);
+                var csvAlreadyExists = System.IO. File.Exists(filePathCSV);
                 if (csvAlreadyExists)
                 {
-                    File.Copy(filePathCSV, filePathCSVBAK, true);
+                    System.IO.File.Copy(filePathCSV, filePathCSVBAK, true);
                 }
                 var alreadySaved = new List<WifiNetworkDto>();
                 if (csvAlreadyExists)
@@ -410,7 +437,7 @@ namespace WiFiManager.Droid
                     }
                 }
 
-                File.Delete(filePathCSVBAK);
+                System.IO.File.Delete(filePathCSVBAK);
             }
             catch (Exception ex)
             {
@@ -429,7 +456,7 @@ namespace WiFiManager.Droid
             JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
             string str = JsonConvert.SerializeObject(wifiNetworks, settings);
             var filePathJSON = string.Format(filePathTemplateJSON, DateTime.Now.ToString("yyyyMMdd-HHmm"));
-            File.WriteAllText(filePathJSON, str);
+            System.IO.File.WriteAllText(filePathJSON, str);
         }
 
         public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto nw)
@@ -637,7 +664,7 @@ namespace WiFiManager.Droid
 
             catch (Exception ex)
             {
-                Console.WriteLine("GetBaseFolderPath caused the follwing exception: {0}", ex);
+                Log.WriteLine(LogPriority.Error, TAG, "GetBaseFolderPath caused the follwing exception: {0}", ex );
             }
 
             return baseFolderPath;
@@ -670,6 +697,78 @@ namespace WiFiManager.Droid
                 return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
             }
         }
+
+        #region PERMISSIONS
+        bool RequestExternalStoragePermissionIfNecessary(int requestCode)
+        {
+            if (Android.OS.Environment.MediaMounted.Equals(Android.OS.Environment.ExternalStorageState))
+            {
+                if (CheckSelfPermission(Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Granted)
+                {
+                    return true;
+                }
+
+                if (ShouldShowRequestPermissionRationale(Manifest.Permission.WriteExternalStorage))
+                {
+                    RequestPermissions(PERMISSIONS_TO_REQUEST, requestCode);
+                    //Snackbar.Make(FindViewById(Android.Resource.Id.Content),
+                    //              Resource.String.write_external_permissions_rationale,
+                    //              Snackbar.LengthIndefinite)
+                    //        .SetAction(Resource.String.ok, delegate { RequestPermissions(PERMISSIONS_TO_REQUEST, requestCode); });
+                }
+                else
+                {
+                    RequestPermissions(PERMISSIONS_TO_REQUEST, requestCode);
+                }
+
+                return false;
+            }
+
+            Log.Warn(TAG, "External storage is not mounted; cannot request permission");
+            return false;
+        }
+
+
+        private async Task RequestStorageWritePermission()
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Plugin.Permissions.Abstractions.Permission.Storage);
+
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(Plugin.Permissions.Abstractions.Permission.Storage);
+                status = results[Plugin.Permissions.Abstractions.Permission.Storage];
+        }
+
+        private async Task RequestStorageWritePermission2()
+        {
+            try
+            {
+                var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Plugin.Permissions.Abstractions.Permission.Storage);
+                if (status != PermissionStatus.Granted)
+                {
+                    if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Plugin.Permissions.Abstractions.Permission.Storage))
+                    {
+                        await Xamarin.Forms.Application.Current?.MainPage?.DisplayAlert("Storage Permission", "OK?", "OK");
+                    }
+
+                    var results = await CrossPermissions.Current.RequestPermissionsAsync(Plugin.Permissions.Abstractions.Permission.Storage);
+                    status = results[Plugin.Permissions.Abstractions.Permission.Storage];
+                }
+
+                if (status == PermissionStatus.Granted)
+                {
+                    await Xamarin.Forms.Application.Current?.MainPage?.DisplayAlert("Storage Permission", "Granted!", "OK");
+                }
+                else if (status != PermissionStatus.Unknown)
+                {
+                    await Xamarin.Forms.Application.Current?.MainPage?.DisplayAlert("Storage Permission", "Denied!", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+        }
+        #endregion
     }
 }
 
