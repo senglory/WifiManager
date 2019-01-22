@@ -30,7 +30,7 @@ namespace WiFiManager.Common
             }
             set
             {
-                SetProperty(ref _WifiNetworks, value, "WifiNetworks");
+                SetProperty(ref _WifiNetworks, value, nameof(WifiNetworks));
             }
         }
 
@@ -48,7 +48,7 @@ namespace WiFiManager.Common
                 {
                     _selectedNetwork.IsSelected = false;
                 }
-                SetProperty(ref _selectedNetwork, value, "SelectedNetwork");
+                SetProperty(ref _selectedNetwork, value, nameof(SelectedNetwork));
                 //if (_selectedNetwork != null)
                 //    _selectedNetwork.CoordsAndPower.Add(new CoordsAndPower
                 //{
@@ -68,7 +68,7 @@ namespace WiFiManager.Common
             get { return isBusy; }
             set
             {
-                SetProperty(ref isBusy, value, "IsBusy");
+                SetProperty(ref isBusy, value, nameof(IsBusy));
             }
         }
 
@@ -78,19 +78,30 @@ namespace WiFiManager.Common
             get { return isConnected; }
             set
             {
-                SetProperty(ref isConnected, value, "IsConnected");
+                SetProperty(ref isConnected, value, nameof (IsConnected));
             }
         }
 
 
-        public bool UsePhoneMemory
+        public bool UseInternalStorageForCSV
         {
-            get { return mgr.UsePhoneMemory; }
+            get { return mgr.UseInternalStorageForCSV; }
             set
             {
-                bool usePhoneMem = value;
-                mgr.UsePhoneMemory = usePhoneMem;
-                SetProperty(ref usePhoneMem, value, "UsePhoneMemory");
+                bool usePhoneStorage = value;
+                mgr.UseInternalStorageForCSV = usePhoneStorage;
+                SetProperty(ref usePhoneStorage, value, nameof(UseInternalStorageForCSV));
+            }
+        }
+
+        public bool UseCachedNetworkLookup
+        {
+            get { return mgr.UseCachedNetworkLookup; }
+            set
+            {
+                bool useRAM = value;
+                mgr.UseCachedNetworkLookup = useRAM;
+                SetProperty(ref useRAM, value, nameof(UseCachedNetworkLookup));
             }
         }
 
@@ -100,7 +111,7 @@ namespace WiFiManager.Common
             get { return useWEPonly; }
             set
             {
-                SetProperty(ref useWEPonly, value, "WEPOnly");
+                SetProperty(ref useWEPonly, value, nameof (WEPOnly));
             }
         }
 
@@ -114,7 +125,7 @@ namespace WiFiManager.Common
             }
             set
             {
-                SetProperty(ref _WifiNetworksHunting, value, "WifiNetworksHunting");
+                SetProperty(ref _WifiNetworksHunting, value, nameof (WifiNetworksHunting));
             }
         }
         #endregion
@@ -152,11 +163,17 @@ namespace WiFiManager.Common
         {
             try
             {
+                var ts0 = DateTime.Now;
+
                 IsBusy = true;
                 FirstFailedLineInCSV = null;
 
                 mgr.DeleteInfoAboutWifiNetworks();
                 var allOnAir = mgr.GetActiveWifiNetworks();
+
+                var ts1 = DateTime.Now;
+                var elapsed = ts1 - ts0;
+                Logging.Info("WiFiManager", $"GetActiveWifiNetworks: finished, elapsed: {elapsed.TotalSeconds} sec");
 
                 // in hunting mode leave only those who's in hunting list
                 if (WifiNetworksHunting.Count > 0)
@@ -173,7 +190,7 @@ namespace WiFiManager.Common
                 {
                     foreach (var wifiOnAir in allOnAir)
                     {
-                        var wifiDtoFromFile = mgr.FindWifiInCSV (wifiOnAir );
+                        var wifiDtoFromFile = mgr.FindWifiInCSV(wifiOnAir );
                         var isInFileAndOnAir = wifiDtoFromFile != null;
                         if (isInFileAndOnAir)
                         {
@@ -196,6 +213,14 @@ namespace WiFiManager.Common
 
                 WifiNetworks = new ObservableCollection<WifiNetworkDto>(allOnAir);
                 SortListByLevel();
+
+                // clean CSV cache if it was used
+                mgr.ClearCachedCSVNetworkList();
+
+                var ts2 = DateTime.Now;
+                var elapsed2 = ts2 - ts0;
+                Logging.Info("WiFiManager", $"DoRefreshNetworks: finished, elapsed: {elapsed2.TotalSeconds} sec");
+
 
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;

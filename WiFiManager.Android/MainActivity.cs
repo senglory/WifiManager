@@ -102,6 +102,7 @@ namespace WiFiManager.Droid
             });
             _config.AssertConfigurationIsValid();
             _mapper = _config.CreateMapper();
+            _CachedCSVNetworkList = new List<WifiNetworkDto>();
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
@@ -125,12 +126,21 @@ namespace WiFiManager.Droid
         }
 
 
-        public bool UsePhoneMemory { get; set; }
+        public bool UseInternalStorageForCSV { get; set; }
+
+        public bool UseCachedNetworkLookup { get; set; }
+
+        List<WifiNetworkDto> _CachedCSVNetworkList { get; set; }
+        public void ClearCachedCSVNetworkList()
+        {
+            _CachedCSVNetworkList.Clear();
+        }
 
         public async Task<Tuple<double, double, double>> GetCoordsAsync()
         {
             try
             {
+                var ts0 = DateTime.Now;
                 var hasPermission = await Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Location);
                 if (!hasPermission)
                     return null;
@@ -150,6 +160,10 @@ namespace WiFiManager.Droid
                     null,
                     includeHeading
                     );
+
+                var ts1 = DateTime.Now;
+                var elapsed = ts1 - ts0;
+                Android.Util.Log.Info("WiFiManager", $"GetCoordsAsync: got GPS coords, elapsed: {elapsed.TotalSeconds} sec" );
 
                 return new Tuple<double, double, double>(position.Latitude, position.Longitude, position.Altitude);
             }
@@ -219,23 +233,60 @@ namespace WiFiManager.Droid
 
         WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
         {
-            using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
+            WifiNetworkDto wifiDtoFromFile;
+
+            if (UseCachedNetworkLookup)
             {
-                using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+                if (_CachedCSVNetworkList.Count == 0)
                 {
-                    // skip header
-                    var ss2 = fr.ReadLine();
-                    while (!fr.EndOfStream)
+                    #region Populate CSV cache
+                    using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
                     {
-                        var lineFromCSV = fr.ReadLine();
-                        WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
-                        if (findMethod(nw, wifiDtoFromFile))
-                            return wifiDtoFromFile;
+                        using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+                        {
+                            // skip header
+                            var ss2 = fr.ReadLine();
+                            while (!fr.EndOfStream)
+                            {
+                                var lineFromCSV = fr.ReadLine();
+                                wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+                                _CachedCSVNetworkList.Add(wifiDtoFromFile);
+                            }
+                        }
+                    } 
+                    #endregion
+                }
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                // Refactor lookup code, also do the same for FindWifiInCSV()
+                var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
+                    (nwtmp) => {
+                    return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper() && nwtmp.Name == nw.Name ;
+                });
+
+                wifiDtoFromFile = wifiDtoFromFileKVP;
+            }
+            else
+            {
+                using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
+                {
+                    using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+                    {
+                        // skip header
+                        var ss2 = fr.ReadLine();
+                        while (!fr.EndOfStream)
+                        {
+                            var lineFromCSV = fr.ReadLine();
+                            wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+
+                            if (findMethod(nw, wifiDtoFromFile))
+                                return wifiDtoFromFile;
+                        }
                     }
                 }
+                wifiDtoFromFile = null;
             }
 
-            return null;
+            return wifiDtoFromFile;
         }
 
         public WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw)
@@ -672,7 +723,7 @@ namespace WiFiManager.Droid
 
         private string GetSDCardDir()
         {
-            if (UsePhoneMemory)
+            if (UseInternalStorageForCSV)
                 return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
             else
             {

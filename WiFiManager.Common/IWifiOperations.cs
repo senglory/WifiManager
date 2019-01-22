@@ -35,6 +35,8 @@ namespace WiFiManager.Common
 
         Task DisConnectAsync();
 
-        bool UsePhoneMemory { get; set; }
+        bool UseInternalStorageForCSV { get; set; }
+        bool UseCachedNetworkLookup { get; set; }
+        void ClearCachedCSVNetworkList();
     }
 }

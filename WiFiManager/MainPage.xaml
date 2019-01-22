@@ -312,8 +312,12 @@
     <ContentPage Title="Settings">
         <StackLayout Spacing="0">
             <StackLayout Orientation="Horizontal">
-                <Label Text="Use Phone Storage" />
-                <Switch IsToggled="{Binding Path=UsePhoneMemory}" HorizontalOptions="FillAndExpand"/>
+                <Label Text="Use Internal Phone Storage" />
+                <Switch IsToggled="{Binding Path=UseInternalStorageForCSV}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Use Cached Network Lookup" />
+                <Switch IsToggled="{Binding Path=UseCachedNetworkLookup}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
                 <Label Text="WEP only" />
