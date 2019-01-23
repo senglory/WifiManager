@@ -26,8 +26,6 @@ namespace WiFiManager.Common
 
         void DeleteInfoAboutWifiNetworks();
 
-        Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync();
-
         Task<Tuple<double, double, double>> GetCoordsAsync();
 
         Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);

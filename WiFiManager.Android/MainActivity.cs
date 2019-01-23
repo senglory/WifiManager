@@ -101,7 +101,14 @@ namespace WiFiManager.Droid
                 cfg.IgnoreUnmapped();
             });
             _config.AssertConfigurationIsValid();
+
+            Log.Info("WiFiManager", "MainActivity - OnCreate - before  CreateMapper");
+
+            var mi = typeof(AutoMapper.Mappers.EnumToEnumMapper).GetRuntimeMethods().First(m => m.IsStatic);
             _mapper = _config.CreateMapper();
+
+            Log.Info("WiFiManager", "MainActivity - OnCreate - after  CreateMapper");
+
             _CachedCSVNetworkList = new List<WifiNetworkDto>();
 
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -586,48 +593,6 @@ namespace WiFiManager.Droid
             }
         }
 
-        public async Task<List<WifiNetworkDto>> GetActiveWifiNetworksAsync()
-        {
-            var locator = CrossGeolocator.Current;
-            locator.DesiredAccuracy = 1;
-            var includeHeading = true;
-
-            var position = await locator.GetPositionAsync(TimeSpan.FromSeconds(10), null, includeHeading);
-            bool b1 = locator.IsGeolocationAvailable;
-            bool b2 = locator.IsGeolocationEnabled;
-
-
-            var wifiNetworks = new List<WifiNetworkDto>();
-            var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-            wifiManager.StartScan();
-            var networks = wifiManager.ConfiguredNetworks;
-            var connectionInfo = wifiManager.ConnectionInfo;
-            var results = wifiManager.ScanResults;
-            foreach (var n in results)
-            {
-                try
-                {
-                    var netw = new WifiNetworkDto()
-                    {
-                        BssID = n.Bssid.ToUpper(),
-                        Name = n.Ssid,
-                        NetworkType = n.Capabilities,
-                        Level = n.Level,
-                        IsEnabled = true
-                    };
-                    wifiNetworks.Add(netw);
-
-                    System.Diagnostics.Debug.WriteLine(n.Level);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("WiFiManager", "GetActiveWifiNetworksAsync "+ ex.Message);
-                }
-            }
-
-            return wifiNetworks ;
-        }
-
         public bool CanLoadFromFile()
         {
             try
@@ -742,7 +707,7 @@ namespace WiFiManager.Droid
                     catch (Exception ex)
                     {
                         Android.Util.Log.Error("!!!",ex.Message );
-                        return "/storage/sdcard1/Android/data/WiFiManager.WiFiManager/cache";
+                        break;
                     }
                 }
                 return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
