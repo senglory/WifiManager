@@ -22,9 +22,9 @@ namespace WiFiManager
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : TabbedPage
     {
-        IWifiOperations mgr;
+        IWifiManagerOperations mgr;
 
-        public MainPage(IWifiOperations mgr)
+        public MainPage(IWifiManagerOperations mgr)
         {
 
             InitializeComponent();

@@ -18,7 +18,7 @@ namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
-        IWifiOperations mgr;
+        IWifiManagerOperations mgr;
 
         #region Properties
         ObservableCollection<WifiNetworkDto> _WifiNetworks=new ObservableCollection<WifiNetworkDto> ();
@@ -138,12 +138,11 @@ namespace WiFiManager.Common
 
 
 
-        public MainPageVM(IWifiOperations mgr)
+        public MainPageVM(IWifiManagerOperations mgr)
         {
             this.mgr = mgr;
 
             SaveCommand = new Command(DoSave);
-            SaveJsonCommand = new Command(DoSaveJson);
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
@@ -282,17 +281,11 @@ namespace WiFiManager.Common
             mgr.SaveToCSV(lst);
         }
 
-        void DoSaveJson(object parameter)
-        {
-            var lst = new List<WifiNetworkDto>(WifiNetworks);
-            mgr.SaveToJSON(lst);
-        }
 
 
 
 
         public Command SaveCommand { get; set; }
-        public Command SaveJsonCommand { get; set; }
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }

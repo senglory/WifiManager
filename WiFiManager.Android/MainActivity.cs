@@ -50,7 +50,7 @@ namespace WiFiManager.Droid
         MainLauncher = true, 
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
-        IWifiOperations
+        IWifiManagerOperations
     {
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
@@ -484,16 +484,16 @@ namespace WiFiManager.Droid
                                     WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
 
                                     var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
-                                    if (wifiOnAir != null)
+                                    if (wifiOnAir == null)
+                                    {
+                                        fw.WriteLine(s);
+                                    }
+                                    else
                                     {
                                         var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
                                         var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
                                         fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                                         alreadySaved.Add(wifiOnAir);
-                                    }
-                                    else
-                                    {
-                                        fw.WriteLine(s);
                                     }
                                 }
                             }

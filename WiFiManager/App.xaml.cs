@@ -10,7 +10,7 @@ namespace WiFiManager
 {
 	public partial class App : Application
 	{
-		public App (IWifiOperations mgr)
+		public App (IWifiManagerOperations mgr)
 		{
 			InitializeComponent();
 
