@@ -272,7 +272,7 @@
                                 <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                     <StackLayout.Resources>
                                         <Style TargetType="Label">
-                                            <Setter Property="FontSize" Value="Default"></Setter>
+                                            <Setter Property="FontSize" Value="Small"></Setter>
                                         </Style>
                                     </StackLayout.Resources>
                                     <Label Text="{Binding LastCoordLat}"></Label>

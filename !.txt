@@ -94,3 +94,10 @@ https://github.com/JTOne123/OnePackagePerABI
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Sluggush GPS in Xamarin.Forms
+https://github.com/MvvmCross/MvvmCross/blob/develop/MvvmCross.Plugins/Location.Fused/FusedLocationHandler.cs
+https://developers.google.com/location-context/fused-location-provider/
+
+
+

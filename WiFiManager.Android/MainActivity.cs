@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Reflection;
 
 using Android.App;
@@ -342,33 +343,48 @@ namespace WiFiManager.Droid
             return (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi);
         }
 
+
+        static readonly Regex _rxForBssId1 = new Regex(@"[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+        static readonly Regex _rxForBssId2 = new Regex(@"[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
         private static WifiNetworkDto GetWifiDtoFromString(string s)
         {
             var arrs = s.Split(new char[] { ';' }, StringSplitOptions .None );
             // parse potential BSSID value
             var bssidRaw = arrs[1].ToUpper().Trim();
             var bssid = bssidRaw;
-            if (!string .IsNullOrEmpty (bssidRaw) && !bssidRaw.Contains(':'))
+            var sb = new StringBuilder();
+            if (!string .IsNullOrEmpty (bssidRaw)) 
             {
-                var sb = new StringBuilder();
-                bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
-                    bssidRaw.Substring(0, 2),
-                    bssidRaw.Substring(2, 2),
-                    bssidRaw.Substring(4, 2),
-                    bssidRaw.Substring(6, 2),
-                    bssidRaw.Substring(8, 2),
-                    bssidRaw.Substring(10, 2)).ToString();
+                if (_rxForBssId1.IsMatch(bssidRaw) || _rxForBssId2.IsMatch(bssidRaw))
+                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
+                        bssidRaw.Substring(0, 2),
+                        bssidRaw.Substring(3, 2),
+                        bssidRaw.Substring(6, 2),
+                        bssidRaw.Substring(9, 2),
+                        bssidRaw.Substring(12, 2),
+                        bssidRaw.Substring(15, 2)).ToString();
+                else
+                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
+                        bssidRaw.Substring(0, 2),
+                        bssidRaw.Substring(2, 2),
+                        bssidRaw.Substring(4, 2),
+                        bssidRaw.Substring(6, 2),
+                        bssidRaw.Substring(8, 2),
+                        bssidRaw.Substring(10, 2)).ToString();
             }
             WifiNetwork nw = null;
+            string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
+
             // legacy
             if (arrs.Length == 6)
             {
                 nw = new WifiNetwork
                 {
                     BssID = bssid,
-                    Name = arrs[0].Trim(),
-                    Password = arrs[2].Trim(),
-                    IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                    Name = arrs[0],
+                    Password = arrs[2],
+                    IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
                     NetworkType = arrs[4],
                     Provider = arrs[5],
                     Level = -1 * Constants.NO_SIGNAL_LEVEL
@@ -380,9 +396,9 @@ namespace WiFiManager.Droid
                 nw = new WifiNetwork
                 {
                     BssID = bssid,
-                    Name = arrs[0].Trim(),
-                    Password = arrs[2].Trim(),
-                    IsEnabled = !Convert.ToBoolean(int.Parse(arrs[3])),
+                    Name = arrs[0],
+                    Password = arrs[2],
+                    IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
                     NetworkType = arrs[4],
                     Provider = arrs[5],
                     WpsPin = arrs[6],
