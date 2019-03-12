@@ -39,8 +39,7 @@ using AutoMapper;
 
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
-
-
+using Android.Hardware;
 
 namespace WiFiManager.Droid
 {
@@ -49,7 +48,8 @@ namespace WiFiManager.Droid
         Theme = "@style/MainTheme", 
         MainLauncher = true, 
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity, 
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity,
+        Android.Hardware.ISensorEventListener,
         IWifiManagerOperations
     {
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
@@ -118,6 +118,12 @@ namespace WiFiManager.Droid
             RequestedOrientation = ScreenOrientation.Portrait;
 
             base.OnCreate(bundle);
+
+            // shake management set up
+            // Register this as a listener with the underlying service.
+            var sensorManager = GetSystemService(SensorService) as Android.Hardware.SensorManager;
+            var sensor = sensorManager.GetDefaultSensor(Android.Hardware.SensorType.Accelerometer);
+            sensorManager.RegisterListener(this, sensor, Android.Hardware.SensorDelay.Game);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
@@ -210,7 +216,7 @@ namespace WiFiManager.Droid
                     Level = n.Level,
                     IsEnabled = true
                 };
-                if (IsIgnoredNetwork(netw))
+                if (netw.IsIgnoredNetwork)
                     continue;
                 wifiNetworks.Add(netw);
             }
@@ -218,26 +224,6 @@ namespace WiFiManager.Droid
             return wifiNetworks;
         }
 
-        bool IsIgnoredNetwork(WifiNetworkDto netw)
-        {
-            return netw.Name == "Telekom_FON"
-                   || netw.Name == "Unitymedia WifiSpot"
-                   || netw.Name == "Globus_Gast"
-                   || netw.Name == "mycloud"
-                   || netw.Name == "MT_FREE"
-                   || netw.Name == "AndroidAP"
-                   || netw.Name == "TSUM Discount"
-                   || netw.Name == "CPPK_Free"
-                   || netw.Name == "Metropolis_FREE"
-                   || netw.Name == "Mosinter"
-                   || netw.Name == "Beeline_WiFi_FREE"
-                   || netw.Name == "Beeline_WiFi_Starbucks_FREE"
-                   || netw.Name == "Starbucks_Beeline_Free"
-                   || netw.Name == "Moscow_WiFi_Free"
-                   || netw.Name == "MetropolisNew-WiFi_FREE"
-                   || netw.Name == "Aeroexpress_iras"
-                   || netw.Name == "Shokoladniza-Guest";
-        }
 
         WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
         {
@@ -799,6 +785,88 @@ namespace WiFiManager.Droid
 
 
             }
+        }
+
+        #endregion
+
+        // https://alexdunn.org/2018/05/08/xamarin-tip-add-easter-eggs-on-shake/
+        #region Shake properties
+        bool hasUpdated = false;
+        DateTime lastUpdate;
+        float lastX = 0.0f;
+        float lastY = 0.0f;
+        float lastZ = 0.0f;
+
+        const int ShakeDetectionTimeLapse = 250;
+        const double ShakeThreshold = 1100;
+        #endregion
+
+        #region Android.Hardware.ISensorEventListener implementation
+
+        /// <summary>
+        /// Handles when the sensor range changes
+        /// </summary>
+        /// <param name="sensor">Sensor.</param>
+        /// <param name="accuracy">Accuracy.</param>
+        public void OnAccuracyChanged(Android.Hardware.Sensor sensor, Android.Hardware.SensorStatus accuracy)
+        {
+        }
+
+        /// <summary>
+        /// Detects sensor changes and is set up to listen for shakes.
+        /// </summary>
+        /// <param name="e">E.</param>
+        public async void OnSensorChanged(Android.Hardware.SensorEvent e)
+        {
+            if (e.Sensor.Type == Android.Hardware.SensorType.Accelerometer)
+            {
+                var x = e.Values[0];
+                var y = e.Values[1];
+                var z = e.Values[2];
+
+                // use to check against last time it was called so we don't register every delta
+                var currentTime = DateTime.Now;
+                if (hasUpdated == false)
+                {
+                    hasUpdated = true;
+                    lastUpdate = currentTime;
+                    lastX = x;
+                    lastY = y;
+                    lastZ = z;
+                }
+                else
+                {
+                    if ((currentTime - lastUpdate).TotalMilliseconds > ShakeDetectionTimeLapse)
+                    {
+                        var diffTime = (float)(currentTime - lastUpdate).TotalMilliseconds;
+                        lastUpdate = currentTime;
+                        var total = x + y + z - lastX - lastY - lastZ;
+                        var speed = Math.Abs(total) / diffTime * 10000;
+
+                        if (speed > ShakeThreshold)
+                        {
+                            // We have a shake folks!
+                            await EasterEggAsync();
+                        }
+
+                        lastX = x;
+                        lastY = y;
+                        lastZ = z;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute the easter egg async.
+        /// </summary>
+        protected virtual async Task EasterEggAsync()
+        {
+            await Task.Run(() => {
+                var wnd = Xamarin.Forms.Application.Current?.MainPage as MainPage;
+                wnd?.RefreshAvailableNetworks();
+            });
+            
         }
         #endregion
     }

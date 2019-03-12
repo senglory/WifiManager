@@ -94,10 +94,48 @@ https://github.com/JTOne123/OnePackagePerABI
 
 
 
+{System.InvalidCastException: Specified cast is not valid.
+  
+
+
+at (wrapper castclass) System.Object.__castclass_with_cache(object,intptr,intptr)
+  
+at Xamarin.Forms.Internals.TemplatedItemsList`2[TView,TItem].ActivateContent (System.Int32 index, System.Object item) [0x00000] in D:\a\1\s\Xamarin.Forms.Core\TemplatedItemsList.cs:534 
+  
+at Xamarin.Forms.Internals.TemplatedItemsList`2[TView,TItem].CreateContent (System.Int32 index, System.Object item, System.Boolean insert) [0x00000] in D:\a\1\s\Xamarin.Forms.Core\TemplatedItemsList.cs:543 
+  
+at Xamarin.Forms.Internals.TemplatedItemsList`2[TView,TItem].ConvertContent (System.Int32 startingIndex, System.Collections.IList items, System.Boolean forceCreate, System.Boolean setIndex) [0x00014] in D:\a\1\s\Xamarin.Forms.Core\TemplatedItemsList.cs:678 
+  at Xamarin.Forms.Internals.TemplatedItemsList`2[TView,TItem].OnProxyCollectionChanged (System.Object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) [0x0016c] in D:\a\1\s\Xamarin.Forms.Core\TemplatedItemsList.cs:999 
+  
+at Xamarin.Forms.ListProxy.OnCollectionChanged (System.Collections.Specialized.NotifyCollectionChangedEventArgs e) [0x0000a] in D:\a\1\s\Xamarin.Forms.Core\ListProxy.cs:233 
+  
+at Xamarin.Forms.ListProxy+<>c__DisplayClass33_0.<OnCollectionChanged>b__0 () [0x00018] in D:\a\1\s\Xamarin.Forms.Core\ListProxy.cs:206 
+  
+at Xamarin.Forms.ListProxy.OnCollectionChanged (System.Object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) [0x000a0] in D:\a\1\s\Xamarin.Forms.Core\ListProxy.cs:225 
+  
+at Xamarin.Forms.ListProxy+WeakNotifyProxy.OnCollectionChanged (System.Object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) [0x00031] in D:\a\1\s\Xamarin.Forms.Core\ListProxy.cs:394 
+  
+at System.Collections.ObjectModel.ObservableCollection`1[T].OnCollectionChanged (System.Collections.Specialized.NotifyCollectionChangedEventArgs e) [0x00018] in <fb6d78e506844b3b96d5b35aa047fbbd>:0 
+  
+at System.Collections.ObjectModel.ObservableCollection`1[T].OnCollectionChanged (System.Collections.Specialized.NotifyCollectionChangedAction action, System.Object item, System.Int32 index) [0x00009] in <fb6d78e506844b3b96d5b35aa047fbbd>:0 
+  
+at System.Collections.ObjectModel.ObservableCollection`1[T].InsertItem (System.Int32 index, T item) [0x0001a] in <fb6d78e506844b3b96d5b35aa047fbbd>:0 
+  
+at System.Collections.ObjectModel.Collection`1[T].Add (T item) [0x00020] in <d4a23bbd2f544c30a48c44dd622ce09f>:0 
+  at WiFiManager.MainPage.MenuItem_Hunt_Clicked (System.Object sender, System.EventArgs e) [0x00021] in C:\prj\Demo\WifiManager\WiFiManager\MainPage.xaml.cs:269 
+
+}
+
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Sluggush GPS in Xamarin.Forms
 https://github.com/MvvmCross/MvvmCross/blob/develop/MvvmCross.Plugins/Location.Fused/FusedLocationHandler.cs
 https://developers.google.com/location-context/fused-location-provider/
 
 
+
+About GPS on Android
+https://developer.android.com/guide/topics/location/strategies.html#kotlin
 

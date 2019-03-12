@@ -21,8 +21,8 @@ namespace WiFiManager.Common
         IWifiManagerOperations mgr;
 
         #region Properties
-        ObservableCollection<WifiNetworkDto> _WifiNetworks=new ObservableCollection<WifiNetworkDto> ();
-        public ObservableCollection<WifiNetworkDto> WifiNetworks
+        WifiNetworksObservableCollection _WifiNetworks =new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworks
         {
             get
             {
@@ -115,9 +115,19 @@ namespace WiFiManager.Common
             }
         }
 
+        bool useWithVPNonly;
+        public bool WithVPNOnly
+        {
+            get { return useWithVPNonly; }
+            set
+            {
+                SetProperty(ref useWithVPNonly, value, nameof(WithVPNOnly));
+            }
+        }
 
-        ObservableCollection<WifiNetworkDto> _WifiNetworksHunting = new ObservableCollection<WifiNetworkDto>();
-        public ObservableCollection<WifiNetworkDto> WifiNetworksHunting
+
+        WifiNetworksObservableCollection _WifiNetworksHunting = new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworksHunting
         {
             get
             {
@@ -142,7 +152,8 @@ namespace WiFiManager.Common
         {
             this.mgr = mgr;
 
-            SaveCommand = new Command(DoSave);
+            // !!!!! TO BE REWRITTEN
+            SaveCommand = new Command((parameter) => { this.DoSave(null); });
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
@@ -155,7 +166,7 @@ namespace WiFiManager.Common
         public void SortListByLevel()
         {
             var lst1 = WifiNetworks.OrderBy (nw => nw.IsInCSVList).ThenBy(nw => Math.Abs( nw.Level));
-            WifiNetworks = new ObservableCollection<WifiNetworkDto>(lst1);
+            WifiNetworks = new WifiNetworksObservableCollection(lst1);
         }
 
         public void DoRefreshNetworks()
@@ -210,7 +221,12 @@ namespace WiFiManager.Common
                     allOnAir = allOnAir.Where(x => x.NetworkType.Contains("WEP")).ToList();
                 }
 
-                WifiNetworks = new ObservableCollection<WifiNetworkDto>(allOnAir);
+                if (WithVPNOnly)
+                {
+                    allOnAir = allOnAir.Where(x => x.IsWithVPN).ToList();
+                }
+
+                WifiNetworks = new WifiNetworksObservableCollection(allOnAir);
                 SortListByLevel();
 
                 // clean CSV cache if it was used
@@ -275,9 +291,13 @@ namespace WiFiManager.Common
             }
         }
 
-        public void DoSave( )
+        public void DoSave(WifiNetworkDto theOne=null)
         {
-            var lst = new List<WifiNetworkDto>(WifiNetworks);
+            List<WifiNetworkDto> lst = new List<WifiNetworkDto>();
+            if (null==theOne)
+                lst.AddRange(WifiNetworks);
+            else
+                lst.Add(theOne);
             mgr.SaveToCSV(lst);
         }
 

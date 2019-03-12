@@ -65,7 +65,7 @@ namespace WiFiManager
             mpv.IsBusy =false ;
         }
 
-        void RefreshAvailableNetworks()
+        public void RefreshAvailableNetworks()
         {
             var mpv = this.BindingContext as MainPageVM;
 
@@ -209,7 +209,6 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-
                 Task.Run(() => {
                     mpv.IsBusy = true;
                     mpv.DoSave();
@@ -260,11 +259,45 @@ namespace WiFiManager
 
         private void MenuItem_Hunt_Clicked(object sender, EventArgs e)
         {
+            try
+            {
+                var bo = sender as BindableObject;
+                var mpv = this.BindingContext as MainPageVM;
+                var dto = bo.BindingContext as WifiNetworkDto;
+
+                mpv.WifiNetworksHunting.TryAdd(dto);
+            }
+            catch (Exception ex)
+            {
+
+                var qq = 555;
+            }
+        }
+
+        private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
+        {
             var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
-            var n = bo.BindingContext as WifiNetworkDto;
+            var dto = bo.BindingContext as WifiNetworkDto;
 
-            mpv.WifiNetworksHunting.Add(n);
+            try
+            {
+                Task.Run(() => {
+                    mpv.IsBusy = true;
+                    mpv.DoSave(dto);
+                }
+                );
+            }
+            catch (Exception ex)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    DisplayAlert("Error", ex.Message, "OK");
+                });
+            }
+            finally
+            {
+                mpv.IsBusy = false;
+            }
         }
     }
 }

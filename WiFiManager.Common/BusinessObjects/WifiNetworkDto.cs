@@ -23,7 +23,7 @@ namespace WiFiManager.Common.BusinessObjects
         {
             get { return firstConnectPublicIP; }
             set {
-                    SetProperty(ref firstConnectPublicIP, value, "FirstConnectPublicIP");
+                    SetProperty(ref firstConnectPublicIP, value, nameof(FirstConnectPublicIP));
             }
         }
 
@@ -33,7 +33,7 @@ namespace WiFiManager.Common.BusinessObjects
             get { return internalIP; }
             set
             {
-                SetProperty(ref internalIP, value, "InternalIP");
+                SetProperty(ref internalIP, value, nameof(InternalIP));
             }
         }
 
@@ -50,7 +50,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
             set
             {
-                SetProperty(ref isInCSVList, value, "IsInCSVList");
+                SetProperty(ref isInCSVList, value, nameof(IsInCSVList));
                 if (isInCSVList)
                     DtoNetworkStateForColoring = DtoNetworkState.IsInCSVList;
                 else
@@ -67,11 +67,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
             set
             {
-                SetProperty(ref isSelected, value, "IsSelected");
-                //if (isSelected)
-                //    DtoNetworkStateForColoring = DtoNetworkState.IsSelected;
-                //else
-                //    DtoNetworkStateForColoring = DtoNetworkState.Default;
+                SetProperty(ref isSelected, value, nameof(IsSelected));
             }
         }
 
@@ -84,11 +80,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
             set
             {
-                SetProperty(ref isEnabled, value, "IsEnabled");
-                //if (isEnabled)
-                //    DtoNetworkStateForColoring = DtoNetworkState.Default; 
-                //else
-                //    DtoNetworkStateForColoring = DtoNetworkState.IsDisabled;
+                SetProperty(ref isEnabled, value, nameof(IsEnabled));
             }
         }
 
@@ -180,7 +172,7 @@ namespace WiFiManager.Common.BusinessObjects
             get { return dtoNetworkStateForColoring; }
             set
             {
-                SetProperty(ref dtoNetworkStateForColoring, value, "DtoNetworkStateForColoring");
+                SetProperty(ref dtoNetworkStateForColoring, value, nameof(DtoNetworkStateForColoring));
             }
         }
 
@@ -192,16 +184,42 @@ namespace WiFiManager.Common.BusinessObjects
             }
             set
             {
-                SetProperty(ref _CoordsAndPower, value, "CoordsAndPower");
+                SetProperty(ref _CoordsAndPower, value, nameof(CoordsAndPower));
             }
         }
 
+        public bool IsIgnoredNetwork
+        {
+            get
+            {
+                return this.Name == "Telekom_FON"
+                       || this.Name == "Unitymedia WifiSpot"
+                       || this.Name == "Globus_Gast"
+                       || this.Name == "mycloud"
+                       || this.Name == "MT_FREE"
+                       || this.Name == "AndroidAP"
+                       || this.Name == "TSUM Discount"
+                       || this.Name == "CPPK_Free"
+                       || this.Name == "Metropolis_FREE"
+                       || this.Name == "Mosinter"
+                       || this.Name == "Beeline_WiFi_FREE"
+                       || this.Name == "Beeline_WiFi_Starbucks_FREE"
+                       || this.Name == "Starbucks_Beeline_Free"
+                       || this.Name == "Moscow_WiFi_Free"
+                       || this.Name == "MetropolisNew-WiFi_FREE"
+                       || this.Name == "Aeroexpress_iras"
+                       || this.Name == "Shokoladniza-Guest";
+            }
+        }
 
         public bool IsVulnerable
         {
             get
             {
-                return !string.IsNullOrWhiteSpace(BssID) && 
+                return !string.IsNullOrWhiteSpace(BssID) 
+                    &&
+                    NetworkType.Contains("WPS")
+                    &&
                     (
                     BssID.StartsWith("00:0E:8F")
                     ||
@@ -330,7 +348,20 @@ namespace WiFiManager.Common.BusinessObjects
             {
                 return BssID.StartsWith("38:2C:4A")
                     ||
-                       BssID.StartsWith("AC:9E:17");
+                       BssID.StartsWith("AC:9E:17")
+                    ||
+                       BssID.StartsWith("E0:3F:49")
+                    ||
+                       BssID.StartsWith("10:C3:7B")
+                    ||
+                       BssID.StartsWith("50:E6:5F")
+                    ||
+                       BssID.StartsWith("70:4D:7B")
+                    ||
+                       BssID.StartsWith("88:D7:F6")
+;
+
+
             }
         }
 
