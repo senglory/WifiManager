@@ -67,11 +67,14 @@ namespace WiFiManager
 
         public void RefreshAvailableNetworks()
         {
+            System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - START");
+
             var mpv = this.BindingContext as MainPageVM;
 
             try
             {
-                mpv.IsBusy = true;
+                if (mpv.IsBusy)
+                    return;
                 mpv.DoRefreshNetworks();
                 if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV))
                 {
@@ -97,10 +100,8 @@ namespace WiFiManager
                 });
                 throw;
             }
-            finally
-            {
-                mpv.IsBusy = false;
-            }
+
+            System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - END");
         }
 
 

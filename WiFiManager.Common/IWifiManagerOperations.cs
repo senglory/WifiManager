@@ -16,9 +16,9 @@ namespace WiFiManager.Common
         List<WifiNetworkDto> GetActiveWifiNetworks();
         WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw );
 
-        void SaveToCSV(List<WifiNetworkDto> wifiNetworks);
+        Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworks);
 
-        bool CanLoadFromFile();
+        bool CanLoadFromFile { get; }
 
         bool IsConnected();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Globalization;
@@ -121,9 +122,16 @@ namespace WiFiManager.Droid
 
             // shake management set up
             // Register this as a listener with the underlying service.
-            var sensorManager = GetSystemService(SensorService) as Android.Hardware.SensorManager;
-            var sensor = sensorManager.GetDefaultSensor(Android.Hardware.SensorType.Accelerometer);
-            sensorManager.RegisterListener(this, sensor, Android.Hardware.SensorDelay.Game);
+            try
+            {
+                var sensorManager = GetSystemService(SensorService) as Android.Hardware.SensorManager;
+                var sensor = sensorManager.GetDefaultSensor(Android.Hardware.SensorType.Accelerometer);
+                sensorManager.RegisterListener(this, sensor, Android.Hardware.SensorDelay.Game);
+            }
+            catch (Exception)
+            {
+                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with SensorManager");
+            }
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
@@ -206,14 +214,14 @@ namespace WiFiManager.Droid
             //var networks = wifiManager.ConfiguredNetworks;
             //var connectionInfo = wifiManager.ConnectionInfo;
             var results = wifiManager.ScanResults;
-            foreach (ScanResult n in results)
+            foreach (ScanResult nw in results)
             {
                 var netw = new WifiNetworkDto()
                 {
-                    BssID = n.Bssid.ToUpper(),
-                    Name = n.Ssid,
-                    NetworkType = n.Capabilities,
-                    Level = n.Level,
+                    BssID = nw.Bssid.ToUpper(),
+                    Name = nw.Ssid,
+                    NetworkType = nw.Capabilities,
+                    Level = nw.Level,
                     IsEnabled = true
                 };
                 if (netw.IsIgnoredNetwork)
@@ -424,7 +432,7 @@ namespace WiFiManager.Droid
             return wifiDtoFromFile;
         }
 
-        public async void SaveToCSV(List<WifiNetworkDto> wifiNetworksOnAir)
+        public async Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworksOnAir)
         {
             FileStream fsBAK = null;
 
@@ -595,18 +603,21 @@ namespace WiFiManager.Droid
             }
         }
 
-        public bool CanLoadFromFile()
+        public bool CanLoadFromFile
         {
-            try
+            get
             {
-                var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
-                var hasPermission = t.Result;
-                return hasPermission;
-            }
-            catch (Exception ex)
-            {
-                Log.Error("WiFiManager", "CanLoadFromFile "+ ex.Message);
-                throw;
+                try
+                {
+                    var t = Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
+                    var hasPermission = t.Result;
+                    return hasPermission;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("WiFiManager", "CanLoadFromFile " + ex.Message);
+                    throw;
+                }
             }
         }
 
@@ -798,7 +809,7 @@ namespace WiFiManager.Droid
         float lastZ = 0.0f;
 
         const int ShakeDetectionTimeLapse = 250;
-        const double ShakeThreshold = 1100;
+        const double ShakeThreshold = 800;
         #endregion
 
         #region Android.Hardware.ISensorEventListener implementation
@@ -846,7 +857,7 @@ namespace WiFiManager.Droid
                         if (speed > ShakeThreshold)
                         {
                             // We have a shake folks!
-                            await EasterEggAsync();
+                            await HandleShaking();
                         }
 
                         lastX = x;
@@ -860,13 +871,14 @@ namespace WiFiManager.Droid
         /// <summary>
         /// Execute the easter egg async.
         /// </summary>
-        protected virtual async Task EasterEggAsync()
+        protected virtual async Task HandleShaking()
         {
+            System.Diagnostics.Debug.WriteLine("HandleShaking - START");
             await Task.Run(() => {
                 var wnd = Xamarin.Forms.Application.Current?.MainPage as MainPage;
                 wnd?.RefreshAvailableNetworks();
             });
-            
+            System.Diagnostics.Debug.WriteLine("HandleShaking - END");
         }
         #endregion
     }

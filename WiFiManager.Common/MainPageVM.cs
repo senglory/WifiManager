@@ -162,13 +162,6 @@ namespace WiFiManager.Common
             IsConnected = mgr.IsConnected();
         }
 
-
-        public void SortListByLevel()
-        {
-            var lst1 = WifiNetworks.OrderBy (nw => nw.IsInCSVList).ThenBy(nw => Math.Abs( nw.Level));
-            WifiNetworks = new WifiNetworksObservableCollection(lst1);
-        }
-
         public void DoRefreshNetworks()
         {
             try
@@ -179,11 +172,13 @@ namespace WiFiManager.Common
                 FirstFailedLineInCSV = null;
 
                 mgr.DeleteInfoAboutWifiNetworks();
+                // clean CSV cache if it was used
+                mgr.ClearCachedCSVNetworkList();
                 var allOnAir = mgr.GetActiveWifiNetworks();
 
-                var ts1 = DateTime.Now;
-                var elapsed = ts1 - ts0;
-                Logging.Info("WiFiManager", $"GetActiveWifiNetworks: finished, elapsed: {elapsed.TotalSeconds} sec");
+                //var ts1 = DateTime.Now;
+                //var elapsed = ts1 - ts0;
+                //Logging.Info("WiFiManager", $"GetActiveWifiNetworks: finished, elapsed: {elapsed.TotalSeconds} sec");
 
                 // in hunting mode leave only those who's in hunting list
                 if (WifiNetworksHunting.Count > 0)
@@ -196,10 +191,11 @@ namespace WiFiManager.Common
                 }
 
                 // try to find info in CSV file
-                if (mgr.CanLoadFromFile())
+                if (mgr.CanLoadFromFile)
                 {
-                    foreach (var wifiOnAir in allOnAir)
+                    for (int i = 0; i < allOnAir.Count; i++)
                     {
+                        var wifiOnAir = allOnAir[i];
                         var wifiDtoFromFile = mgr.FindWifiInCSV(wifiOnAir );
                         var isInFileAndOnAir = wifiDtoFromFile != null;
                         if (isInFileAndOnAir)
@@ -226,16 +222,12 @@ namespace WiFiManager.Common
                     allOnAir = allOnAir.Where(x => x.IsWithVPN).ToList();
                 }
 
-                WifiNetworks = new WifiNetworksObservableCollection(allOnAir);
-                SortListByLevel();
+                var lst1 = allOnAir.OrderBy(nw => nw.IsInCSVList).ThenBy(nw => Math.Abs(nw.Level));
+                WifiNetworks = new WifiNetworksObservableCollection(lst1);
 
-                // clean CSV cache if it was used
-                mgr.ClearCachedCSVNetworkList();
-
-                var ts2 = DateTime.Now;
-                var elapsed2 = ts2 - ts0;
-                Logging.Info("WiFiManager", $"DoRefreshNetworks: finished, elapsed: {elapsed2.TotalSeconds} sec");
-
+                //var ts2 = DateTime.Now;
+                //var elapsed2 = ts2 - ts0;
+                //Logging.Info("WiFiManager", $"DoRefreshNetworks: finished, elapsed: {elapsed2.TotalSeconds} sec");
 
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;
@@ -260,8 +252,9 @@ namespace WiFiManager.Common
                 {
                     if (!t2.IsFaulted)
                     {
-                        foreach (var wifi in WifiNetworks)
+                        for (int i = 0; i < WifiNetworks.Count; i++)
                         {
+                            var wifi = WifiNetworks[i];
                             wifi.TryUpdateRecentCoords(t2.Result);
                         }
                     }
@@ -293,12 +286,22 @@ namespace WiFiManager.Common
 
         public void DoSave(WifiNetworkDto theOne=null)
         {
-            List<WifiNetworkDto> lst = new List<WifiNetworkDto>();
-            if (null==theOne)
-                lst.AddRange(WifiNetworks);
-            else
-                lst.Add(theOne);
-            mgr.SaveToCSV(lst);
+            try
+            {
+                IsBusy = true;
+                Task.Run(() => {
+                    List<WifiNetworkDto> lst = new List<WifiNetworkDto>();
+                    if (null == theOne)
+                        lst.AddRange(WifiNetworks);
+                    else
+                        lst.Add(theOne);
+                    mgr.SaveToCSVAsync(lst);
+                });
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
 
