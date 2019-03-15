@@ -655,14 +655,9 @@ namespace WiFiManager.Droid
                     When = DateTime.Now
                 });
 
-                if (!network.FirstCoordLat.HasValue)
-                {
-                    network.FirstCoordLat = coords2.Item1;
-                }
-                if (!network.FirstCoordLong.HasValue)
-                {
-                    network.FirstCoordLong = coords2.Item2;
-                }
+                network.LastCoordLat = coords2.Item1;
+                network.LastCoordLong = coords2.Item2;
+                network.LastCoordAlt = coords2.Item3;
             }
         }
 
@@ -823,49 +818,54 @@ namespace WiFiManager.Droid
         {
         }
 
+
         /// <summary>
         /// Detects sensor changes and is set up to listen for shakes.
         /// </summary>
-        /// <param name="e">E.</param>
         public async void OnSensorChanged(Android.Hardware.SensorEvent e)
         {
-            if (e.Sensor.Type == Android.Hardware.SensorType.Accelerometer)
-            {
-                var x = e.Values[0];
-                var y = e.Values[1];
-                var z = e.Values[2];
+                //System.Diagnostics.Debug.WriteLine("OnSensorChanged - START");
 
-                // use to check against last time it was called so we don't register every delta
-                var currentTime = DateTime.Now;
-                if (hasUpdated == false)
+                //if (handleSensorChanged)
+                //    return;
+                //handleSensorChanged = true;
+                if (e.Sensor.Type == Android.Hardware.SensorType.Accelerometer)
                 {
-                    hasUpdated = true;
-                    lastUpdate = currentTime;
-                    lastX = x;
-                    lastY = y;
-                    lastZ = z;
-                }
-                else
-                {
-                    if ((currentTime - lastUpdate).TotalMilliseconds > ShakeDetectionTimeLapse)
+                    var x = e.Values[0];
+                    var y = e.Values[1];
+                    var z = e.Values[2];
+
+                    // use to check against last time it was called so we don't register every delta
+                    var currentTime = DateTime.Now;
+                    if (hasUpdated == false)
                     {
-                        var diffTime = (float)(currentTime - lastUpdate).TotalMilliseconds;
+                        hasUpdated = true;
                         lastUpdate = currentTime;
-                        var total = x + y + z - lastX - lastY - lastZ;
-                        var speed = Math.Abs(total) / diffTime * 10000;
-
-                        if (speed > ShakeThreshold)
-                        {
-                            // We have a shake folks!
-                            await HandleShaking();
-                        }
-
                         lastX = x;
                         lastY = y;
                         lastZ = z;
                     }
+                    else
+                    {
+                        if ((currentTime - lastUpdate).TotalMilliseconds > ShakeDetectionTimeLapse)
+                        {
+                            var diffTime = (float)(currentTime - lastUpdate).TotalMilliseconds;
+                            lastUpdate = currentTime;
+                            var total = x + y + z - lastX - lastY - lastZ;
+                            var speed = Math.Abs(total) / diffTime * 10000;
+
+                            if (speed > ShakeThreshold)
+                            {
+                                // We have a shake folks!
+                                await HandleShaking();
+                            }
+
+                            lastX = x;
+                            lastY = y;
+                            lastZ = z;
+                        }
+                    }
                 }
-            }
         }
 
         /// <summary>
@@ -873,12 +873,10 @@ namespace WiFiManager.Droid
         /// </summary>
         protected virtual async Task HandleShaking()
         {
-            System.Diagnostics.Debug.WriteLine("HandleShaking - START");
             await Task.Run(() => {
                 var wnd = Xamarin.Forms.Application.Current?.MainPage as MainPage;
-                wnd?.RefreshAvailableNetworks();
+                wnd?.RefreshAvailableNetworks(true);
             });
-            System.Diagnostics.Debug.WriteLine("HandleShaking - END");
         }
         #endregion
     }

@@ -17,6 +17,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.IO;
 
+
 namespace WiFiManager
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
@@ -65,7 +66,7 @@ namespace WiFiManager
             mpv.IsBusy =false ;
         }
 
-        public void RefreshAvailableNetworks()
+        public void RefreshAvailableNetworks(bool doVibrateUponFinish = false)
         {
             System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - START");
 
@@ -82,6 +83,12 @@ namespace WiFiManager
                     {
                         DisplayAlert("Alert", mpv.FirstFailedLineInCSV, "OK");
                     });
+                }
+
+                if (doVibrateUponFinish)
+                {
+                    var v = Plugin.Vibrate.CrossVibrate.Current;
+                    v.Vibration(TimeSpan.FromSeconds(0.5));
                 }
             }
             catch (InvalidDataException ex)

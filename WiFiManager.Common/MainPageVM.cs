@@ -125,6 +125,16 @@ namespace WiFiManager.Common
             }
         }
 
+        bool useShakeForRefresh;
+        public bool UseShakeForRefresh
+        {
+            get { return useShakeForRefresh; }
+            set
+            {
+                SetProperty(ref useShakeForRefresh, value, nameof(UseShakeForRefresh));
+            }
+        }
+
 
         WifiNetworksObservableCollection _WifiNetworksHunting = new WifiNetworksObservableCollection();
         public WifiNetworksObservableCollection WifiNetworksHunting

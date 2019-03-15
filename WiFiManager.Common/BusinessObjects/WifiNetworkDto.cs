@@ -325,7 +325,7 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                     BssID.StartsWith("10:C3:7B")
                     ||
-                    BssID.StartsWith("10:7B:EF")
+                    BssID.StartsWith("10:7B:EF") // Keenetic
                     ||
                     BssID.StartsWith("08:C6:B3")
                     ||
@@ -350,18 +350,39 @@ namespace WiFiManager.Common.BusinessObjects
                     ||
                        BssID.StartsWith("AC:9E:17")
                     ||
+                       BssID.StartsWith("AC:22:0B")
+                    ||
                        BssID.StartsWith("E0:3F:49")
                     ||
+                       BssID.StartsWith("E0:CB:4E")
+                    ||
                        BssID.StartsWith("10:C3:7B")
+                    ||
+                       BssID.StartsWith("18:31:BF")
                     ||
                        BssID.StartsWith("50:E6:5F")
                     ||
                        BssID.StartsWith("70:4D:7B")
                     ||
                        BssID.StartsWith("88:D7:F6")
-;
-
-
+                    ||
+                       BssID.StartsWith("30:5A:3A")
+                    ||
+                       BssID.StartsWith("30:85:A9")
+                    ||
+                       BssID.StartsWith("78:24:AF")
+                    ||
+                       BssID.StartsWith("38:D5:47")
+                    ||
+                       BssID.StartsWith("10:BF:48")
+                    ||
+                       BssID.StartsWith("14:DD:A9")
+                    ||
+                       BssID.StartsWith("1C:B7:2C")
+                    ||
+                       BssID.StartsWith("60:A4:4C")
+                       
+ ;
             }
         }
 
