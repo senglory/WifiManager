@@ -557,12 +557,15 @@ namespace WiFiManager.Droid
                 Priority = Constants.WIFI_CONFIG_PRIORITY
             };
 
-            if (dto.NetworkType == "[ESS]")
+            if (dto.NetworkType.Contains("[ESS]"))
             {
+                wifiConfig.AllowedProtocols.Set( (int)WifiConfiguration.Protocol.Rsn);
+                wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
             }
             else
             if (dto.NetworkType.Contains("[WPA"))
             {
+                //wifiConfig.AllowKeyManagement.Set((int)KeyManagementType.WpaPsk);
                 wifiConfig.PreSharedKey = formattedPassword;
             }
             else
@@ -574,6 +577,8 @@ namespace WiFiManager.Droid
                 // wifiConfig.WepTxKeyIndex = 0;
                 //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
                 //wifiConfig.AllowedGroupCiphers.Set((int)GroupCipherType.Wep40);
+                // wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                //wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
             }
 
 
