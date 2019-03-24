@@ -1,21 +1,23 @@
 ﻿using System;
-
-using Xamarin.Forms;
-using Plugin.Geolocator;
-using Plugin.Permissions.Abstractions;
-using Xamarin.Forms.PlatformConfiguration;
-
-using WiFiManager.Common.BusinessObjects;
-using WiFiManager.Common;
-using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using Xamarin.Forms.Xaml;
 using System.Net;
 using System.Text;
 using System.Net.Http;
-using Newtonsoft.Json;
 using System.IO;
+using System.Threading.Tasks;
+
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+using Xamarin.Essentials;
+using Xamarin.Forms.PlatformConfiguration;
+using Plugin.Connectivity;
+using Plugin.Geolocator;
+using Plugin.Permissions.Abstractions;
+
+using WiFiManager.Common.BusinessObjects;
+using WiFiManager.Common;
+
 
 
 namespace WiFiManager
@@ -32,6 +34,19 @@ namespace WiFiManager
             this.mgr = mgr;
             var vm = new MainPageVM(mgr);
             this.BindingContext = vm;
+
+            CrossConnectivity.Current.ConnectivityChanged +=  (sender, args) =>
+            {
+                if (args.IsConnected)
+                {
+                    WifiConnectNotify();
+                }
+                else
+                {
+                    WifiDisConnectNotify();
+                }
+            };
+
             RefreshAvailableNetworks();
         }
 
@@ -39,6 +54,8 @@ namespace WiFiManager
         public void WifiConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
+            var current = Connectivity.NetworkAccess;
+
             mpv.IsConnected = true;
 
             var nw = mpv.SelectedNetwork;
@@ -157,7 +174,7 @@ namespace WiFiManager
             var t2 = Task.Run(() => response.Content.ReadAsStringAsync());
              var resultString = t2.Result;
 
-            var result = JsonConvert.DeserializeObject<IpResult>(resultString);
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<IpResult>(resultString);
 
             var externalIp = result.Ip;
 

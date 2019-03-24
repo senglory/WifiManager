@@ -35,12 +35,13 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Java.IO;
 
-using Newtonsoft.Json;
 using AutoMapper;
 
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
 using Android.Hardware;
+
+
 
 namespace WiFiManager.Droid
 {
@@ -260,10 +261,17 @@ namespace WiFiManager.Droid
                 }
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // Refactor lookup code, also do the same for FindWifiInCSV()
+                //var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
+                //    (nwtmp) => {
+                //    return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper() && nwtmp.Name == nw.Name ;
+                //});
                 var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
                     (nwtmp) => {
-                    return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper() && nwtmp.Name == nw.Name ;
-                });
+                        if ( string.IsNullOrEmpty (  nw.BssID))
+                            return nwtmp.Name == nw.Name;
+                        else
+                            return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper();
+                    });
 
                 wifiDtoFromFile = wifiDtoFromFileKVP;
             }
@@ -484,9 +492,10 @@ namespace WiFiManager.Droid
                                     }
                                     else
                                     {
-                                        var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
+                                        var isBanned = wifiOnAir.IsEnabled ? "" : "1";
+                                        var dummy = "";
                                         var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
-                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{dummy};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                 }
@@ -498,8 +507,9 @@ namespace WiFiManager.Droid
                             var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
                             if (wifiAlreadySaved == null)
                             {
-                                var isBanned = wifiOnAir.IsEnabled ? 0 : 1;
-                                fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{wifiOnAir.NetworkType};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                var isBanned = wifiOnAir.IsEnabled ? "" : "1";
+                                var dummy = "";
+                                fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{dummy};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                             }
                         }
                     }
@@ -519,32 +529,53 @@ namespace WiFiManager.Droid
             }
         }
 
-        public void SaveToJSON(List<WifiNetworkDto> wifiNetworks)
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-            string str = JsonConvert.SerializeObject(wifiNetworks, settings);
-            var filePathJSON = string.Format(filePathTemplateJSON, DateTime.Now.ToString("yyyyMMdd-HHmm"));
-            System.IO.File.WriteAllText(filePathJSON, str);
-        }
+        //public void SaveToJSON(List<WifiNetworkDto> wifiNetworks)
+        //{
+        //    JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+        //    string str = JsonConvert.SerializeObject(wifiNetworks, settings);
+        //    var filePathJSON = string.Format(filePathTemplateJSON, DateTime.Now.ToString("yyyyMMdd-HHmm"));
+        //    System.IO.File.WriteAllText(filePathJSON, str);
+        //}
 
-        public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto nw)
+        public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto dto)
         {
-            string bssid = nw.BssID;
-            string ssid = nw.Name;
-            string password = nw.Password;
+            string bssid = dto.BssID;
+            string ssid = dto.Name;
+            string password = dto.Password;
 
             WifiConnectionInfo info2;
 
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
 
+
+
             var wifiConfig = new WifiConfiguration
             {
                 Bssid = bssid,
                 Ssid = formattedSsid,
-                PreSharedKey = formattedPassword,
                 Priority = Constants.WIFI_CONFIG_PRIORITY
             };
+
+            if (dto.NetworkType == "[ESS]")
+            {
+            }
+            else
+            if (dto.NetworkType.Contains("[WPA"))
+            {
+                wifiConfig.PreSharedKey = formattedPassword;
+            }
+            else
+            if (dto.NetworkType.Contains("[WEP]"))
+            {
+                // for WEP
+                //wifiConfig.WepKeys[0] = formattedPassword;
+
+                // wifiConfig.WepTxKeyIndex = 0;
+                //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
+                //wifiConfig.AllowedGroupCiphers.Set((int)GroupCipherType.Wep40);
+            }
+
 
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);

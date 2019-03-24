@@ -3,7 +3,8 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 using WiFiManager.Common;
-using Plugin.Connectivity;
+
+
 
 [assembly: XamlCompilation (XamlCompilationOptions.Compile)]
 namespace WiFiManager
@@ -16,32 +17,5 @@ namespace WiFiManager
 
 			MainPage = new MainPage(mgr);
 		}
-
-		protected override void OnStart ()
-		{
-            CrossConnectivity.Current.ConnectivityChanged += Current_ConnectivityChanged;
-        }
-
-        protected void Current_ConnectivityChanged(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs e)
-        {
-            if (e.IsConnected)
-            {
-                (MainPage as MainPage).WifiConnectNotify();
-            }
-            else
-            {
-                (MainPage as MainPage).WifiDisConnectNotify();
-            }
-        }
-
-        protected override void OnSleep ()
-		{
-            CrossConnectivity.Current.ConnectivityChanged -= Current_ConnectivityChanged;
-        }
-
-        protected override void OnResume ()
-		{
-            CrossConnectivity.Current.ConnectivityChanged += Current_ConnectivityChanged;
-        }
     }
 }
