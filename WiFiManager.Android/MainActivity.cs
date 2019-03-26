@@ -57,6 +57,8 @@ namespace WiFiManager.Droid
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
         const int RC_DELETE_STORAGE_FILE = 1200;
+        const string SEMICOLON_REPLACEMENT_IN_CSV = "\x3B";
+
         static readonly string TAG = "WiFiManager";
         static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
 
@@ -434,6 +436,14 @@ namespace WiFiManager.Droid
                         nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
                     }
                 }
+
+                // prevent from further breaking of list load because of ';' in name or pwd or comments
+                var nameAdj = nw.Name.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+                var passwordAdj = nw.Password.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+                var commentsAdj = nw.Provider.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+                nw.Name = nameAdj;
+                nw.Password = passwordAdj;
+                nw.Provider = commentsAdj;
             }
 
             var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
@@ -495,7 +505,11 @@ namespace WiFiManager.Droid
                                         var isBanned = wifiOnAir.IsEnabled ? "" : "1";
                                         var dummy = "";
                                         var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
-                                        fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{dummy};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                        // prevent from further breaking of list load because of ';' in name or pwd or comments
+                                        var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                        var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                        var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                        fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                 }
@@ -509,7 +523,11 @@ namespace WiFiManager.Droid
                             {
                                 var isBanned = wifiOnAir.IsEnabled ? "" : "1";
                                 var dummy = "";
-                                fw.WriteLine($"{wifiOnAir.Name};{wifiOnAir.BssID};{wifiOnAir.Password};{isBanned};{dummy};{wifiOnAir.Provider};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                // prevent from further breaking of list load because of ';' in name or pwd or comments
+                                var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+                                fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                             }
                         }
                     }
@@ -557,7 +575,7 @@ namespace WiFiManager.Droid
                 Priority = Constants.WIFI_CONFIG_PRIORITY
             };
 
-            if (dto.NetworkType.Contains("[ESS]"))
+            if (!dto.NetworkType.Contains("[WPA"))
             {
                 wifiConfig.AllowedProtocols.Set( (int)WifiConfiguration.Protocol.Rsn);
                 wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
@@ -572,13 +590,11 @@ namespace WiFiManager.Droid
             if (dto.NetworkType.Contains("[WEP]"))
             {
                 // for WEP
-                //wifiConfig.WepKeys[0] = formattedPassword;
+                wifiConfig.WepKeys[0] = formattedPassword;
 
-                // wifiConfig.WepTxKeyIndex = 0;
-                //wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
-                //wifiConfig.AllowedGroupCiphers.Set((int)GroupCipherType.Wep40);
-                // wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-                //wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                wifiConfig.WepTxKeyIndex = 0;
+                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
+                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
             }
 
 
@@ -605,7 +621,6 @@ namespace WiFiManager.Droid
                 info2 = new WifiConnectionInfo
                 {
                     FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
-
                 };
             }
 

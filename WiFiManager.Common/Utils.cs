@@ -1,13 +1,12 @@
-﻿using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xamarin.Forms;
+﻿using System.Threading.Tasks;
 
-namespace WiFiManager
+using Xamarin.Forms;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
+
+
+
+namespace WiFiManager.Common
 {
 	public static class Utils
 	{
@@ -38,7 +37,6 @@ namespace WiFiManager
 				}
 
 				request = true;
-
 			}
 
 			if (request || permissionStatus != PermissionStatus.Granted)

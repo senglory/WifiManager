@@ -152,14 +152,14 @@
                     </StackLayout>
 
                     <ViewCell.ContextActions>
-                        <MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
-                                  Text="Delete" IsDestructive="True" />
-                        <MenuItem Clicked="MenuItem_Hunt_Clicked"
-                                  Text="Hunt for" IsDestructive="False" />
-                        <MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
-                                  Text="Refresh Coords" IsDestructive="False" />
-                        <MenuItem Clicked="MenuItem_SaveThis_Clicked" 
+						<MenuItem Clicked="MenuItem_SaveThis_Clicked" 
                                   Text="Save this" IsDestructive="False" />
+						<MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
+                                  Text="Delete" IsDestructive="True" />
+						<MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
+                                  Text="Refresh Coords" IsDestructive="False" />
+						<MenuItem Clicked="MenuItem_Hunt_Clicked"
+                                  Text="Hunt for" IsDestructive="False" />
                     </ViewCell.ContextActions>
                 </ViewCell>
             </DataTemplate>
