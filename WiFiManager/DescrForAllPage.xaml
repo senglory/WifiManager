@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WiFiManager.DescrForAllPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Description:"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand" />
+			<Entry x:Name="descrText" FontSize="Large" FontAttributes="Bold" />
+			<Button x:Name="okButton" Text="Ok" Clicked="OnOkButtonClicked" />
+			<Button x:Name="dismissButton" Text="Cancel" Clicked="OnDismissButtonClicked" />
+		</StackLayout>
+    </ContentPage.Content>
+</ContentPage>

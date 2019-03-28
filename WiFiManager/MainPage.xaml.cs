@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
+using System.Linq;
 using System.Net.Http;
 using System.IO;
 using System.Threading.Tasks;
@@ -324,5 +324,11 @@ namespace WiFiManager
                 mpv.IsBusy = false;
             }
         }
-    }
+
+		async void SetDescrForAll_Clicked(object sender, EventArgs e)
+		{
+			var detailPage = new DescrForAllPage(this.BindingContext as MainPageVM);
+			await Navigation.PushModalAsync(detailPage);
+		}
+	}
 }
