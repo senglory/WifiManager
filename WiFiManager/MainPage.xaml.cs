@@ -46,8 +46,6 @@ namespace WiFiManager
                     WifiDisConnectNotify();
                 }
             };
-
-            RefreshAvailableNetworks();
         }
 
 
@@ -207,7 +205,14 @@ namespace WiFiManager
             }
         }
 
-        async void Disconn_Clicked(object sender, EventArgs e)
+		void WebAdm_Clicked(object sender, EventArgs e){
+			var mpv = this.BindingContext as MainPageVM;
+
+			Device.OpenUri(new Uri("http://" + mpv.SelectedNetwork.InternalIP));
+		}
+
+
+		async void Disconn_Clicked(object sender, EventArgs e)
         {
             var mpv = this.BindingContext as MainPageVM;
 
@@ -258,7 +263,7 @@ namespace WiFiManager
         }
  
 
-        private void MenuItem_DeleteNetwork_Clicked(object sender, EventArgs e)
+        void MenuItem_DeleteNetwork_Clicked(object sender, EventArgs e)
         {
             var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
@@ -274,15 +279,21 @@ namespace WiFiManager
             {
                 mpv.IsBusy = true;
 
-                await mpv.DoRefreshCoords();
-            }
-            finally
+				var t = mpv.DoRefreshCoords();
+				await t.ContinueWith(t3 =>
+			   {
+				  // notify about finishing via vibration
+				  var v = Plugin.Vibrate.CrossVibrate.Current;
+				   v.Vibration(TimeSpan.FromSeconds(0.5));
+			   });
+			}
+			finally
             {
                 mpv.IsBusy = false ;
             }
         }
 
-        private void MenuItem_Hunt_Clicked(object sender, EventArgs e)
+        void MenuItem_Hunt_Clicked(object sender, EventArgs e)
         {
             try
             {

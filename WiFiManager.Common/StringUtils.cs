@@ -12,5 +12,12 @@ namespace WiFiManager.Common
 				return src;
 			return src.Replace(whatToFind, replacement);
 		}
+
+		public static bool StartsWithNullSafe(this string src, string whatToFind)
+		{
+			if (string.IsNullOrEmpty(src))
+				return false;
+			return src.StartsWith(whatToFind, StringComparison.InvariantCultureIgnoreCase);
+		}
 	}
 }

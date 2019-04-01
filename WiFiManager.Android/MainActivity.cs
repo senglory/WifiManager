@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.Views;
@@ -21,6 +22,7 @@ using Android.OS;
 using Android.Net;
 using Android.Net.Wifi;
 using Android.Locations;
+using Android.Hardware;
 using Android;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
@@ -39,9 +41,9 @@ using AutoMapper;
 
 using WiFiManager.Common.BusinessObjects;
 using WiFiManager.Common;
-using Android.Hardware;
-
-
+using Java.Util;
+using Android.Support.V4.Content;
+using Android.Support.V4.App;
 
 namespace WiFiManager.Droid
 {
@@ -52,7 +54,8 @@ namespace WiFiManager.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity,
         Android.Hardware.ISensorEventListener,
-        IWifiManagerOperations
+		Android.Locations.ILocationListener,
+		IWifiManagerOperations
     {
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
@@ -64,7 +67,7 @@ namespace WiFiManager.Droid
 
         delegate bool FindDelegate(WifiNetworkDto nw, WifiNetworkDto nw2);
 
-        string filePathCSV
+        string _filePathCSV
         {
             get {
                 var sdCardPathDCIM = GetSDCardDir();
@@ -72,7 +75,7 @@ namespace WiFiManager.Droid
             }
         }
 
-        string filePathCSVBAK
+        string _filePathCSVBAK
         {
             get
             {
@@ -81,7 +84,7 @@ namespace WiFiManager.Droid
             }
         }
 
-        string filePathTemplateJSON
+        string _filePathTemplateJSON
         {
             get
             {
@@ -94,8 +97,26 @@ namespace WiFiManager.Droid
         static  IMapper _mapper;
         static  CultureInfo _cultUS;
         static  CultureInfo _cultRU;
+		
+		LocationManager _locationManager;
+		LocationManager Manager
+		{
+			get
+			{
+				if (_locationManager == null)
+					_locationManager = (LocationManager)Android.App.Application.Context.GetSystemService(Context.LocationService);
 
-        protected override void OnCreate(Bundle bundle)
+				return _locationManager;
+			}
+		}
+		string[] Providers => Manager.GetProviders(enabledOnly: false).ToArray();
+		string[] IgnoredProviders => new string[] { LocationManager.PassiveProvider, "local_database" };
+
+		Location _location;
+
+
+
+		protected override void OnCreate(Bundle bundle)
         {
             _cultUS = new CultureInfo("en-us");
             _cultRU = new CultureInfo("ru-ru");
@@ -124,19 +145,50 @@ namespace WiFiManager.Droid
             base.OnCreate(bundle);
 
             // shake management set up
-            // Register this as a listener with the underlying service.
             try
             {
                 var sensorManager = GetSystemService(SensorService) as Android.Hardware.SensorManager;
                 var sensor = sensorManager.GetDefaultSensor(Android.Hardware.SensorType.Accelerometer);
                 sensorManager.RegisterListener(this, sensor, Android.Hardware.SensorDelay.Game);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with SensorManager");
+                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with SensorManager " + ex.Message );
             }
 
-            Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+			// GPS listener
+			try
+			{
+
+				var targetsMOrHigher = ApplicationInfo.TargetSdkVersion >= Android.OS.BuildVersionCodes.M;
+				if (targetsMOrHigher)
+				{
+					if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.AccessFineLocation) !=
+						Android.Content.PM.Permission.Granted)
+					{
+						ActivityCompat.RequestPermissions(this,
+							new[] { Manifest.Permission.AccessFineLocation, Manifest.Permission.AccessCoarseLocation }, 12);
+					}
+				}
+
+				Xamarin.Essentials.Platform.Init(this, bundle);
+
+				var locationCriteria = new Criteria();
+
+				locationCriteria.Accuracy = Accuracy.Medium;
+				locationCriteria.PowerRequirement = Power.High;
+
+				// get provider: GPS, Network, etc.
+				var locationProvider = Manager.GetBestProvider(locationCriteria, true);
+
+				Manager.RequestLocationUpdates("gps", 1000, 1, this);
+			}
+			catch (Exception ex)
+			{
+				Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with RequestLocationUpdates " + ex.Message);
+			}
+
+			Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -146,8 +198,9 @@ namespace WiFiManager.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+			//Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
 
@@ -179,18 +232,24 @@ namespace WiFiManager.Droid
                 locator.DesiredAccuracy = Constants.GPS_ACCURACY;
                 
                 var includeHeading = true;
+				var gpsStatus = Manager.GetGpsStatus(null);
+				var prov = Manager.GetProvider("gps");
 
-                var position = await locator.GetPositionAsync(
-                    TimeSpan.FromSeconds(Constants.GPS_TIMEOUT),
-                    null,
-                    includeHeading
-                    );
+				var isSat = prov.RequiresSatellite();
 
-                var ts1 = DateTime.Now;
-                var elapsed = ts1 - ts0;
-                Android.Util.Log.Info("WiFiManager", $"GetCoordsAsync: got GPS coords, elapsed: {elapsed.TotalSeconds} sec" );
+				_location = Manager.GetLastKnownLocation("gps");
 
-                return new Tuple<double, double, double>(position.Latitude, position.Longitude, position.Altitude);
+				//var position = await locator.GetPositionAsync(
+    //                TimeSpan.FromSeconds(Constants.GPS_TIMEOUT),
+    //                null,
+    //                includeHeading
+    //                );
+
+                //var ts1 = DateTime.Now;
+                //var elapsed = ts1 - ts0;
+                //Android.Util.Log.Info("WiFiManager", $"GetCoordsAsync: got GPS coords, elapsed: {elapsed.TotalSeconds} sec" );
+
+                return new Tuple<double, double, double>(_location.Latitude, _location.Longitude, _location.Altitude);
             }
             catch (Exception ex)
             {
@@ -245,7 +304,7 @@ namespace WiFiManager.Droid
                 if (_CachedCSVNetworkList.Count == 0)
                 {
                     #region Populate CSV cache
-                    using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
+                    using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
                     {
                         using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                         {
@@ -279,7 +338,7 @@ namespace WiFiManager.Droid
             }
             else
             {
-                using (var fs = new FileStream(filePathCSV, FileMode.Open, FileAccess.Read))
+                using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
                 {
                     using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                     {
@@ -307,7 +366,7 @@ namespace WiFiManager.Droid
 
             try
             {
-                if (!System.IO.File.Exists(filePathCSV))
+                if (!System.IO.File.Exists(_filePathCSV))
                 {
                     return null;
                 }
@@ -467,18 +526,18 @@ namespace WiFiManager.Droid
 
                 Thread.CurrentThread.CurrentCulture = _cultUS;
                 Thread.CurrentThread.CurrentUICulture = _cultUS;
-                Android.Util.Log.Info("SaveToCSV", "Saving CSV in BAK as " + filePathCSVBAK);
-                var csvAlreadyExists = System.IO. File.Exists(filePathCSV);
+                Android.Util.Log.Info("SaveToCSV", "Saving CSV in BAK as " + _filePathCSVBAK);
+                var csvAlreadyExists = System.IO. File.Exists(_filePathCSV);
                 if (csvAlreadyExists)
                 {
-                    System.IO.File.Copy(filePathCSV, filePathCSVBAK, true);
+                    System.IO.File.Copy(_filePathCSV, _filePathCSVBAK, true);
                 }
                 var alreadySaved = new List<WifiNetworkDto>();
                 if (csvAlreadyExists)
                 {
-                    fsBAK = new FileStream(filePathCSVBAK, FileMode.Open);
+                    fsBAK = new FileStream(_filePathCSVBAK, FileMode.Open);
                 }
-                using (var fsw = new FileStream(filePathCSV, FileMode.Create))
+                using (var fsw = new FileStream(_filePathCSV, FileMode.Create))
                 {
                     using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                     {
@@ -533,7 +592,7 @@ namespace WiFiManager.Droid
                     }
                 }
 
-                System.IO.File.Delete(filePathCSVBAK);
+                System.IO.File.Delete(_filePathCSVBAK);
             }
             catch (Exception ex)
             {
@@ -621,8 +680,10 @@ namespace WiFiManager.Droid
                 info2 = new WifiConnectionInfo
                 {
                     FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
-                };
-            }
+					// https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
+					InternalIP = DependencyService.Get<IIPAddressManager>().GetIPAddress()
+				};
+			}
 
             var coords = await GetCoordsAsync();
             if (coords != null)
@@ -929,7 +990,27 @@ namespace WiFiManager.Droid
                 wnd?.RefreshAvailableNetworks(true);
             });
         }
-        #endregion
-    }
+
+		public void OnLocationChanged(Location location)
+		{
+			_location = location;
+		}
+
+		public void OnProviderDisabled(string provider)
+		{
+			//throw new NotImplementedException();
+		}
+
+		public void OnProviderEnabled(string provider)
+		{
+			//throw new NotImplementedException();
+		}
+
+		public void OnStatusChanged(string provider, [GeneratedEnum] Availability status, Bundle extras)
+		{
+			//throw new NotImplementedException();
+		}
+		#endregion
+	}
 }
 

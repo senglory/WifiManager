@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
+
 using Xamarin.Forms;
+
+
 
 namespace WiFiManager.Common.BusinessObjects
 {
@@ -212,137 +215,108 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
+		string[] _vulnerableBssIds = new string[] {
+			"00:0E:8F",
+			"00:1F:CE",
+			"00:18:E7",
+			"08:C6:B3",
+			"04:BF:6D",
+			"84:C9:B2",
+			"F8:C0:91",
+			"EE:43:F6",
+			"EC:43:F6",
+			"EA:37:7A",
+			"E8:CD:2D",
+			"E4:F4:C6",
+			"E4:BE:ED",
+			"E0:3F:49",
+			"D8:50:E6",
+			"D8:EB:97",
+			"D4:BF:7F",
+			"D4:6E:0E",
+			"D4:21:22",
+			"CC:5D:4E",
+			"C8:6C:87",
+			"C8:60:00",
+			"C8:3A:35",
+			"C0:25:E9",
+			"B4:75:0E",
+			"B0:B2:DC",
+			"B0:4E:26",
+			"94:4A:0C",
+			"90:EF:68",
+			"90:94:E4",
+			"70:4D:7B",
+			"78:44:76",
+			"74:DA:38",
+			"6A:28:5D",
+			"60:31:97",
+			"60:A4:4C", // ASUS
+			"5C:F4:AB",
+			"50:67:F0",
+			"50:67:F0",
+			"50:46:5D", // ASUS
+			"4E:5D:4E",
+			"4C:60:DE",
+			"40:4A:03",
+					
+			"40:16:7E",
+					
+			"30:85:A9", // ASUS
+                    
+			"38:2C:4A", // ASUS
+                    
+			"38:D5:47", // ASUS
+                    
+			"F8:32:E4", // ASUS
+                    
+			"28:28:5D", // Keenetic
+			"28:C6:8E", // Keenetic
+			"2C:56:DC",
+			"1C:B7:2C",
+			"1C:7E:E5",
+			"18:D6:C7",
+			"14:A9:E3",
+			"10:C3:7B",
+			"10:7B:EF", // Keenetic
+		};  
+
         public bool IsVulnerable
         {
             get
             {
-                return !string.IsNullOrWhiteSpace(BssID) 
-                    &&
-                    NetworkType.Contains("WPS")
-                    &&
-                    (
-                    BssID.StartsWith("00:0E:8F")
-                    ||
-                    BssID.StartsWith("00:1F:CE")
-                    ||
-                    BssID.StartsWith("00:18:E7")
-                    ||
-                    BssID.StartsWith("00:0E:8F")
-                    ||
-                    BssID.StartsWith("F8:C0:91")
-                    ||
-                    BssID.StartsWith("EE:43:F6")
-                    ||
-                    BssID.StartsWith("EC:43:F6")
-                    ||
-                    BssID.StartsWith("EA:37:7A")
-                    ||
-                    BssID.StartsWith("E8:CD:2D")
-                    ||
-                    BssID.StartsWith("E8:37:7A")
-                    ||
-                    BssID.StartsWith("E4:F4:C6")
-                    ||
-                    BssID.StartsWith("E4:BE:ED")
-                    ||
-                    BssID.StartsWith("E0:3F:49")
-                    ||
-                    BssID.StartsWith("D8:50:E6") // ASUS
-                    ||
-                    BssID.StartsWith("D8:EB:97")
-                    ||
-                    BssID.StartsWith("D4:BF:7F")
-                    ||
-                    BssID.StartsWith("D4:6E:0E")
-                    ||
-                    BssID.StartsWith("D4:21:22")
-                    ||
-                    BssID.StartsWith("CC:5D:4E")
-                    ||
-                    BssID.StartsWith("C8:6C:87")
-                    ||
-                    BssID.StartsWith("C8:60:00") // ASUS
-                    ||
-                    BssID.StartsWith("C8:3A:35")
-                    ||
-                    BssID.StartsWith("C0:25:E9")
-                    ||
-                    BssID.StartsWith("B4:75:0E")
-                    ||
-                    BssID.StartsWith("B0:B2:DC") // Keenetic
-                    ||
-                    BssID.StartsWith("B0:4E:26")
-                    ||
-                    BssID.StartsWith("94:4A:0C")
-                    ||
-                    BssID.StartsWith("90:EF:68")
-                    ||
-                    BssID.StartsWith("90:94:E4")
-                    ||
-                    BssID.StartsWith("84:C9:B2")
-                    ||
-                    BssID.StartsWith("70:4D:7B")
-                    ||
-                    BssID.StartsWith("78:44:76")
-                    ||
-                    BssID.StartsWith("74:DA:38")
-                    ||
-                    BssID.StartsWith("6A:28:5D")
-                    ||
-                    BssID.StartsWith("60:31:97")
-                    ||
-                    BssID.StartsWith("60:A4:4C") // ASUS
-                    ||
-                    BssID.StartsWith("5C:F4:AB")
-                    ||
-                    BssID.StartsWith("50:67:F0")
-                    ||
-                    BssID.StartsWith("50:67:F0")
-                    ||
-                    BssID.StartsWith("50:46:5D") // ASUS
-                    ||
-                    BssID.StartsWith("4E:5D:4E")
-                    ||
-                    BssID.StartsWith("4C:60:DE")
-                    ||
-                    BssID.StartsWith("40:4A:03")
-                    ||
-                    BssID.StartsWith("40:16:7E")
-                    ||
-                    BssID.StartsWith("30:85:A9") // ASUS
-                    ||
-                    BssID.StartsWith("38:2C:4A") // ASUS
-                    ||
-                    BssID.StartsWith("38:D5:47") // ASUS
-                    ||
-                    BssID.StartsWith("F8:32:E4") // ASUS
-                    ||
-                    BssID.StartsWith("28:C6:8E") // Keenetic
-                    ||
-                    BssID.StartsWith("28:28:5D") // Keenetic
-                    ||
-                    BssID.StartsWith("1C:B7:2C")
-                    ||
-                    BssID.StartsWith("1C:7E:E5")
-                    ||
-                    BssID.StartsWith("2C:56:DC")
-                    ||
-                    BssID.StartsWith("18:D6:C7")
-                    ||
-                    BssID.StartsWith("14:A9:E3")
-                    ||
-                    BssID.StartsWith("10:C3:7B")
-                    ||
-                    BssID.StartsWith("10:7B:EF") // Keenetic
-                    ||
-                    BssID.StartsWith("08:C6:B3")
-                    ||
-                    BssID.StartsWith("04:BF:6D")
-                    );
+				return !string.IsNullOrWhiteSpace(BssID)
+					&&
+					NetworkType.Contains("WPS")
+					&&
+					_vulnerableBssIds.Any(w => BssID.StartsWithNullSafe(w));
             }
         }
 
-        public bool IsOpen
+		string[] _bssIdsWithVPN = new string[] {
+				"38:2C:4A",
+				"AC:9E:17",
+				"AC:22:0B",
+				"E0:3F:49",
+				"E0:CB:4E",
+				"10:C3:7B",
+				"18:31:BF",
+				"50:E6:5F",
+				"70:4D:7B",
+				"88:D7:F6",
+				"30:5A:3A",
+				"30:85:A9",
+				"78:24:AF",
+				"38:D5:47",
+				"10:BF:48",
+				"14:DD:A9",
+				"1C:B7:2C",
+				"60:A4:4C",
+				"BC:AE:C5"
+		};
+
+
+		public bool IsOpen
         {
             get
             {
@@ -354,43 +328,7 @@ namespace WiFiManager.Common.BusinessObjects
         {
             get
             {
-                return BssID.StartsWith("38:2C:4A")
-                    ||
-                       BssID.StartsWith("AC:9E:17")
-                    ||
-                       BssID.StartsWith("AC:22:0B")
-                    ||
-                       BssID.StartsWith("E0:3F:49")
-                    ||
-                       BssID.StartsWith("E0:CB:4E")
-                    ||
-                       BssID.StartsWith("10:C3:7B")
-                    ||
-                       BssID.StartsWith("18:31:BF")
-                    ||
-                       BssID.StartsWith("50:E6:5F")
-                    ||
-                       BssID.StartsWith("70:4D:7B")
-                    ||
-                       BssID.StartsWith("88:D7:F6")
-                    ||
-                       BssID.StartsWith("30:5A:3A")
-                    ||
-                       BssID.StartsWith("30:85:A9")
-                    ||
-                       BssID.StartsWith("78:24:AF")
-                    ||
-                       BssID.StartsWith("38:D5:47")
-                    ||
-                       BssID.StartsWith("10:BF:48")
-                    ||
-                       BssID.StartsWith("14:DD:A9")
-                    ||
-                       BssID.StartsWith("1C:B7:2C")
-                    ||
-                       BssID.StartsWith("60:A4:4C")
-                       
- ;
+				return _bssIdsWithVPN.Any(w => BssID.StartsWithNullSafe(w));
             }
         }
 
