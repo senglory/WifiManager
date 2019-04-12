@@ -189,9 +189,16 @@ namespace WiFiManager
                 mpv.IsBusy = true;
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
-                var wi = await mgr.ConnectAsync(nw);
+                //var wi = await mgr.ConnectAsync(nw);
 
-                nw.TryUpdateFirstConnectionInfo(wi);
+
+				var t = mgr.ConnectAsync(nw);
+				await t.ContinueWith(t3 =>
+				{
+					nw.TryUpdateFirstConnectionInfo(t3.Result);
+				});
+
+
             }
             catch (Exception ex)
             {

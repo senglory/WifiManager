@@ -616,86 +616,103 @@ namespace WiFiManager.Droid
 
         public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto dto)
         {
-            string bssid = dto.BssID;
-            string ssid = dto.Name;
-            string password = dto.Password;
-
-            WifiConnectionInfo info2;
-
-            var formattedSsid = $"\"{ssid}\"";
-            var formattedPassword = $"\"{password}\"";
+            WifiConnectionInfo info2 = null;
 
 
+			if (TryConnectViaMethod(dto, ref info2))
+			{
 
-            var wifiConfig = new WifiConfiguration
-            {
-                Bssid = bssid,
-                Ssid = formattedSsid,
-                Priority = Constants.WIFI_CONFIG_PRIORITY
-            };
+				var coords = await GetCoordsAsync();
+				if (coords != null)
+				{
+					info2.FirstCoordLat = coords.Item1;
+					info2.FirstCoordLong = coords.Item2;
+					info2.FirstCoordAlt = coords.Item3;
+					info2.FirstConnectWhen = DateTime.Now;
+				}
+			}
+            return info2;
+        }
 
-            if (!dto.NetworkType.Contains("[WPA"))
-            {
-                wifiConfig.AllowedProtocols.Set( (int)WifiConfiguration.Protocol.Rsn);
-                wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
-            }
-            else
-            if (dto.NetworkType.Contains("[WPA"))
-            {
-                //wifiConfig.AllowKeyManagement.Set((int)KeyManagementType.WpaPsk);
-                wifiConfig.PreSharedKey = formattedPassword;
-            }
-            else
-            if (dto.NetworkType.Contains("[WEP]"))
-            {
-                // for WEP
-                wifiConfig.WepKeys[0] = formattedPassword;
-
-                wifiConfig.WepTxKeyIndex = 0;
-                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
-                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
-            }
+		bool TryConnectViaMethod(WifiNetworkDto dto, ref WifiConnectionInfo info2)
+		{
+			string bssid = dto.BssID;
+			string ssid = dto.Name;
+			string password = dto.Password;
+			var formattedSsid = $"\"{ssid}\"";
+			var formattedPassword = $"\"{password}\"";
 
 
-            var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-            var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
-            var ni1 = connManager.ActiveNetworkInfo;
 
-            if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
-            {
-                //WifiConnectionInfo info = new WifiConnectionInfo
-                //{
-                //    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+			var wifiConfig = new WifiConfiguration
+			{
+				Bssid = bssid,
+				Ssid = formattedSsid,
+				Priority = Constants.WIFI_CONFIG_PRIORITY
+			};
 
-                //};
-                return null;
-            }
-            else
-            {
-                wifiManager.SetWifiEnabled(true);
-                var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
-                var bd = wifiManager.Disconnect();
-                var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
-                var brc = wifiManager.Reconnect();
-                info2 = new WifiConnectionInfo
-                {
-                    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+			if (dto.NetworkType.Contains("[WEP]"))
+			{
+				// for WEP
+				wifiConfig.WepKeys[0] = formattedPassword;
+
+				wifiConfig.WepTxKeyIndex = 0;
+				wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
+
+				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
+				wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
+				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Wpa);
+
+				wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
+			}
+			else
+			if (dto.NetworkType.Contains("[WPA"))
+			{
+				//wifiConfig.AllowKeyManagement.Set((int)KeyManagementType.WpaPsk);
+				wifiConfig.PreSharedKey = formattedPassword;
+			}
+			else
+			{
+				// open networks
+				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
+				wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
+			}
+
+
+			var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
+			var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
+			var ni1 = connManager.ActiveNetworkInfo;
+
+			if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
+			{
+				//WifiConnectionInfo info = new WifiConnectionInfo
+				//{
+				//    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+
+				//};
+				return false;
+			}
+			else
+			{
+				wifiManager.SetWifiEnabled(true);
+				var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
+				var bd = wifiManager.Disconnect();
+				var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
+				var brc = wifiManager.Reconnect();
+				info2 = new WifiConnectionInfo
+				{
+					FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
 					// https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
-					InternalIP = DependencyService.Get<IIPAddressManager>().GetIPAddress()
+					InternalIP = DependencyService.Get<IIPAddressManager>().GetIPAddress(),
 				};
 			}
 
-            var coords = await GetCoordsAsync();
-            if (coords != null)
-            {
-                info2.FirstCoordLat = coords.Item1;
-                info2.FirstCoordLong = coords.Item2;
-                info2.FirstCoordAlt = coords.Item3;
-                info2.FirstConnectWhen = DateTime.Now;
-            }
-            return info2;
-        }
-        public async Task DisConnectAsync()
+			var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" && info2.InternalIP != "127.0.0.1";
+
+			return isConnectedToAP;
+		}
+
+		public async Task DisConnectAsync()
         {
             await Task.Run(() => DisConnect());
         }

@@ -359,11 +359,15 @@
                 <Label Text="VPN only (ASUS?)" />
                 <Switch IsToggled="{Binding Path=WithVPNOnly}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="Shake for reloading" />
-                <Switch IsToggled="{Binding Path=UseShakeForRefresh}" HorizontalOptions="FillAndExpand"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
+			<StackLayout Orientation="Horizontal">
+				<Label Text="Shake for reloading" />
+				<Switch IsToggled="{Binding Path=UseShakeForRefresh}" HorizontalOptions="FillAndExpand"/>
+			</StackLayout>
+			<StackLayout Orientation="Horizontal">
+				<Label Text="Do Disconnect Before Refresh" />
+				<Switch IsToggled="{Binding Path=DoDisconnectBeforeRefresh}" HorizontalOptions="FillAndExpand"/>
+			</StackLayout>
+			<StackLayout Orientation="Horizontal">
                 <Label x:Name="lblLastError" TextColor="Red"></Label>
                 <Label x:Name="lblSysInfo" FontSize="Micro"></Label>
             </StackLayout>

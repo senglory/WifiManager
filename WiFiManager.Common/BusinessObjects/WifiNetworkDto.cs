@@ -225,6 +225,7 @@ namespace WiFiManager.Common.BusinessObjects
 			"F8:C0:91",
 			"EE:43:F6",
 			"EC:43:F6",
+			"EA:28:5D",
 			"EA:37:7A",
 			"E8:CD:2D",
 			"E4:F4:C6",
@@ -243,15 +244,17 @@ namespace WiFiManager.Common.BusinessObjects
 			"B4:75:0E",
 			"B0:B2:DC",
 			"B0:4E:26",
-			"94:4A:0C",
 			"90:EF:68",
 			"90:94:E4",
+			"92:7B:EF",
+			"94:4A:0C",
 			"70:4D:7B",
 			"78:44:76",
 			"74:DA:38",
-			"6A:28:5D",
 			"60:31:97",
 			"60:A4:4C", // ASUS
+			"64:6E:EA",
+			"6A:28:5D",
 			"5C:F4:AB",
 			"50:67:F0",
 			"50:67:F0",
@@ -259,7 +262,6 @@ namespace WiFiManager.Common.BusinessObjects
 			"4E:5D:4E",
 			"4C:60:DE",
 			"40:4A:03",
-					
 			"40:16:7E",
 					
 			"30:85:A9", // ASUS
@@ -269,7 +271,7 @@ namespace WiFiManager.Common.BusinessObjects
 			"38:D5:47", // ASUS
                     
 			"F8:32:E4", // ASUS
-                    
+			"FE:F5:28", // Keenetic
 			"28:28:5D", // Keenetic
 			"28:C6:8E", // Keenetic
 			"2C:56:DC",
@@ -279,6 +281,7 @@ namespace WiFiManager.Common.BusinessObjects
 			"14:A9:E3",
 			"10:C3:7B",
 			"10:7B:EF", // Keenetic
+			"1C:74:0D", // Keenetic
 		};  
 
         public bool IsVulnerable
@@ -294,25 +297,46 @@ namespace WiFiManager.Common.BusinessObjects
         }
 
 		string[] _bssIdsWithVPN = new string[] {
-				"38:2C:4A",
-				"AC:9E:17",
-				"AC:22:0B",
-				"E0:3F:49",
-				"E0:CB:4E",
+				"08:60:6E",
+				"10:7B:44",
+				"10:BF:48",
 				"10:C3:7B",
+				"14:DD:A9",
 				"18:31:BF",
-				"50:E6:5F",
-				"70:4D:7B",
-				"88:D7:F6",
+				"1C:B7:2C",
+				"20:CF:30",
+				"2C:4D:54",
+				"2C:56:DC",
+				"2C:FD:A1",
 				"30:5A:3A",
 				"30:85:A9",
-				"78:24:AF",
+				"34:97:F6",
+				"38:2C:4A",
 				"38:D5:47",
-				"10:BF:48",
-				"14:DD:A9",
-				"1C:B7:2C",
+				"40:16:7E",
+				"50:46:5D",
+				"50:E6:5F",
+				"54:04:A6",
+				"54:A0:50",
+				"60:45:CB",
 				"60:A4:4C",
-				"BC:AE:C5"
+				"70:4D:7B",
+				"72:4D:7B",
+				"74:D0:2B",
+				"78:24:AF",
+				"88:D7:F6",
+				"90:57:84",
+				"90:E6:BA",
+				"9C:5C:8E",
+				"AC:9E:17",
+				"AC:22:0B",
+				"BC:AE:C5",
+				"BC:EE:7B",
+				"C8:60:00",
+				"D8:50:E6",
+				"E0:3F:49",
+				"E0:CB:4E",
+				"F0:B4:29"
 		};
 
 

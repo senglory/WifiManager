@@ -127,8 +127,17 @@ namespace WiFiManager.Common
             }
         }
 
+		bool doDisconnectBeforeRefresh;
+		public bool DoDisconnectBeforeRefresh
+		{
+			get { return doDisconnectBeforeRefresh; }
+			set
+			{
+				SetProperty(ref doDisconnectBeforeRefresh, value, nameof(DoDisconnectBeforeRefresh));
+			}
+		}
 
-        WifiNetworksObservableCollection _WifiNetworksHunting = new WifiNetworksObservableCollection();
+		WifiNetworksObservableCollection _WifiNetworksHunting = new WifiNetworksObservableCollection();
         public WifiNetworksObservableCollection WifiNetworksHunting
         {
             get
