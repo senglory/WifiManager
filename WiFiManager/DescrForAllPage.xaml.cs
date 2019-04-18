@@ -30,7 +30,13 @@ namespace WiFiManager
 			var descrTextForAll = descrText.Text;
 			for (int i = 0; i < mpv.WifiNetworks.Count; i++)
 			{
-				mpv.WifiNetworks[i].Provider = descrTextForAll;
+				if (mpv.UpdateOnlyEmptyInfo && string.IsNullOrWhiteSpace(mpv.WifiNetworks[i].Provider)
+				||
+					!mpv.UpdateOnlyEmptyInfo
+					)
+				{
+					mpv.WifiNetworks[i].Provider = descrTextForAll;
+				}
 			}
 
 

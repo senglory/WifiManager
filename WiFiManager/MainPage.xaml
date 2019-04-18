@@ -6,15 +6,14 @@
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain"
             >
+	<TabbedPage.Resources>
+		<local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
+		<local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
+		<local:SafeGetCoordsConverter x:Key="SafeGetCoordsCvt"  />
+	</TabbedPage.Resources>
 
     <ContentPage Title="Main"  >
         <ContentPage.Resources>
-
-            <local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
-            <local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
-            <local:SafeGetCoordsConverter x:Key="SafeGetCoordsCvt"  />
-
-
 
             <!-- Default DataTemplate -->
             <DataTemplate x:Key="DefaultDataTemplate">
@@ -31,7 +30,7 @@
                                             <BindingCondition Binding="{Binding IsSelected}" Value="True" />
                                             <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
                                         </MultiTrigger.Conditions>
-                                        <Setter Property="BackgroundColor" Value="OrangeRed" />
+										<Setter Property="BackgroundColor" Value="OrangeRed" />
                                     </MultiTrigger>
                                     <MultiTrigger TargetType="StackLayout">
                                         <MultiTrigger.Conditions>
@@ -192,11 +191,13 @@
                     </Style.Triggers>
                 </Style>
                 <Style TargetType="StackLayout">
-                    <Setter Property="BackgroundColor" Value="Black" />
+					<Setter Property="BackgroundColor" Value="{Binding IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
+					<!--<Setter Property="BackgroundColor" Value="Black" />-->
                 </Style>
                 <Style TargetType="ListView">
-                    <Setter Property="BackgroundColor" Value="Black" />
-                </Style>
+					<!--<Setter Property="BackgroundColor" Value="{Binding IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />-->
+					<Setter Property="BackgroundColor" Value="Black" />
+				</Style>
             </ResourceDictionary>
         </ContentPage.Resources>
 		<Frame HasShadow="False" >
@@ -352,11 +353,11 @@
                 <Switch IsToggled="{Binding Path=UseCachedNetworkLookup}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
-                <Label Text="WEP only" />
+                <Label Text="Display with WEP only" />
                 <Switch IsToggled="{Binding Path=WEPOnly}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
-                <Label Text="VPN only (ASUS?)" />
+                <Label Text="Display with VPN only (ASUS?)" />
                 <Switch IsToggled="{Binding Path=WithVPNOnly}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
 			<StackLayout Orientation="Horizontal">
@@ -366,6 +367,14 @@
 			<StackLayout Orientation="Horizontal">
 				<Label Text="Do Disconnect Before Refresh" />
 				<Switch IsToggled="{Binding Path=DoDisconnectBeforeRefresh}" HorizontalOptions="FillAndExpand"/>
+			</StackLayout>
+			<StackLayout Orientation="Horizontal">
+				<Label Text="Update description &amp; GPS only for empty" />
+				<Switch IsToggled="{Binding Path=UpdateOnlyEmptyInfo}" HorizontalOptions="FillAndExpand"/>
+			</StackLayout>
+			<StackLayout Orientation="Horizontal">
+				<Label Text="Use NIGHT Mode" />
+				<Switch IsToggled="{Binding Path=IsNightTheme}" HorizontalOptions="FillAndExpand"/>
 			</StackLayout>
 			<StackLayout Orientation="Horizontal">
                 <Label x:Name="lblLastError" TextColor="Red"></Label>

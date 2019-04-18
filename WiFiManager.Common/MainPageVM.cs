@@ -137,6 +137,16 @@ namespace WiFiManager.Common
 			}
 		}
 
+		bool updateOnlyEmptyInfo;
+		public bool UpdateOnlyEmptyInfo
+		{
+			get { return updateOnlyEmptyInfo; }
+			set
+			{
+				SetProperty(ref updateOnlyEmptyInfo, value, nameof(UpdateOnlyEmptyInfo));
+			}
+		}
+
 		WifiNetworksObservableCollection _WifiNetworksHunting = new WifiNetworksObservableCollection();
         public WifiNetworksObservableCollection WifiNetworksHunting
         {
@@ -149,11 +159,23 @@ namespace WiFiManager.Common
                 SetProperty(ref _WifiNetworksHunting, value, nameof (WifiNetworksHunting));
             }
         }
-        #endregion
+
+
+		bool isNightTheme;
+		public bool IsNightTheme
+		{
+			get { return isNightTheme; }
+			set
+			{
+				SetProperty(ref isNightTheme, value, nameof(IsNightTheme));
+			}
+		}
+
+		#endregion
 
 
 
-        public string FirstFailedLineInCSV;
+		public string FirstFailedLineInCSV;
 
 		bool isFailed;
 		public bool IsFailed
@@ -180,7 +202,9 @@ namespace WiFiManager.Common
             StopHuntingCommand = new Command(DoStopHunting);
 
             IsConnected = mgr.IsConnected();
-        }
+			IsNightTheme = false;
+
+		}
 
         public void DoRefreshNetworks()
         {
@@ -192,8 +216,10 @@ namespace WiFiManager.Common
 				IsFailed = false;
 
 				FirstFailedLineInCSV = null;
-
-				mgr.DeleteInfoAboutWifiNetworks();
+				if (DoDisconnectBeforeRefresh)
+				{
+					mgr.DeleteInfoAboutWifiNetworks();
+				}
 				// clean CSV cache if it was used
 				mgr.ClearCachedCSVNetworkList();
 				var allOnAir = mgr.GetActiveWifiNetworks();
@@ -282,7 +308,13 @@ namespace WiFiManager.Common
 							for (int i = 0; i < WifiNetworks.Count; i++)
 							{
 								var wifi = WifiNetworks[i];
-								wifi.TryUpdateRecentCoords(t2.Result);
+								if (UpdateOnlyEmptyInfo && !wifi.HasCoords
+									||
+									!UpdateOnlyEmptyInfo
+									)
+								{
+									wifi.TryUpdateRecentCoords(t2.Result);
+								}
 							}
 							Thread.Sleep(2000);
 						}

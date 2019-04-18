@@ -15,6 +15,10 @@ namespace WiFiManager
 		{
 			InitializeComponent();
 
+//DisplayMetrics displayMetrics = new DisplayMetrics();
+//WindowManager.DefaultDisplay.GetRealMetrics(displayMetrics);
+// displayMetrics.WidthPixels
+// displayMetrics.HeightPixels
 			MainPage = new MainPage(mgr);
 		}
     }

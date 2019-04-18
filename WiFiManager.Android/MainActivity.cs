@@ -630,6 +630,7 @@ namespace WiFiManager.Droid
 					info2.FirstCoordAlt = coords.Item3;
 					info2.FirstConnectWhen = DateTime.Now;
 				}
+				dto.InternalIP = info2.InternalIP;
 			}
             return info2;
         }
@@ -699,11 +700,16 @@ namespace WiFiManager.Droid
 				var bd = wifiManager.Disconnect();
 				var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
 				var brc = wifiManager.Reconnect();
+
+				var gwAddr = (wifiManager.DhcpInfo.Gateway & 0xFF) + "." +
+					((wifiManager.DhcpInfo.Gateway >> 8) & 0xFF) + "." +
+					((wifiManager.DhcpInfo.Gateway >> 16) & 0xFF) + "." +
+					((wifiManager.DhcpInfo.Gateway >> 24) & 0xFF);
 				info2 = new WifiConnectionInfo
 				{
 					FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
 					// https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
-					InternalIP = DependencyService.Get<IIPAddressManager>().GetIPAddress(),
+					InternalIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
 				};
 			}
 

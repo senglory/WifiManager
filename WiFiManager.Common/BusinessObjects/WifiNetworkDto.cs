@@ -376,6 +376,12 @@ namespace WiFiManager.Common.BusinessObjects
 
         }
 
+		public bool HasCoords{
+			get{
+				return LastCoordLat.HasValue && LastCoordLong.HasValue && LastCoordAlt.HasValue;
+			}
+		}
+
         public void TryUpdateRecentCoords(Tuple<double, double, double> coords2)
         {
             CoordsAndPower.Add(new CoordsAndPower
