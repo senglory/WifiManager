@@ -64,7 +64,16 @@ namespace WiFiManager.Common
             }
         }
 
-        bool isConnected;
+		public bool IsNotBusy
+		{
+			get { return !isBusy; }
+			set
+			{
+				SetProperty(ref isBusy, !value, nameof(IsNotBusy));
+			}
+		}
+
+		bool isConnected;
         public bool IsConnected
         {
             get { return isConnected; }
@@ -187,10 +196,15 @@ namespace WiFiManager.Common
 			}
 		}
 
+		/// <summary>
+		///	Just FOR xaml
+		/// </summary>
+		public MainPageVM()
+		{
 
+		}
 
-
-		public MainPageVM(IWifiManagerOperations mgr)
+		public void AddMgr(IWifiManagerOperations mgr)
         {
             this.mgr = mgr;
 
@@ -369,7 +383,8 @@ namespace WiFiManager.Common
 					else
 						lst.Add(theOne);
 					mgr.SaveToCSVAsync(lst);
-				});
+				})
+				.Wait();
 			}
 			catch {
 				IsFailed = true;

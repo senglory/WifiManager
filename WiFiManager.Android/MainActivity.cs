@@ -60,7 +60,7 @@ namespace WiFiManager.Droid
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
         const int RC_DELETE_STORAGE_FILE = 1200;
-        const string SEMICOLON_REPLACEMENT_IN_CSV = "\x3B";
+        const string SEMICOLON_REPLACEMENT_IN_CSV = @"\x3B";
 
         static readonly string TAG = "WiFiManager";
         static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
@@ -439,21 +439,6 @@ namespace WiFiManager.Droid
             WifiNetwork nw = null;
             string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
 
-            // legacy
-            if (arrs.Length == 6)
-            {
-                nw = new WifiNetwork
-                {
-                    BssID = bssid,
-                    Name = arrs[0],
-                    Password = arrs[2],
-                    IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
-                    NetworkType = arrs[4],
-                    Provider = arrs[5],
-                    Level = -1 * Constants.NO_SIGNAL_LEVEL
-                };
-            }
-            // + extra info about connection
             if (arrs.Length >= 10)
             {
                 nw = new WifiNetwork
@@ -504,6 +489,10 @@ namespace WiFiManager.Droid
                 nw.Password = passwordAdj;
                 nw.Provider = commentsAdj;
             }
+			else
+			{
+				System.Diagnostics.Debug.WriteLine(s);
+			}
 
             var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
             return wifiDtoFromFile;
@@ -537,6 +526,7 @@ namespace WiFiManager.Droid
                 {
                     fsBAK = new FileStream(_filePathCSVBAK, FileMode.Open);
                 }
+				var s = "";
                 using (var fsw = new FileStream(_filePathCSV, FileMode.Create))
                 {
                     using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
@@ -548,7 +538,7 @@ namespace WiFiManager.Droid
                         {
                             using (var sr = new StreamReader(fsBAK, Constants.UNIVERSAL_ENCODING))
                             {
-                                var s = sr.ReadLine();
+                                s = sr.ReadLine();
                                 while (!sr.EndOfStream)
                                 {
                                     s = sr.ReadLine();
@@ -597,7 +587,7 @@ namespace WiFiManager.Droid
             catch (Exception ex)
             {
                 Log.Error("WiFiManager", "SaveToCSV "+ ex.Message);
-                //throw ex;
+                throw ex;
             }
             finally
             {

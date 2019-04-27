@@ -2,8 +2,10 @@
 <Application xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
+             xmlns:lc="clr-namespace:WiFiManager.Common;assembly=WiFiManager.Common"
              x:Class="WiFiManager.App">
 	<Application.Resources>
 		<local:ThemeSwitchCvt x:Key="ThemeSwitchCvt1"  />
+		<lc:MainPageVM x:Key="MainPageVM"></lc:MainPageVM>
 	</Application.Resources>
 </Application>

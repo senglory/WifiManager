@@ -27,13 +27,12 @@ namespace WiFiManager
     {
         IWifiManagerOperations mgr;
 
-        public MainPage(IWifiManagerOperations mgr)
+        public MainPage(IWifiManagerOperations mgr, MainPageVM vm)
         {
-
             InitializeComponent();
             this.mgr = mgr;
-            var vm = new MainPageVM(mgr);
-            this.BindingContext = vm;
+			vm.AddMgr(mgr);
+			this.BindingContext = vm;
 
             CrossConnectivity.Current.ConnectivityChanged +=  (sender, args) =>
             {
@@ -316,23 +315,18 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             var dto = bo.BindingContext as WifiNetworkDto;
 
+			if (mpv.IsBusy)
+				return;
+
             try
             {
-                Task.Run(() => {
-                    mpv.IsBusy = true;
-                    mpv.DoSave(dto);
-                }
-                );
+                mpv.DoSave(dto);
             }
             catch (Exception ex)
             {
                 Device.BeginInvokeOnMainThread(() => {
                     DisplayAlert("Error", ex.Message, "OK");
                 });
-            }
-            finally
-            {
-                mpv.IsBusy = false;
             }
         }
 

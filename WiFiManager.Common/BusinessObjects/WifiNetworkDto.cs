@@ -461,6 +461,7 @@ namespace WiFiManager.Common.BusinessObjects
             dtoDst.IsEnabled = IsEnabled;
             dtoDst.Password = Password;
             dtoDst.Provider = Provider;
+			dtoDst.WpsPin = WpsPin;
             dtoDst.FirstConnectWhen = FirstConnectWhen;
             dtoDst.FirstConnectPublicIP = FirstConnectPublicIP;
             dtoDst.FirstConnectMac = FirstConnectMac;
