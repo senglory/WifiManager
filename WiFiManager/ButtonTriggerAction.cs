@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 
 
 namespace WiFiManager
@@ -13,5 +14,13 @@ namespace WiFiManager
             if (button == null) return;
             if (BackgroundColor != null) button.BackgroundColor = BackgroundColor;
         }
-    }
+
+
+		public static readonly BindableProperty BgColor = BindableProperty.Create(nameof(BgColor), typeof(Color), typeof(Color));
+		public Color BackgroundColorValue
+		{
+			get { return BackgroundColor; }
+			set { BackgroundColor = value; }
+		}
+	}
 }

@@ -6,6 +6,9 @@
              x:Class="WiFiManager.App">
 	<Application.Resources>
 		<local:ThemeSwitchCvt x:Key="ThemeSwitchCvt1"  />
+		<local:ThemeSwitchCvt2 x:Key="ThemeSwitchCvt2"  />
+		<local:ThemeSwitchCvtIsOpen x:Key="ThemeSwitchCvtIsOpen"  />
+		<local:ThemeSwitchCvtWifiDescr x:Key="ThemeSwitchCvtWifiDescr"  />
 		<lc:MainPageVM x:Key="MainPageVM"></lc:MainPageVM>
 	</Application.Resources>
 </Application>

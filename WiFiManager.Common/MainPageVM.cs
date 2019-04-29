@@ -12,8 +12,7 @@ using Xamarin.Forms;
 using Plugin.Logging;
 
 using WiFiManager.Common.BusinessObjects;
-
-
+using System.Windows.Input;
 
 namespace WiFiManager.Common
 {
@@ -35,8 +34,20 @@ namespace WiFiManager.Common
             }
         }
 
+		WifiNetworksObservableCollection _WifiNetworksInLookup = new WifiNetworksObservableCollection();
+		public WifiNetworksObservableCollection WifiNetworksInLookup
+		{
+			get
+			{
+				return _WifiNetworksInLookup;
+			}
+			set
+			{
+				SetProperty(ref _WifiNetworksInLookup, value, nameof(WifiNetworksInLookup));
+			}
+		}
 
-        WifiNetworkDto _selectedNetwork;
+		WifiNetworkDto _selectedNetwork;
         public WifiNetworkDto SelectedNetwork
         {
             get
@@ -180,6 +191,16 @@ namespace WiFiManager.Common
 			}
 		}
 
+
+		string wiFiNameOrBssIdLookup;
+		public string  WiFiNameOrBssIdLookup
+		{
+			get { return wiFiNameOrBssIdLookup; }
+			set
+			{
+				SetProperty(ref wiFiNameOrBssIdLookup, value, nameof(WiFiNameOrBssIdLookup));
+			}
+		}
 		#endregion
 
 
@@ -214,8 +235,10 @@ namespace WiFiManager.Common
             DisconnectCommand = new Command(DoDisconnect);
             RefreshNetworksCommand = new Command(DoRefreshNetworks);
             StopHuntingCommand = new Command(DoStopHunting);
+			//DoLookupCommand = new Command((wifiNameOrBssId) => { this.DoLookup(wifiNameOrBssId); });
+			//DoLookupCommand = new Command(async x => await DoLookupAsync((string)x));
 
-            IsConnected = mgr.IsConnected();
+			IsConnected = mgr.IsConnected();
 			IsNightTheme = false;
 
 		}
@@ -396,17 +419,38 @@ namespace WiFiManager.Common
         }
 
 
-
-
-
-        public Command SaveCommand { get; set; }
+		public Command SaveCommand { get; set; }
         public Command RefreshNetworksCommand { get; set; }
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
         public Command StopHuntingCommand { get; set; }
+		//public Command DoLookupCommand { get; set; }
+		public ICommand DoLookupCommand => new Command<string>(async x =>
+		{
+			try
+			{
+				IsBusy = true;
 
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
+				WifiNetworksInLookup.Clear();
+				if (string.IsNullOrWhiteSpace(WiFiNameOrBssIdLookup))
+					return;
+				var lst = mgr.FindWifiInCSV(WiFiNameOrBssIdLookup);
+				foreach (var wifi in lst)
+				{
+					WifiNetworksInLookup.Add(wifi);
+				}
+			}
+			catch (Exception ex)
+			{
+				IsFailed = true;
+			}
+			finally
+			{
+				IsBusy = false;
+			}
+		});
+		#region INotifyPropertyChanged
+		public event PropertyChangedEventHandler PropertyChanged;
 
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",

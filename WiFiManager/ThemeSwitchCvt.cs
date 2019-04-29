@@ -11,7 +11,7 @@ namespace WiFiManager
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return System.Convert.ToBoolean (value) ? "Black" : "White";
+			return System.Convert.ToBoolean (value) ? Color.Black : Color.White;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -45,6 +45,8 @@ using Java.Util;
 using Android.Support.V4.Content;
 using Android.Support.V4.App;
 
+
+
 namespace WiFiManager.Droid
 {
     [Activity(Label = "WiFiManager", 
@@ -66,8 +68,10 @@ namespace WiFiManager.Droid
         static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
 
         delegate bool FindDelegate(WifiNetworkDto nw, WifiNetworkDto nw2);
+		delegate bool FindDelegateBulk( WifiNetworkDto nw2);
 
-        string _filePathCSV
+
+		string _filePathCSV
         {
             get {
                 var sdCardPathDCIM = GetSDCardDir();
@@ -294,8 +298,29 @@ namespace WiFiManager.Droid
             return wifiNetworks;
         }
 
+		IEnumerable<WifiNetworkDto> FindInternal(FindDelegateBulk findMethod)
+		{
+			using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
+			{
+				using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+				{
+					// skip header
+					var ss2 = fr.ReadLine();
+					while (!fr.EndOfStream)
+					{
+						var lineFromCSV = fr.ReadLine();
+						var wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
 
-        WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
+						if (findMethod( wifiDtoFromFile))
+							yield return wifiDtoFromFile;
+					}
+				}
+			}
+		}
+
+
+
+		WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
         {
             WifiNetworkDto wifiDtoFromFile;
 
@@ -397,7 +422,38 @@ namespace WiFiManager.Droid
             return res;
         }
 
-        public bool IsConnected()
+		public IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId)
+		{
+			IEnumerable<WifiNetworkDto> res = new List<WifiNetworkDto>();
+
+			try
+			{
+				if (!System.IO.File.Exists(_filePathCSV))
+				{
+					return null;
+				}
+
+				res = FindInternal( (nw1) => {
+					return nw1.Name.StartsWithNullSafe(wifiNameOrBssId);
+				});
+				if (res.Count() == 0)
+				{
+					res = FindInternal(( nw1) =>
+					{
+						return nw1.BssID.StartsWithNullSafe(wifiNameOrBssId);
+					});
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error("WiFiManager", "FindWifiInCSV " + ex.Message);
+			}
+
+			return res;
+		}
+
+
+		public bool IsConnected()
         {
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
