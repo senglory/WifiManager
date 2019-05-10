@@ -3,99 +3,99 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:behaviorsPack="clr-namespace:Xamarin.Forms.BehaviorsPack;assembly=Xamarin.Forms.BehaviorsPack"
-			 xmlns:b="clr-namespace:Xamarin.Behaviors;assembly=Xamarin.Behaviors"
+             xmlns:b="clr-namespace:Xamarin.Behaviors;assembly=Xamarin.Behaviors"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain"
             >
-	<TabbedPage.Resources>
-		<local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
-		<local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
-		<local:SafeGetCoordsConverter x:Key="SafeGetCoordsCvt"  />
+    <TabbedPage.Resources>
+        <local:EmptyStringCvt x:Key="EmptyPwdCvt"  />
+        <local:NetworkTypeCvt x:Key="WEPNetworkCvt"  />
+        <local:SafeGetCoordsConverter x:Key="SafeGetCoordsCvt"  />
 
 
-		<!-- Default DataTemplate -->
-		<DataTemplate x:Key="DefaultDataTemplate">
-		</DataTemplate>
-		<DataTemplate x:Key="NoteDataTemplate">
-			<ViewCell>
-				<StackLayout Orientation="Vertical"  HorizontalOptions="Fill" >
-					<StackLayout.Resources>
-						<Style TargetType="StackLayout">
-							<Style.Triggers>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="True" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="False" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="OrangeRed" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="False" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="Gray" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="False" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="False" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="DarkRed" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="True" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="False" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="OrangeRed" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="False" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="False" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="DarkRed" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="True" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="OrangeRed" />
-								</MultiTrigger>
-								<MultiTrigger TargetType="StackLayout">
-									<MultiTrigger.Conditions>
-										<BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
-										<BindingCondition Binding="{Binding IsSelected}" Value="True" />
-										<BindingCondition Binding="{Binding IsEnabled}" Value="True" />
-									</MultiTrigger.Conditions>
-									<Setter Property="BackgroundColor" Value="OrangeRed" />
-								</MultiTrigger>
-							</Style.Triggers>
-						</Style>
-					</StackLayout.Resources>
-					<Grid RowSpacing="1" ColumnSpacing="0">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="25"/>
-							<RowDefinition Height="25"/>
-						</Grid.RowDefinitions>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition  Width="5"/>
-							<ColumnDefinition  Width="5"/>
-							<ColumnDefinition  Width="10"/>
-						</Grid.ColumnDefinitions>
-						<Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="Lime" HeightRequest="20" />
-						<StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
-							<Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
-							<!--<Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" TextColor="Black">
+        <!-- Default DataTemplate -->
+        <DataTemplate x:Key="DefaultDataTemplate">
+        </DataTemplate>
+        <DataTemplate x:Key="NoteDataTemplate">
+            <ViewCell>
+                <StackLayout Orientation="Vertical"  HorizontalOptions="Fill" >
+                    <StackLayout.Resources>
+                        <Style TargetType="StackLayout">
+                            <Style.Triggers>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="Gray" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="DarkRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="DarkRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                                <MultiTrigger TargetType="StackLayout">
+                                    <MultiTrigger.Conditions>
+                                        <BindingCondition Binding="{Binding IsInCSVList}" Value="False" />
+                                        <BindingCondition Binding="{Binding IsSelected}" Value="True" />
+                                        <BindingCondition Binding="{Binding IsEnabled}" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="BackgroundColor" Value="OrangeRed" />
+                                </MultiTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackLayout.Resources>
+                    <Grid RowSpacing="1" ColumnSpacing="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition  Width="5"/>
+                            <ColumnDefinition  Width="5"/>
+                            <ColumnDefinition  Width="10"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="Lime" HeightRequest="20" />
+                        <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
+                            <Label Text="{Binding BssID}"  HeightRequest="20" MinimumWidthRequest="180" />
+                            <!--<Label Text="{Binding NetworkType}" HeightRequest="20" FontSize="Micro" TextColor="Black">
                                     <Label.Style>
                                         <Style TargetType="Label">
                                             <Style.Triggers >
@@ -106,86 +106,89 @@
                                         </Style>
                                     </Label.Style>
                                 </Label>-->
-							<Label Text="{Binding Level}" TextColor="LightSkyBlue" FontAttributes="Bold"></Label>
-							<BoxView IsVisible="{Binding IsVulnerable}" BackgroundColor="LimeGreen" />
-							<BoxView IsVisible="{Binding IsOpen}" BackgroundColor="Wheat" />
-							<BoxView IsVisible="{Binding IsWithVPN}" BackgroundColor="DodgerBlue" />
-						</StackLayout>
+                            <Label Text="{Binding Level}" TextColor="LightSkyBlue" FontAttributes="Bold"></Label>
+                            <BoxView IsVisible="{Binding IsVulnerable}" BackgroundColor="LimeGreen" />
+                            <BoxView IsVisible="{Binding IsOpen}" BackgroundColor="Wheat" />
+                            <BoxView IsVisible="{Binding IsWithVPN}" BackgroundColor="DodgerBlue" />
+                        </StackLayout>
 
-						<BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="5"  >
-							<BoxView.Style>
-								<Style TargetType="BoxView">
-									<Style.Triggers >
-										<DataTrigger TargetType="BoxView" Binding="{Binding NetworkType, Converter={StaticResource WEPNetworkCvt}}" Value="WPS">
-											<Setter Property="BackgroundColor" Value="BlueViolet" />
-										</DataTrigger>
-									</Style.Triggers>
-								</Style>
-							</BoxView.Style>
-						</BoxView>
-						<BoxView Grid.RowSpan="2" Grid.Column="2" WidthRequest="5"  >
-							<BoxView.Style>
-								<Style TargetType="BoxView">
-									<Style.Triggers >
-										<DataTrigger TargetType="BoxView" Binding="{Binding NetworkType, Converter={StaticResource WEPNetworkCvt}}" Value="WEP">
-											<Setter Property="BackgroundColor" Value="Yellow" />
-										</DataTrigger>
-									</Style.Triggers>
-								</Style>
-							</BoxView.Style>
-						</BoxView>
-						<BoxView Grid.RowSpan="2" Grid.Column="3" WidthRequest="10"  >
-							<BoxView.Style>
-								<Style TargetType="BoxView">
-									<Style.Triggers >
-										<DataTrigger TargetType="BoxView" Binding="{Binding Password, Converter={StaticResource EmptyPwdCvt}}" Value="True">
-											<Setter Property="BackgroundColor" Value="LightGreen" />
-										</DataTrigger>
-									</Style.Triggers>
-								</Style>
-							</BoxView.Style>
-						</BoxView>
-					</Grid>
-				</StackLayout>
+                        <BoxView Grid.RowSpan="2" Grid.Column="1" WidthRequest="5"  >
+                            <BoxView.Style>
+                                <Style TargetType="BoxView">
+                                    <Style.Triggers >
+                                        <DataTrigger TargetType="BoxView" Binding="{Binding NetworkType, Converter={StaticResource WEPNetworkCvt}}" Value="WPS">
+                                            <Setter Property="BackgroundColor" Value="BlueViolet" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </BoxView.Style>
+                        </BoxView>
+                        <BoxView Grid.RowSpan="2" Grid.Column="2" WidthRequest="5"  >
+                            <BoxView.Style>
+                                <Style TargetType="BoxView">
+                                    <Style.Triggers >
+                                        <DataTrigger TargetType="BoxView" Binding="{Binding NetworkType, Converter={StaticResource WEPNetworkCvt}}" Value="WEP">
+                                            <Setter Property="BackgroundColor" Value="Yellow" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </BoxView.Style>
+                        </BoxView>
+                        <BoxView Grid.RowSpan="2" Grid.Column="3" WidthRequest="10"  >
+                            <BoxView.Style>
+                                <Style TargetType="BoxView">
+                                    <Style.Triggers >
+                                        <DataTrigger TargetType="BoxView" Binding="{Binding Password, Converter={StaticResource EmptyPwdCvt}}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="LightGreen" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </BoxView.Style>
+                        </BoxView>
+                    </Grid>
+                </StackLayout>
 
-				<ViewCell.ContextActions>
-					<MenuItem Clicked="MenuItem_SaveThis_Clicked" 
+                <ViewCell.ContextActions>
+                    <MenuItem Clicked="MenuItem_SaveThis_Clicked" 
                                   Text="Save this" IsDestructive="False"
-								  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-					<MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
+                                  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
+                    <MenuItem Clicked="MenuItem_DeleteNetwork_Clicked"
                                   Text="Delete" IsDestructive="True" 
-								   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-					<MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
+                                   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
+                    <MenuItem Clicked="MenuItem2_RefreshCoords_Clicked"
                                   Text="Refresh Coords" IsDestructive="False" 
-								   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-					<MenuItem Clicked="MenuItem_Hunt_Clicked"
+                                   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
+                    <MenuItem Clicked="MenuItem_Hunt_Clicked"
                                   Text="Hunt for" IsDestructive="False" 
-								   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-				</ViewCell.ContextActions>
-			</ViewCell>
-		</DataTemplate>
+                                   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
+                    <MenuItem Clicked="MenuItem_AddToSaveList_Clicked"
+                                  Text="Add to 'Save List'" IsDestructive="False" 
+                                   IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
+                </ViewCell.ContextActions>
+            </ViewCell>
+        </DataTemplate>
 
-		<local:ItemTemplateSelector x:Key="viewInListTemplateSelector"
+        <local:ItemTemplateSelector x:Key="viewInListTemplateSelector"
               DefaultnDataTemplate="{StaticResource DefaultDataTemplate}"
               NoteDataTemplate="{StaticResource NoteDataTemplate}" 
                                         />
-	</TabbedPage.Resources>
+    </TabbedPage.Resources>
 
     <ContentPage Title="Main"  >
         <ContentPage.Resources>
 
             <ResourceDictionary>
                 <Style TargetType="Label">
-					<Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
+                    <Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
                     <Setter Property="HeightRequest" Value="27"/>
                 </Style>
                 <Style TargetType="Entry">
-					<Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
-					<Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
-				</Style>
+                    <Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
+                    <Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
+                </Style>
                 <Style TargetType="Button">
-					<Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
-					<Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
+                    <Setter Property="TextColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt2}}" />
+                    <Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
                     <Setter Property="BorderColor" Value="Beige" />
                     <Setter Property="BorderWidth" Value="1" />
                     <Style.Triggers>
@@ -193,156 +196,150 @@
                             <local:ButtonTriggerAction BackgroundColor="Maroon" />
                         </EventTrigger>
                         <EventTrigger Event="Released">
-							<!-- BgColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" -->
-							<local:ButtonTriggerAction BackgroundColor="Black" />
+                            <!-- BgColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" -->
+                            <local:ButtonTriggerAction BackgroundColor="Black" />
                         </EventTrigger>
                     </Style.Triggers>
                 </Style>
                 <Style TargetType="StackLayout">
-					<Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
+                    <Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
                 </Style>
                 <Style TargetType="ListView">
-					<Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
-				</Style>
+                    <Setter Property="BackgroundColor" Value="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />
+                </Style>
             </ResourceDictionary>
         </ContentPage.Resources>
-		<Frame HasShadow="False" >
-			<Frame.Style>
-				<Style TargetType="Frame">
-					<Setter Property="BorderColor" Value="Maroon"></Setter>
-					<Setter Property="Padding" Value="0"></Setter>
-					<Style.Triggers>
-						<DataTrigger TargetType="Frame"  Binding="{Binding IsFailed}" Value="True" >
-							<Setter Property="BackgroundColor" Value="Maroon" />
-							<Setter Property="Padding" Value="10" />
-						</DataTrigger>
-						<DataTrigger TargetType="Frame"  Binding="{Binding IsFailed}" Value="False" >
-							<Setter Property="BackgroundColor" Value="Green" />
-							<Setter Property="Padding" Value="0" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</Frame.Style>
+        <Frame HasShadow="False" >
+            <Frame.Style>
+                <Style TargetType="Frame">
+                    <Setter Property="BorderColor" Value="Maroon"></Setter>
+                    <Setter Property="Padding" Value="0"></Setter>
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Frame"  Binding="{Binding IsFailed}" Value="True" >
+                            <Setter Property="BackgroundColor" Value="Maroon" />
+                            <Setter Property="Padding" Value="10" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Frame"  Binding="{Binding IsFailed}" Value="False" >
+                            <Setter Property="BackgroundColor" Value="Green" />
+                            <Setter Property="Padding" Value="0" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Frame.Style>
 
-			<AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
-				<StackLayout Spacing="0"  AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,0,1,1">
-					<Grid>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="60" />
-							<RowDefinition Height="30*"/>
-							<RowDefinition Height="30*"/>
-						</Grid.RowDefinitions>
+            <AbsoluteLayout HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+                <StackLayout Spacing="0"  AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,0,1,1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60" />
+                            <RowDefinition Height="30*"/>
+                            <RowDefinition Height="30*"/>
+                        </Grid.RowDefinitions>
 
-						<StackLayout Grid.Row="0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Spacing="0">
-							<Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}" IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"></Button>
-							<Button Text="GPS" Clicked="RefreshCoords_Clicked"  FontSize="Micro"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" WidthRequest="40"></Button>
-							<Button Text="Descr" Clicked="SetDescrForAll_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" FontSize="Micro" WidthRequest="40"></Button>
-							<Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-							<Button Text="Refresh" Clicked="RefreshNetworks_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"  FontSize="Micro"></Button>
-						</StackLayout>
+                        <StackLayout Grid.Row="0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Spacing="0">
+                            <Button Text="Save"  FontSize="Micro" Command="{Binding SaveCommand}" IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"></Button>
+                            <Button Text="GPS" Clicked="RefreshCoords_Clicked"  FontSize="Micro"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" WidthRequest="40"></Button>
+                            <Button Text="Descr" Clicked="SetDescrForAll_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" FontSize="Micro" WidthRequest="40"></Button>
+                            <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
+                            <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"  FontSize="Micro"></Button>
+                        </StackLayout>
 
-						<ListView
-							Grid.Row="1"
-							x:Name="lstNetworks"
-							SeparatorColor="Beige"
-							SelectionMode="Single"
-							ItemsSource="{Binding  WifiNetworks}"
-							SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
-							ItemTemplate="{StaticResource viewInListTemplateSelector}"
-						>
-							<!--<ListView.Behaviors>
-                    <behaviorsPack:EventToCommandBehavior EventName="ItemSelected" Command="{Binding DeleteNetworkCommand}"
-                                  EventArgsPropertyPath="Item" />
-                </ListView.Behaviors>-->
-							<!--<ListView.GestureRecognizers>
-                    <PinchGestureRecognizer PinchUpdated="PinchGestureRecognizer_PinchUpdated"></PinchGestureRecognizer>
-                </ListView.GestureRecognizers>-->
-						</ListView>
+                        <ListView
+                            Grid.Row="1"
+                            x:Name="lstNetworks"
+                            SeparatorColor="Beige"
+                            SelectionMode="Single"
+                            ItemsSource="{Binding  WifiNetworks}"
+                            SelectedItem="{Binding SelectedNetwork, Mode=TwoWay}"
+                            ItemTemplate="{StaticResource viewInListTemplateSelector}"
+                        >
 
-						<StackLayout 
-							Grid.Row="2" 
-							x:Name="DetailsArea"  
-							Spacing="0" 
-							VerticalOptions="StartAndExpand"
-							BackgroundColor="DarkKhaki">
-							<Frame HasShadow="False" Padding="3" >
-								<Frame.Style>
-									<Style TargetType="Frame">
-										<Setter Property="BorderColor" Value="Maroon"></Setter>
-										<Style.Triggers>
-											<DataTrigger TargetType="Frame"  Binding="{Binding IsConnected}" Value="True" >
-												<Setter Property="BorderColor" Value="Lime" />
-											</DataTrigger>
-										</Style.Triggers>
-									</Style>
-								</Frame.Style>
-								<StackLayout BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" VerticalOptions="StartAndExpand">
-									<Grid  RowSpacing="0" ColumnSpacing="0" 
-										BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}"
-										>
-										<Grid.RowDefinitions>
-											<RowDefinition Height="35" />
-											<RowDefinition Height="50"/>
-											<RowDefinition Height="35" />
-											<RowDefinition />
-											<RowDefinition Height="35" />
-										</Grid.RowDefinitions>
+                        </ListView>
 
-										<StackLayout Grid.Row="0" Orientation="Horizontal">
-											<Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
-											<Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand"/>
-										</StackLayout>
-										<StackLayout Grid.Row="1" Orientation="Horizontal" HeightRequest="50">
-											<Label Text="Pwd:" HorizontalOptions="Start" />
-											<Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="Large" />
-										</StackLayout>
-										<StackLayout Grid.Row="2" Orientation="Horizontal">
-											<Label Text="Info:" HorizontalOptions="Start" />
-											<Entry Text="{Binding Provider}"  HorizontalOptions="FillAndExpand" FontSize="Micro"/>
-										</StackLayout>
-										<StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-											<StackLayout.Resources>
-												<Style TargetType="Label">
-													<Setter Property="FontSize" Value="Small"></Setter>
-												</Style>
-											</StackLayout.Resources>
-											<Label Text="{Binding LastCoordLat}"></Label>
-											<Label Text="{Binding LastCoordLong}"></Label>
-											<Label Text="{Binding LastCoordAlt}"></Label>
-										</StackLayout>
-										<StackLayout Grid.Row="4" Orientation="Horizontal" HorizontalOptions="FillAndExpand" HeightRequest="30">
-											<Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" HorizontalOptions="Start" />
-											<Button Text="WebAdm" Clicked="WebAdm_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" HorizontalOptions="End" />
-										</StackLayout>
-									</Grid>
-								</StackLayout>
-							</Frame>
-						</StackLayout>
-					</Grid>
-				</StackLayout>
+                        <StackLayout 
+                            Grid.Row="2" 
+                            x:Name="DetailsArea"  
+                            Spacing="0" 
+                            VerticalOptions="StartAndExpand"
+                            BackgroundColor="DarkKhaki">
+                            <Frame HasShadow="False" Padding="3" >
+                                <Frame.Style>
+                                    <Style TargetType="Frame">
+                                        <Setter Property="BorderColor" Value="Maroon"></Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Frame"  Binding="{Binding IsConnected}" Value="True" >
+                                                <Setter Property="BorderColor" Value="Lime" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Frame.Style>
+                                <StackLayout BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" VerticalOptions="StartAndExpand">
+                                    <Grid  RowSpacing="0" ColumnSpacing="0" 
+                                        BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}"
+                                        >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="35" />
+                                            <RowDefinition Height="50"/>
+                                            <RowDefinition Height="35" />
+                                            <RowDefinition />
+                                            <RowDefinition Height="35" />
+                                        </Grid.RowDefinitions>
 
-				<StackLayout IsVisible="{Binding IsBusy}" Padding="12"
-					 AbsoluteLayout.LayoutFlags="PositionProportional"
-					 AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1">
+                                        <StackLayout Grid.Row="0" Orientation="Horizontal">
+                                            <Label x:Name="ctlLOGVIEW" Text="{Binding Name}" HorizontalOptions="Start"/>
+                                            <Switch x:Name="ctlIsEnabled" IsToggled="{Binding Path=IsEnabled}" HorizontalOptions="FillAndExpand"/>
+                                        </StackLayout>
+                                        <StackLayout Grid.Row="1" Orientation="Horizontal" HeightRequest="50">
+                                            <Label Text="Pwd:" HorizontalOptions="Start" />
+                                            <Entry Text="{Binding Password}" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="Large" />
+                                        </StackLayout>
+                                        <StackLayout Grid.Row="2" Orientation="Horizontal">
+                                            <Label Text="Info:" HorizontalOptions="Start" />
+                                            <Entry Text="{Binding Provider}"  HorizontalOptions="FillAndExpand" FontSize="Micro"/>
+                                        </StackLayout>
+                                        <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                            <StackLayout.Resources>
+                                                <Style TargetType="Label">
+                                                    <Setter Property="FontSize" Value="Small"></Setter>
+                                                </Style>
+                                            </StackLayout.Resources>
+                                            <Label Text="{Binding LastCoordLat}"></Label>
+                                            <Label Text="{Binding LastCoordLong}"></Label>
+                                            <Label Text="{Binding LastCoordAlt}"></Label>
+                                        </StackLayout>
+                                        <StackLayout Grid.Row="4" Orientation="Horizontal" HorizontalOptions="FillAndExpand" HeightRequest="30">
+                                            <Button Text="Conn" Clicked="Conn_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" HorizontalOptions="Start" />
+                                            <Button Text="WebAdm" Clicked="WebAdm_Clicked" BindingContext="{x:Reference Name=ctlIsEnabled}"  IsEnabled="{Binding Path=IsToggled}" HorizontalOptions="End" />
+                                        </StackLayout>
+                                    </Grid>
+                                </StackLayout>
+                            </Frame>
+                        </StackLayout>
+                    </Grid>
+                </StackLayout>
 
-					<ActivityIndicator x:Name="pleaseWait"
+                <StackLayout IsVisible="{Binding IsBusy}" Padding="12"
+                     AbsoluteLayout.LayoutFlags="PositionProportional"
+                     AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1">
+
+                    <ActivityIndicator x:Name="pleaseWait"
                            IsRunning="{Binding IsBusy}"
                            IsVisible="{Binding IsBusy}"
                            VerticalOptions="Center" 
                            BackgroundColor="Black"
                            />
 
-					<Label Text="Loading..." HorizontalOptions="Center" TextColor="White"/>
+                    <Label Text="Loading..." HorizontalOptions="Center" TextColor="White"/>
 
-				</StackLayout>
-			</AbsoluteLayout>
-		</Frame>
-	</ContentPage>
+                </StackLayout>
+            </AbsoluteLayout>
+        </Frame>
+    </ContentPage>
 
     <ContentPage Title="Details">
         <StackLayout Orientation="Horizontal" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworks}}" >
-            <Label Text="Internal IP" HorizontalOptions="Start"></Label>
-            <Label Text="{Binding InternalIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
+            <Label Text="Router Web UI IP" HorizontalOptions="Start"></Label>
+            <Label Text="{Binding RouterWebUIIP}" FontAttributes="Bold" FontSize="Large" HorizontalOptions="Start" />
             <Label Text="Public IP" HorizontalOptions="Start"></Label>
             <Label Text="{Binding FirstConnectPublicIP}" FontAttributes="Bold" FontSize="Large" />
         </StackLayout>
@@ -366,23 +363,23 @@
                 <Label Text="Display with VPN only (ASUS?)" />
                 <Switch IsToggled="{Binding Path=WithVPNOnly}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
-			<StackLayout Orientation="Horizontal">
-				<Label Text="Shake for reloading" />
-				<Switch IsToggled="{Binding Path=UseShakeForRefresh}" HorizontalOptions="FillAndExpand"/>
-			</StackLayout>
-			<StackLayout Orientation="Horizontal">
-				<Label Text="Do Disconnect Before Refresh" />
-				<Switch IsToggled="{Binding Path=DoDisconnectBeforeRefresh}" HorizontalOptions="FillAndExpand"/>
-			</StackLayout>
-			<StackLayout Orientation="Horizontal">
-				<Label Text="Update description &amp; GPS only for empty" />
-				<Switch IsToggled="{Binding Path=UpdateOnlyEmptyInfo}" HorizontalOptions="FillAndExpand"/>
-			</StackLayout>
-			<StackLayout Orientation="Horizontal">
-				<Label Text="Use NIGHT Mode" />
-				<Switch IsToggled="{Binding Path=IsNightTheme}" HorizontalOptions="FillAndExpand"/>
-			</StackLayout>
-			<StackLayout Orientation="Horizontal">
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Shake for reloading" />
+                <Switch IsToggled="{Binding Path=UseShakeForRefresh}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Do Disconnect Before Refresh" />
+                <Switch IsToggled="{Binding Path=DoDisconnectBeforeRefresh}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Update description &amp; GPS only for empty" />
+                <Switch IsToggled="{Binding Path=UpdateOnlyEmptyInfo}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Use NIGHT Mode" />
+                <Switch IsToggled="{Binding Path=IsNightTheme}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
                 <Label x:Name="lblLastError" TextColor="Red"></Label>
                 <Label x:Name="lblSysInfo" FontSize="Micro"></Label>
             </StackLayout>
@@ -412,28 +409,27 @@
         </StackLayout>
     </ContentPage>
 
-	<ContentPage Title="Lookup">
-		<StackLayout Spacing="0"  AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,0,1,1" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}">
-			<Label Text="Name or BssID:" HorizontalOptions="Start" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"/>
-			<Entry HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="Large" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"
-				   Text="{Binding WiFiNameOrBssIdLookup, Mode=TwoWay}">
-				<Entry.Behaviors>
-					<behaviorsPack:EventToCommandBehavior EventName="TextChanged" Command="{Binding DoLookupCommand}" 
-					 />
-				</Entry.Behaviors>
-			</Entry>
-			<ListView
-				SeparatorColor="Beige"
-				SelectionMode="Single"
-				x:Name="lstNetworksInLookup"
-				ItemsSource="{Binding  WifiNetworksInLookup}"
-				ItemTemplate="{StaticResource viewInListTemplateSelector}"
-				BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"
-			>
-			</ListView>
-			<Label Text="{Binding Path=Password}" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworksInLookup}}"  BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" 
-				   HorizontalOptions="CenterAndExpand" FontSize="Large" FontAttributes="Bold"
-				   VerticalOptions="CenterAndExpand"/>
-		</StackLayout>
-	</ContentPage>
+    <ContentPage Title="Lookup">
+        <StackLayout Spacing="0"  AbsoluteLayout.LayoutFlags="All" AbsoluteLayout.LayoutBounds="0,0,1,1" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}">
+            <Label Text="Name or BssID:" HorizontalOptions="Start" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"/>
+            <Entry x:Name="txtNetworkBssIdOrName" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="Large" BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"
+                   Text="{Binding WiFiNameOrBssIdLookup, Mode=TwoWay}">
+            </Entry>
+            <Button Text="Search" 
+                    Command="{Binding DoLookupCommand}" 
+                    CommandParameter="{Binding Source={x:Reference txtNetworkBssIdOrName}, Path=Text}"></Button>
+            <ListView
+                SeparatorColor="Beige"
+                SelectionMode="Single"
+                x:Name="lstNetworksInLookup"
+                ItemsSource="{Binding  WifiNetworksInLookup}"
+                ItemTemplate="{StaticResource viewInListTemplateSelector}"
+                BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}"
+            >
+            </ListView>
+            <Label Text="{Binding Path=Password}" BindingContext="{Binding  SelectedItem,Source={x:Reference lstNetworksInLookup}}"  BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" 
+                   HorizontalOptions="CenterAndExpand" FontSize="Large" FontAttributes="Bold"
+                   VerticalOptions="CenterAndExpand"/>
+        </StackLayout>
+    </ContentPage>
 </TabbedPage>

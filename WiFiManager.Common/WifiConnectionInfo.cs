@@ -9,7 +9,7 @@ namespace WiFiManager.Common
         public string FirstConnectMac;
         public DateTime FirstConnectWhen;
         public string FirstConnectPublicIP;
-        public string InternalIP;
+        public string RouterWebUIIP;
         public double FirstCoordLat;
         public double FirstCoordLong;
         public double FirstCoordAlt;

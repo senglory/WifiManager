@@ -17,6 +17,7 @@ namespace WiFiManager.Common.BusinessObjects
         public string BssID { get; set; }
         public string NetworkType { get; set; }
         public string Password { get; set; }
+        public int Channel { get; set; }
         public string WpsPin { get; set; }
         public DateTime? FirstConnectWhen { get; set; }
         public string FirstConnectMac { get; set; }
@@ -30,13 +31,13 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        string internalIP;
-        public string InternalIP
+        string routerWebUIIP;
+        public string RouterWebUIIP
         {
-            get { return internalIP; }
+            get { return routerWebUIIP; }
             set
             {
-                SetProperty(ref internalIP, value, nameof(InternalIP));
+                SetProperty(ref routerWebUIIP, value, nameof(RouterWebUIIP));
             }
         }
 
@@ -215,132 +216,132 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-		string[] _vulnerableBssIds = new string[] {
-			"00:0E:8F",
-			"00:1F:CE",
-			"00:18:E7",
-			"08:C6:B3",
-			"04:BF:6D",
-			"84:C9:B2",
-			"F8:C0:91",
-			"EE:43:F6",
-			"EC:43:F6",
-			"EA:28:5D",
-			"EA:37:7A",
-			"E8:CD:2D",
-			"E4:F4:C6",
-			"E4:BE:ED",
-			"E0:3F:49",
-			"D8:50:E6",
-			"D8:EB:97",
-			"D4:BF:7F",
-			"D4:6E:0E",
-			"D4:21:22",
-			"CC:5D:4E",
-			"C8:6C:87",
-			"C8:60:00",
-			"C8:3A:35",
-			"C0:25:E9",
-			"B4:75:0E",
-			"B0:B2:DC",
-			"B0:4E:26",
-			"90:EF:68",
-			"90:94:E4",
-			"92:7B:EF",
-			"94:4A:0C",
-			"70:4D:7B",
-			"78:44:76",
-			"74:DA:38",
-			"60:31:97",
-			"60:A4:4C", // ASUS
-			"64:6E:EA",
-			"6A:28:5D",
-			"5C:F4:AB",
-			"50:67:F0",
-			"50:67:F0",
-			"50:46:5D", // ASUS
-			"4E:5D:4E",
-			"4C:60:DE",
-			"40:4A:03",
-			"40:16:7E",
-					
-			"30:85:A9", // ASUS
+        string[] _vulnerableBssIds = new string[] {
+            "00:0E:8F",
+            "00:1F:CE",
+            "00:18:E7",
+            "08:C6:B3",
+            "04:BF:6D",
+            "84:C9:B2",
+            "F8:C0:91",
+            "EE:43:F6",
+            "EC:43:F6",
+            "EA:28:5D",
+            "EA:37:7A",
+            "E8:CD:2D",
+            "E4:F4:C6",
+            "E4:BE:ED",
+            "E0:3F:49",
+            "D8:50:E6",
+            "D8:EB:97",
+            "D4:BF:7F",
+            "D4:6E:0E",
+            "D4:21:22",
+            "CC:5D:4E",
+            "C8:6C:87",
+            "C8:60:00",
+            "C8:3A:35",
+            "C0:25:E9",
+            "B4:75:0E",
+            "B0:B2:DC",
+            "B0:4E:26",
+            "90:EF:68",
+            "90:94:E4",
+            "92:7B:EF",
+            "94:4A:0C",
+            "70:4D:7B",
+            "78:44:76",
+            "74:DA:38",
+            "60:31:97",
+            "60:A4:4C", // ASUS
+            "64:6E:EA",
+            "6A:28:5D",
+            "5C:F4:AB",
+            "50:67:F0",
+            "50:67:F0",
+            "50:46:5D", // ASUS
+            "4E:5D:4E",
+            "4C:60:DE",
+            "40:4A:03",
+            "40:16:7E",
                     
-			"38:2C:4A", // ASUS
+            "30:85:A9", // ASUS
                     
-			"38:D5:47", // ASUS
+            "38:2C:4A", // ASUS
                     
-			"F8:32:E4", // ASUS
-			"FE:F5:28", // Keenetic
-			"28:28:5D", // Keenetic
-			"28:C6:8E", // Keenetic
-			"2C:56:DC",
-			"1C:B7:2C",
-			"1C:7E:E5",
-			"18:D6:C7",
-			"14:A9:E3",
-			"10:C3:7B",
-			"10:7B:EF", // Keenetic
-			"1C:74:0D", // Keenetic
-		};  
+            "38:D5:47", // ASUS
+                    
+            "F8:32:E4", // ASUS
+            "FE:F5:28", // Keenetic
+            "28:28:5D", // Keenetic
+            "28:C6:8E", // Keenetic
+            "2C:56:DC",
+            "1C:B7:2C",
+            "1C:7E:E5",
+            "18:D6:C7",
+            "14:A9:E3",
+            "10:C3:7B",
+            "10:7B:EF", // Keenetic
+            "1C:74:0D", // Keenetic
+        };  
 
         public bool IsVulnerable
         {
             get
             {
-				return !string.IsNullOrWhiteSpace(BssID)
-					&&
-					NetworkType.Contains("WPS")
-					&&
-					_vulnerableBssIds.Any(w => BssID.StartsWithNullSafe(w));
+                return !string.IsNullOrWhiteSpace(BssID)
+                    &&
+                    NetworkType.Contains("WPS")
+                    &&
+                    _vulnerableBssIds.Any(w => BssID.StartsWithNullSafe(w));
             }
         }
 
-		string[] _bssIdsWithVPN = new string[] {
-				"08:60:6E",
-				"10:7B:44",
-				"10:BF:48",
-				"10:C3:7B",
-				"14:DD:A9",
-				"18:31:BF",
-				"1C:B7:2C",
-				"20:CF:30",
-				"2C:4D:54",
-				"2C:56:DC",
-				"2C:FD:A1",
-				"30:5A:3A",
-				"30:85:A9",
-				"34:97:F6",
-				"38:2C:4A",
-				"38:D5:47",
-				"40:16:7E",
-				"50:46:5D",
-				"50:E6:5F",
-				"54:04:A6",
-				"54:A0:50",
-				"60:45:CB",
-				"60:A4:4C",
-				"70:4D:7B",
-				"72:4D:7B",
-				"74:D0:2B",
-				"78:24:AF",
-				"88:D7:F6",
-				"90:57:84",
-				"90:E6:BA",
-				"9C:5C:8E",
-				"AC:9E:17",
-				"AC:22:0B",
-				"BC:AE:C5",
-				"BC:EE:7B",
-				"C8:60:00",
-				"D8:50:E6",
-				"E0:3F:49",
-				"E0:CB:4E",
-				"F0:B4:29"
-		};
+        string[] _bssIdsWithVPN = new string[] {
+                "08:60:6E",
+                "10:7B:44",
+                "10:BF:48",
+                "10:C3:7B",
+                "14:DD:A9",
+                "18:31:BF",
+                "1C:B7:2C",
+                "20:CF:30",
+                "2C:4D:54",
+                "2C:56:DC",
+                "2C:FD:A1",
+                "30:5A:3A",
+                "30:85:A9",
+                "34:97:F6",
+                "38:2C:4A",
+                "38:D5:47",
+                "40:16:7E",
+                "50:46:5D",
+                "50:E6:5F",
+                "54:04:A6",
+                "54:A0:50",
+                "60:45:CB",
+                "60:A4:4C",
+                "70:4D:7B",
+                "72:4D:7B",
+                "74:D0:2B",
+                "78:24:AF",
+                "88:D7:F6",
+                "90:57:84",
+                "90:E6:BA",
+                "9C:5C:8E",
+                "AC:9E:17",
+                "AC:22:0B",
+                "BC:AE:C5",
+                "BC:EE:7B",
+                "C8:60:00",
+                "D8:50:E6",
+                "E0:3F:49",
+                "E0:CB:4E",
+                "F0:B4:29"
+        };
 
 
-		public bool IsOpen
+        public bool IsOpen
         {
             get
             {
@@ -352,7 +353,7 @@ namespace WiFiManager.Common.BusinessObjects
         {
             get
             {
-				return _bssIdsWithVPN.Any(w => BssID.StartsWithNullSafe(w));
+                return _bssIdsWithVPN.Any(w => BssID.StartsWithNullSafe(w));
             }
         }
 
@@ -376,11 +377,11 @@ namespace WiFiManager.Common.BusinessObjects
 
         }
 
-		public bool HasCoords{
-			get{
-				return LastCoordLat.HasValue && LastCoordLong.HasValue && LastCoordAlt.HasValue;
-			}
-		}
+        public bool HasCoords{
+            get{
+                return LastCoordLat.HasValue && LastCoordLong.HasValue && LastCoordAlt.HasValue;
+            }
+        }
 
         public void TryUpdateRecentCoords(Tuple<double, double, double> coords2)
         {
@@ -420,6 +421,8 @@ namespace WiFiManager.Common.BusinessObjects
                 FirstCoordLong = info2.FirstCoordLong;
                 FirstCoordAlt = info2.FirstCoordAlt;
             }
+            // always actualize info about Web UI
+            RouterWebUIIP = info2.RouterWebUIIP;
         }
 
         public override string ToString()
@@ -461,9 +464,10 @@ namespace WiFiManager.Common.BusinessObjects
             dtoDst.IsEnabled = IsEnabled;
             dtoDst.Password = Password;
             dtoDst.Provider = Provider;
-			dtoDst.WpsPin = WpsPin;
+            dtoDst.WpsPin = WpsPin;
             dtoDst.FirstConnectWhen = FirstConnectWhen;
             dtoDst.FirstConnectPublicIP = FirstConnectPublicIP;
+            dtoDst.RouterWebUIIP = RouterWebUIIP;
             dtoDst.FirstConnectMac = FirstConnectMac;
             dtoDst.FirstCoordLat = FirstCoordLat;
             dtoDst.FirstCoordLong = FirstCoordLong;

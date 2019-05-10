@@ -17,7 +17,8 @@ namespace WiFiManager.Common.BusinessObjects
         public DateTime? FirstConnectWhen { get; set; }
         public string FirstConnectMac { get; set; }
         public string FirstConnectPublicIP { get; set; }
-        public double? FirstCoordLat { get; set; }
+		public string RouterWebUIIP { get; set; }
+		public double? FirstCoordLat { get; set; }
         public double? FirstCoordLong { get; set; }
         public double? FirstCoordAlt { get; set; }
         public double? LastCoordLat { get; set; }

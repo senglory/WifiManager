@@ -56,8 +56,8 @@ namespace WiFiManager.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity,
         Android.Hardware.ISensorEventListener,
-		Android.Locations.ILocationListener,
-		IWifiManagerOperations
+        Android.Locations.ILocationListener,
+        IWifiManagerOperations
     {
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
@@ -68,10 +68,10 @@ namespace WiFiManager.Droid
         static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
 
         delegate bool FindDelegate(WifiNetworkDto nw, WifiNetworkDto nw2);
-		delegate bool FindDelegateBulk( WifiNetworkDto nw2);
+        delegate bool FindDelegateBulk( WifiNetworkDto nw2);
 
 
-		string _filePathCSV
+        string _filePathCSV
         {
             get {
                 var sdCardPathDCIM = GetSDCardDir();
@@ -101,26 +101,26 @@ namespace WiFiManager.Droid
         static  IMapper _mapper;
         static  CultureInfo _cultUS;
         static  CultureInfo _cultRU;
-		
-		LocationManager _locationManager;
-		LocationManager Manager
-		{
-			get
-			{
-				if (_locationManager == null)
-					_locationManager = (LocationManager)Android.App.Application.Context.GetSystemService(Context.LocationService);
+        
+        LocationManager _locationManager;
+        LocationManager Manager
+        {
+            get
+            {
+                if (_locationManager == null)
+                    _locationManager = (LocationManager)Android.App.Application.Context.GetSystemService(Context.LocationService);
 
-				return _locationManager;
-			}
-		}
-		string[] Providers => Manager.GetProviders(enabledOnly: false).ToArray();
-		string[] IgnoredProviders => new string[] { LocationManager.PassiveProvider, "local_database" };
+                return _locationManager;
+            }
+        }
+        string[] Providers => Manager.GetProviders(enabledOnly: false).ToArray();
+        string[] IgnoredProviders => new string[] { LocationManager.PassiveProvider, "local_database" };
 
-		Location _location;
+        Location _location;
 
 
 
-		protected override void OnCreate(Bundle bundle)
+        protected override void OnCreate(Bundle bundle)
         {
             _cultUS = new CultureInfo("en-us");
             _cultRU = new CultureInfo("ru-ru");
@@ -160,39 +160,39 @@ namespace WiFiManager.Droid
                 Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with SensorManager " + ex.Message );
             }
 
-			// GPS listener
-			try
-			{
+            // GPS listener
+            try
+            {
 
-				var targetsMOrHigher = ApplicationInfo.TargetSdkVersion >= Android.OS.BuildVersionCodes.M;
-				if (targetsMOrHigher)
-				{
-					if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.AccessFineLocation) !=
-						Android.Content.PM.Permission.Granted)
-					{
-						ActivityCompat.RequestPermissions(this,
-							new[] { Manifest.Permission.AccessFineLocation, Manifest.Permission.AccessCoarseLocation }, 12);
-					}
-				}
+                var targetsMOrHigher = ApplicationInfo.TargetSdkVersion >= Android.OS.BuildVersionCodes.M;
+                if (targetsMOrHigher)
+                {
+                    if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.AccessFineLocation) !=
+                        Android.Content.PM.Permission.Granted)
+                    {
+                        ActivityCompat.RequestPermissions(this,
+                            new[] { Manifest.Permission.AccessFineLocation, Manifest.Permission.AccessCoarseLocation }, 12);
+                    }
+                }
 
-				Xamarin.Essentials.Platform.Init(this, bundle);
+                Xamarin.Essentials.Platform.Init(this, bundle);
 
-				var locationCriteria = new Criteria();
+                var locationCriteria = new Criteria();
 
-				locationCriteria.Accuracy = Accuracy.Medium;
-				locationCriteria.PowerRequirement = Power.High;
+                locationCriteria.Accuracy = Accuracy.Medium;
+                locationCriteria.PowerRequirement = Power.High;
 
-				// get provider: GPS, Network, etc.
-				var locationProvider = Manager.GetBestProvider(locationCriteria, true);
+                // get provider: GPS, Network, etc.
+                var locationProvider = Manager.GetBestProvider(locationCriteria, true);
 
-				Manager.RequestLocationUpdates("gps", 1000, 1, this);
-			}
-			catch (Exception ex)
-			{
-				Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with RequestLocationUpdates " + ex.Message);
-			}
+                Manager.RequestLocationUpdates("gps", 1000, 1, this);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with RequestLocationUpdates " + ex.Message);
+            }
 
-			Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -202,9 +202,9 @@ namespace WiFiManager.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-			//Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            //Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
 
@@ -236,14 +236,14 @@ namespace WiFiManager.Droid
                 locator.DesiredAccuracy = Constants.GPS_ACCURACY;
                 
                 var includeHeading = true;
-				var gpsStatus = Manager.GetGpsStatus(null);
-				var prov = Manager.GetProvider("gps");
+                var gpsStatus = Manager.GetGpsStatus(null);
+                var prov = Manager.GetProvider("gps");
 
-				var isSat = prov.RequiresSatellite();
+                var isSat = prov.RequiresSatellite();
 
-				_location = Manager.GetLastKnownLocation("gps");
+                _location = Manager.GetLastKnownLocation("gps");
 
-				//var position = await locator.GetPositionAsync(
+                //var position = await locator.GetPositionAsync(
     //                TimeSpan.FromSeconds(Constants.GPS_TIMEOUT),
     //                null,
     //                includeHeading
@@ -298,29 +298,31 @@ namespace WiFiManager.Droid
             return wifiNetworks;
         }
 
-		IEnumerable<WifiNetworkDto> FindInternal(FindDelegateBulk findMethod)
-		{
-			using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
-			{
-				using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
-				{
-					// skip header
-					var ss2 = fr.ReadLine();
-					while (!fr.EndOfStream)
-					{
-						var lineFromCSV = fr.ReadLine();
-						var wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+        IEnumerable<WifiNetworkDto> FindInternal(FindDelegateBulk findMethod)
+        {
+            using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
+            {
+                using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
+                {
+                    // skip header
+                    var ss2 = fr.ReadLine();
+                    while (!fr.EndOfStream)
+                    {
+                        var lineFromCSV = fr.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineFromCSV))
+                            continue;
+                        var wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
 
-						if (findMethod( wifiDtoFromFile))
-							yield return wifiDtoFromFile;
-					}
-				}
-			}
-		}
+                        if (findMethod( wifiDtoFromFile))
+                            yield return wifiDtoFromFile;
+                    }
+                }
+            }
+        }
 
 
 
-		WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
+        WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
         {
             WifiNetworkDto wifiDtoFromFile;
 
@@ -338,6 +340,8 @@ namespace WiFiManager.Droid
                             while (!fr.EndOfStream)
                             {
                                 var lineFromCSV = fr.ReadLine();
+                                if (string.IsNullOrWhiteSpace(lineFromCSV))
+                                    continue;
                                 wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
                                 _CachedCSVNetworkList.Add(wifiDtoFromFile);
                             }
@@ -372,6 +376,8 @@ namespace WiFiManager.Droid
                         while (!fr.EndOfStream)
                         {
                             var lineFromCSV = fr.ReadLine();
+                            if (string.IsNullOrWhiteSpace(lineFromCSV))
+                                continue;
                             wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
 
                             if (findMethod(nw, wifiDtoFromFile))
@@ -422,38 +428,38 @@ namespace WiFiManager.Droid
             return res;
         }
 
-		public IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId)
-		{
-			IEnumerable<WifiNetworkDto> res = new List<WifiNetworkDto>();
+        public IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId)
+        {
+            IEnumerable<WifiNetworkDto> res = new List<WifiNetworkDto>();
 
-			try
-			{
-				if (!System.IO.File.Exists(_filePathCSV))
-				{
-					return null;
-				}
+            try
+            {
+                if (!System.IO.File.Exists(_filePathCSV))
+                {
+                    return null;
+                }
 
-				res = FindInternal( (nw1) => {
-					return nw1.Name.StartsWithNullSafe(wifiNameOrBssId);
-				});
-				if (res.Count() == 0)
-				{
-					res = FindInternal(( nw1) =>
-					{
-						return nw1.BssID.StartsWithNullSafe(wifiNameOrBssId);
-					});
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error("WiFiManager", "FindWifiInCSV " + ex.Message);
-			}
+                res = FindInternal( (nw1) => {
+                    return nw1.Name.StartsWithNullSafe(wifiNameOrBssId);
+                });
+                if (res.Count() == 0)
+                {
+                    res = FindInternal(( nw1) =>
+                    {
+                        return nw1.BssID.StartsWithNullSafe(wifiNameOrBssId);
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("WiFiManager", "FindWifiInCSV " + ex.Message);
+            }
 
-			return res;
-		}
+            return res;
+        }
 
 
-		public bool IsConnected()
+        public bool IsConnected()
         {
             var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
             var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
@@ -495,60 +501,54 @@ namespace WiFiManager.Droid
             WifiNetwork nw = null;
             string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
 
-            if (arrs.Length >= 10)
+            nw = new WifiNetwork
             {
-                nw = new WifiNetwork
-                {
-                    BssID = bssid,
-                    Name = arrs[0],
-                    Password = arrs[2],
-                    IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
-                    NetworkType = arrs[4],
-                    Provider = arrs[5],
-                    WpsPin = arrs[6],
-                    FirstConnectPublicIP = arrs[8],
-                    FirstConnectMac = arrs[9],
-                    Level = -1 * Constants.NO_SIGNAL_LEVEL
-                };
-                if (!string.IsNullOrEmpty (arrs[10]))
-                    nw.FirstCoordLat = Convert.ToDouble(arrs[10], _cultUS);
-                if (!string.IsNullOrEmpty(arrs[11]))
-                    nw.FirstCoordLong = Convert.ToDouble(arrs[11], _cultUS);
-                if (!string.IsNullOrEmpty(arrs[12]))
-                    nw.FirstCoordAlt = Convert.ToDouble(arrs[12], _cultUS);
+                BssID = bssid,
+                Name = arrs[0],
+                Password = arrs[2],
+                IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
+                NetworkType = arrs[4],
+                Provider = arrs[5],
+                WpsPin = arrs[6],
+                FirstConnectPublicIP = arrs[8],
+                RouterWebUIIP = arrs[9],
+                FirstConnectMac = arrs[10],
+                Level = -1 * Constants.NO_SIGNAL_LEVEL
+            };
+            if (!string.IsNullOrEmpty (arrs[11]))
+                nw.FirstCoordLat = Convert.ToDouble(arrs[11], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[12]))
+                nw.FirstCoordLong = Convert.ToDouble(arrs[12], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[13]))
+                nw.FirstCoordAlt = Convert.ToDouble(arrs[13], _cultUS);
 
-                if (!string.IsNullOrEmpty(arrs[13]))
-                    nw.LastCoordLat = Convert.ToDouble(arrs[13], _cultUS);
-                if (!string.IsNullOrEmpty(arrs[14]))
-                    nw.LastCoordLong = Convert.ToDouble(arrs[14], _cultUS);
-                if (!string.IsNullOrEmpty(arrs[15]))
-                    nw.LastCoordAlt = Convert.ToDouble(arrs[15], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[14]))
+                nw.LastCoordLat = Convert.ToDouble(arrs[14], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[15]))
+                nw.LastCoordLong = Convert.ToDouble(arrs[15], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[16]))
+                nw.LastCoordAlt = Convert.ToDouble(arrs[16], _cultUS);
 
-                // get first connection date
-                if (!string.IsNullOrEmpty(arrs[7]))
+            // get first connection date
+            if (!string.IsNullOrEmpty(arrs[7]))
+            {
+                try
                 {
-                    try
-                    {
-                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultUS);
-                    }
-                    catch (Exception)
-                    {
-                        nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
-                    }
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultUS);
                 }
-
-                // prevent from further breaking of list load because of ';' in name or pwd or comments
-                var nameAdj = nw.Name.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-                var passwordAdj = nw.Password.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-                var commentsAdj = nw.Provider.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-                nw.Name = nameAdj;
-                nw.Password = passwordAdj;
-                nw.Provider = commentsAdj;
+                catch (Exception)
+                {
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
+                }
             }
-			else
-			{
-				System.Diagnostics.Debug.WriteLine(s);
-			}
+
+            // prevent from further breaking of list load because of ';' in name or pwd or comments
+            var nameAdj = nw.Name.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            var passwordAdj = nw.Password.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            var commentsAdj = nw.Provider.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            nw.Name = nameAdj;
+            nw.Password = passwordAdj;
+            nw.Provider = commentsAdj;
 
             var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
             return wifiDtoFromFile;
@@ -582,13 +582,14 @@ namespace WiFiManager.Droid
                 {
                     fsBAK = new FileStream(_filePathCSVBAK, FileMode.Open);
                 }
-				var s = "";
+                var s = "";
                 using (var fsw = new FileStream(_filePathCSV, FileMode.Create))
                 {
                     using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                     {
                         // write header
-                        fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;FirstCoordAlt;LastCoordLat;LastCoordLong;LastCoordAlt;");
+                        fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;RouterWebUIIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;FirstCoordAlt;LastCoordLat;LastCoordLong;LastCoordAlt;");
+
 
                         if (csvAlreadyExists)
                         {
@@ -614,7 +615,7 @@ namespace WiFiManager.Droid
                                         var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
                                         var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
                                         var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                        fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                        fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                 }
@@ -632,7 +633,7 @@ namespace WiFiManager.Droid
                                 var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
                                 var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
                                 var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
                             }
                         }
                     }
@@ -665,106 +666,105 @@ namespace WiFiManager.Droid
             WifiConnectionInfo info2 = null;
 
 
-			if (TryConnectViaMethod(dto, ref info2))
-			{
-
-				var coords = await GetCoordsAsync();
-				if (coords != null)
-				{
-					info2.FirstCoordLat = coords.Item1;
-					info2.FirstCoordLong = coords.Item2;
-					info2.FirstCoordAlt = coords.Item3;
-					info2.FirstConnectWhen = DateTime.Now;
-				}
-				dto.InternalIP = info2.InternalIP;
-			}
+            if (TryConnectViaMethod(dto, ref info2))
+            {
+                var coords = await GetCoordsAsync();
+                if (coords != null)
+                {
+                    info2.FirstCoordLat = coords.Item1;
+                    info2.FirstCoordLong = coords.Item2;
+                    info2.FirstCoordAlt = coords.Item3;
+                    info2.FirstConnectWhen = DateTime.Now;
+                }
+                info2.RouterWebUIIP = "http://" + info2.RouterWebUIIP;
+            }
             return info2;
         }
 
-		bool TryConnectViaMethod(WifiNetworkDto dto, ref WifiConnectionInfo info2)
-		{
-			string bssid = dto.BssID;
-			string ssid = dto.Name;
-			string password = dto.Password;
-			var formattedSsid = $"\"{ssid}\"";
-			var formattedPassword = $"\"{password}\"";
+        bool TryConnectViaMethod(WifiNetworkDto dto, ref WifiConnectionInfo info2)
+        {
+            string bssid = dto.BssID;
+            string ssid = dto.Name;
+            string password = dto.Password;
+            var formattedSsid = $"\"{ssid}\"";
+            var formattedPassword = $"\"{password}\"";
 
 
 
-			var wifiConfig = new WifiConfiguration
-			{
-				Bssid = bssid,
-				Ssid = formattedSsid,
-				Priority = Constants.WIFI_CONFIG_PRIORITY
-			};
+            var wifiConfig = new WifiConfiguration
+            {
+                Bssid = bssid,
+                Ssid = formattedSsid,
+                Priority = Constants.WIFI_CONFIG_PRIORITY
+            };
 
-			if (dto.NetworkType.Contains("[WEP]"))
-			{
-				// for WEP
-				wifiConfig.WepKeys[0] = formattedPassword;
+            if (dto.NetworkType.Contains("[WEP]"))
+            {
+                // for WEP
+                wifiConfig.WepKeys[0] = formattedPassword;
 
-				wifiConfig.WepTxKeyIndex = 0;
-				wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
+                wifiConfig.WepTxKeyIndex = 0;
+                wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
 
-				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
-				wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
-				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Wpa);
+                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
+                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
+                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Wpa);
 
-				wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
-			}
-			else
-			if (dto.NetworkType.Contains("[WPA"))
-			{
-				//wifiConfig.AllowKeyManagement.Set((int)KeyManagementType.WpaPsk);
-				wifiConfig.PreSharedKey = formattedPassword;
-			}
-			else
-			{
-				// open networks
-				wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
-				wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
-			}
+                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
+            }
+            else
+            if (dto.NetworkType.Contains("[WPA"))
+            {
+                //wifiConfig.AllowKeyManagement.Set((int)KeyManagementType.WpaPsk);
+                wifiConfig.PreSharedKey = formattedPassword;
+            }
+            else
+            {
+                // open networks
+                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
+                wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
+            }
 
 
-			var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
-			var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
-			var ni1 = connManager.ActiveNetworkInfo;
+            var wifiManager = (WifiManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.WifiService);
+            var connManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Android.Content.Context.ConnectivityService);
+            var ni1 = connManager.ActiveNetworkInfo;
 
-			if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
-			{
-				//WifiConnectionInfo info = new WifiConnectionInfo
-				//{
-				//    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+            if (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi)
+            {
+                //WifiConnectionInfo info = new WifiConnectionInfo
+                //{
+                //    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
 
-				//};
-				return false;
-			}
-			else
-			{
-				wifiManager.SetWifiEnabled(true);
-				var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
-				var bd = wifiManager.Disconnect();
-				var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
-				var brc = wifiManager.Reconnect();
+                //};
+                return false;
+            }
+            else
+            {
+                wifiManager.SetWifiEnabled(true);
+                var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
+                var bd = wifiManager.Disconnect();
+                var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
+                var brc = wifiManager.Reconnect();
 
-				var gwAddr = (wifiManager.DhcpInfo.Gateway & 0xFF) + "." +
-					((wifiManager.DhcpInfo.Gateway >> 8) & 0xFF) + "." +
-					((wifiManager.DhcpInfo.Gateway >> 16) & 0xFF) + "." +
-					((wifiManager.DhcpInfo.Gateway >> 24) & 0xFF);
-				info2 = new WifiConnectionInfo
-				{
-					FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
-					// https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
-					InternalIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
-				};
-			}
+                var gwAddr = (wifiManager.DhcpInfo.Gateway & 0xFF) + "." +
+                    ((wifiManager.DhcpInfo.Gateway >> 8) & 0xFF) + "." +
+                    ((wifiManager.DhcpInfo.Gateway >> 16) & 0xFF) + "." +
+                    ((wifiManager.DhcpInfo.Gateway >> 24) & 0xFF);
+                info2 = new WifiConnectionInfo
+                {
+                    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+                    // https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
+                    RouterWebUIIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
+                };
+            }
 
-			var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" && info2.InternalIP != "127.0.0.1";
+            var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" && info2.RouterWebUIIP != "127.0.0.1";
 
-			return isConnectedToAP;
-		}
+            return isConnectedToAP;
+        }
 
-		public async Task DisConnectAsync()
+        public async Task DisConnectAsync()
         {
             await Task.Run(() => DisConnect());
         }
@@ -1060,26 +1060,26 @@ namespace WiFiManager.Droid
             });
         }
 
-		public void OnLocationChanged(Location location)
-		{
-			_location = location;
-		}
+        public void OnLocationChanged(Location location)
+        {
+            _location = location;
+        }
 
-		public void OnProviderDisabled(string provider)
-		{
-			//throw new NotImplementedException();
-		}
+        public void OnProviderDisabled(string provider)
+        {
+            //throw new NotImplementedException();
+        }
 
-		public void OnProviderEnabled(string provider)
-		{
-			//throw new NotImplementedException();
-		}
+        public void OnProviderEnabled(string provider)
+        {
+            //throw new NotImplementedException();
+        }
 
-		public void OnStatusChanged(string provider, [GeneratedEnum] Availability status, Bundle extras)
-		{
-			//throw new NotImplementedException();
-		}
-		#endregion
-	}
+        public void OnStatusChanged(string provider, [GeneratedEnum] Availability status, Bundle extras)
+        {
+            //throw new NotImplementedException();
+        }
+        #endregion
+    }
 }
 

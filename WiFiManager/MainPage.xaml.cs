@@ -61,7 +61,7 @@ namespace WiFiManager
             // get internal IP
             string ipaddress = DependencyService.Get<IIPAddressManager>().GetIPAddress();
             {
-                nw.InternalIP = ipaddress;
+                nw.RouterWebUIIP = ipaddress;
             }
             // get external IP (for the very first connection to the particular network)
             if (string.IsNullOrEmpty(nw.FirstConnectPublicIP))
@@ -189,8 +189,12 @@ namespace WiFiManager
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
                 var wi = await mgr.ConnectAsync(nw);
-
-                nw.TryUpdateFirstConnectionInfo(wi);
+				// successfull connection attempt - update info in CSV
+				if (wi != null)
+				{
+					nw.TryUpdateFirstConnectionInfo(wi);
+					mpv.DoSave(nw);
+				}
             }
             catch (Exception ex)
             {
@@ -207,7 +211,7 @@ namespace WiFiManager
 		void WebAdm_Clicked(object sender, EventArgs e){
 			var mpv = this.BindingContext as MainPageVM;
 
-			Device.OpenUri(new Uri("http://" + mpv.SelectedNetwork.InternalIP));
+			Device.OpenUri(new Uri(mpv.SelectedNetwork.RouterWebUIIP));
 		}
 
 
@@ -309,7 +313,24 @@ namespace WiFiManager
             }
         }
 
-        private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
+		void MenuItem_AddToSaveList_Clicked(object sender, EventArgs e)
+		{
+			try
+			{
+				var bo = sender as BindableObject;
+				var mpv = this.BindingContext as MainPageVM;
+				var dto = bo.BindingContext as WifiNetworkDto;
+
+				mpv.WifiNetworksSaveList.TryAdd(dto);
+			}
+			catch (Exception ex)
+			{
+
+				var qq = 555;
+			}
+		}
+
+		private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
         {
             var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
