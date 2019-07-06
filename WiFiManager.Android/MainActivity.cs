@@ -62,7 +62,6 @@ namespace WiFiManager.Droid
         const int RC_WRITE_EXTERNAL_STORAGE_PERMISSION = 1000;
         const int RC_READ_EXTERNAL_STORAGE_PERMISSION = 1100;
         const int RC_DELETE_STORAGE_FILE = 1200;
-        const string SEMICOLON_REPLACEMENT_IN_CSV = @"\x3B";
 
         static readonly string TAG = "WiFiManager";
         static readonly string[] PERMISSIONS_TO_REQUEST = { Manifest.Permission.WriteExternalStorage };
@@ -88,20 +87,16 @@ namespace WiFiManager.Droid
             }
         }
 
-        string _filePathTemplateJSON
+        string _filePathCSVinBluetooth
         {
             get
             {
-                var sdCardPathDCIM = GetSDCardDir();
-                return Path.Combine(sdCardPathDCIM, "WIFINETWORKS-{0}.JSON");
+                var sdCardPathBluetooth = "/storage/sdcard0/bluetooth/";
+                return Path.Combine(sdCardPathBluetooth, "WIFINETWORKS.csv");
             }
         }
 
-        static  MapperConfiguration _config;
-        static  IMapper _mapper;
-        static  CultureInfo _cultUS;
-        static  CultureInfo _cultRU;
-        
+
         LocationManager _locationManager;
         LocationManager Manager
         {
@@ -122,22 +117,9 @@ namespace WiFiManager.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
-            _cultUS = new CultureInfo("en-us");
-            _cultRU = new CultureInfo("ru-ru");
-            _config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
-                cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
-                cfg.IgnoreUnmapped();
-            });
-            _config.AssertConfigurationIsValid();
+            Log.Info(TAG, "MainActivity - OnCreate - before  CreateMapper");
 
-            Log.Info("WiFiManager", "MainActivity - OnCreate - before  CreateMapper");
-
-            var mi = typeof(AutoMapper.Mappers.EnumToEnumMapper).GetRuntimeMethods().First(m => m.IsStatic);
-            _mapper = _config.CreateMapper();
-
-            Log.Info("WiFiManager", "MainActivity - OnCreate - after  CreateMapper");
+            Log.Info(TAG, "MainActivity - OnCreate - after  CreateMapper");
 
             _CachedCSVNetworkList = new List<WifiNetworkDto>();
 
@@ -157,7 +139,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with SensorManager " + ex.Message );
+                Log.Error(TAG, "MainActivity - OnCreate - failed to work with SensorManager " + ex.Message );
             }
 
             // GPS listener
@@ -189,7 +171,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("WiFiManager", "MainActivity - OnCreate - failed to work with RequestLocationUpdates " + ex.Message);
+                Log.Error(TAG, "MainActivity - OnCreate - failed to work with RequestLocationUpdates " + ex.Message);
             }
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
@@ -251,13 +233,13 @@ namespace WiFiManager.Droid
 
                 //var ts1 = DateTime.Now;
                 //var elapsed = ts1 - ts0;
-                //Android.Util.Log.Info("WiFiManager", $"GetCoordsAsync: got GPS coords, elapsed: {elapsed.TotalSeconds} sec" );
+                //Android.Util.Log.Info(TAG, $"GetCoordsAsync: got GPS coords, elapsed: {elapsed.TotalSeconds} sec" );
 
                 return new Tuple<double, double, double>(_location.Latitude, _location.Longitude, _location.Altitude);
             }
             catch (Exception ex)
             {
-                Android.Util.Log.Error("WiFiManager", "GetCoordsAsync " + ex.Message);
+                Android.Util.Log.Error(TAG, "GetCoordsAsync " + ex.Message);
                 throw;
             }
         }
@@ -311,7 +293,7 @@ namespace WiFiManager.Droid
                         var lineFromCSV = fr.ReadLine();
                         if (string.IsNullOrWhiteSpace(lineFromCSV))
                             continue;
-                        var wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+                        var wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV);
 
                         if (findMethod( wifiDtoFromFile))
                             yield return wifiDtoFromFile;
@@ -342,7 +324,7 @@ namespace WiFiManager.Droid
                                 var lineFromCSV = fr.ReadLine();
                                 if (string.IsNullOrWhiteSpace(lineFromCSV))
                                     continue;
-                                wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+                                wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV);
                                 _CachedCSVNetworkList.Add(wifiDtoFromFile);
                             }
                         }
@@ -378,7 +360,7 @@ namespace WiFiManager.Droid
                             var lineFromCSV = fr.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineFromCSV))
                                 continue;
-                            wifiDtoFromFile = GetWifiDtoFromString(lineFromCSV);
+                            wifiDtoFromFile = WifiNetworkDto.GetWifiDtoFromString(lineFromCSV);
 
                             if (findMethod(nw, wifiDtoFromFile))
                                 return wifiDtoFromFile;
@@ -422,7 +404,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("WiFiManager", "FindWifiInCSV " + ex.Message);
+                Log.Error(TAG, "FindWifiInCSV " + ex.Message);
             }
 
             return res;
@@ -452,7 +434,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("WiFiManager", "FindWifiInCSV " + ex.Message);
+                Log.Error(TAG, "FindWifiInCSV " + ex.Message);
             }
 
             return res;
@@ -468,90 +450,13 @@ namespace WiFiManager.Droid
             return (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi);
         }
 
-
-        static readonly Regex _rxForBssId1 = new Regex(@"[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-        static readonly Regex _rxForBssId2 = new Regex(@"[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
-        private static WifiNetworkDto GetWifiDtoFromString(string s)
+        public void MoveCSVFromBluetoothFolder()
         {
-            var arrs = s.Split(new char[] { ';' }, StringSplitOptions .None );
-            // parse potential BSSID value
-            var bssidRaw = arrs[1].ToUpper().Trim();
-            var bssid = bssidRaw;
-            var sb = new StringBuilder();
-            if (!string .IsNullOrEmpty (bssidRaw)) 
+            if (System.IO.File.Exists(_filePathCSVinBluetooth))
             {
-                if (_rxForBssId1.IsMatch(bssidRaw) || _rxForBssId2.IsMatch(bssidRaw))
-                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
-                        bssidRaw.Substring(0, 2),
-                        bssidRaw.Substring(3, 2),
-                        bssidRaw.Substring(6, 2),
-                        bssidRaw.Substring(9, 2),
-                        bssidRaw.Substring(12, 2),
-                        bssidRaw.Substring(15, 2)).ToString();
-                else
-                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
-                        bssidRaw.Substring(0, 2),
-                        bssidRaw.Substring(2, 2),
-                        bssidRaw.Substring(4, 2),
-                        bssidRaw.Substring(6, 2),
-                        bssidRaw.Substring(8, 2),
-                        bssidRaw.Substring(10, 2)).ToString();
+                System.IO.File.Copy(_filePathCSVinBluetooth, _filePathCSV, true);
+                System.IO.File.Delete(_filePathCSVinBluetooth);
             }
-            WifiNetwork nw = null;
-            string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
-
-            nw = new WifiNetwork
-            {
-                BssID = bssid,
-                Name = arrs[0],
-                Password = arrs[2],
-                IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
-                NetworkType = arrs[4],
-                Provider = arrs[5],
-                WpsPin = arrs[6],
-                FirstConnectPublicIP = arrs[8],
-                RouterWebUIIP = arrs[9],
-                FirstConnectMac = arrs[10],
-                Level = -1 * Constants.NO_SIGNAL_LEVEL
-            };
-            if (!string.IsNullOrEmpty (arrs[11]))
-                nw.FirstCoordLat = Convert.ToDouble(arrs[11], _cultUS);
-            if (!string.IsNullOrEmpty(arrs[12]))
-                nw.FirstCoordLong = Convert.ToDouble(arrs[12], _cultUS);
-            if (!string.IsNullOrEmpty(arrs[13]))
-                nw.FirstCoordAlt = Convert.ToDouble(arrs[13], _cultUS);
-
-            if (!string.IsNullOrEmpty(arrs[14]))
-                nw.LastCoordLat = Convert.ToDouble(arrs[14], _cultUS);
-            if (!string.IsNullOrEmpty(arrs[15]))
-                nw.LastCoordLong = Convert.ToDouble(arrs[15], _cultUS);
-            if (!string.IsNullOrEmpty(arrs[16]))
-                nw.LastCoordAlt = Convert.ToDouble(arrs[16], _cultUS);
-
-            // get first connection date
-            if (!string.IsNullOrEmpty(arrs[7]))
-            {
-                try
-                {
-                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultUS);
-                }
-                catch (Exception)
-                {
-                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
-                }
-            }
-
-            // prevent from further breaking of list load because of ';' in name or pwd or comments
-            var nameAdj = nw.Name.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-            var passwordAdj = nw.Password.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-            var commentsAdj = nw.Provider.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
-            nw.Name = nameAdj;
-            nw.Password = passwordAdj;
-            nw.Provider = commentsAdj;
-
-            var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
-            return wifiDtoFromFile;
         }
 
         public async Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworksOnAir)
@@ -569,9 +474,7 @@ namespace WiFiManager.Droid
                     return;
                 //RequestPermissions(PERMISSIONS_TO_REQUEST, requestCode);
 
-                Thread.CurrentThread.CurrentCulture = _cultUS;
-                Thread.CurrentThread.CurrentUICulture = _cultUS;
-                Android.Util.Log.Info("SaveToCSV", "Saving CSV in BAK as " + _filePathCSVBAK);
+                Android.Util.Log.Info(TAG, "Saving CSV in BAK as " + _filePathCSVBAK);
                 var csvAlreadyExists = System.IO. File.Exists(_filePathCSV);
                 if (csvAlreadyExists)
                 {
@@ -599,7 +502,7 @@ namespace WiFiManager.Droid
                                 while (!sr.EndOfStream)
                                 {
                                     s = sr.ReadLine();
-                                    WifiNetworkDto wifiDtoFromFile = GetWifiDtoFromString(s);
+                                    WifiNetworkDto wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(s);
 
                                     var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
                                     if (wifiOnAir == null)
@@ -608,14 +511,9 @@ namespace WiFiManager.Droid
                                     }
                                     else
                                     {
-                                        var isBanned = wifiOnAir.IsEnabled ? "" : "1";
-                                        var dummy = "";
-                                        var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
-                                        // prevent from further breaking of list load because of ';' in name or pwd or comments
-                                        var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                        var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                        var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                        fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                        var res = WifiNetworkDto.ToStringInCSV(wifiOnAir);
+                                        fw.WriteLine(res);
+
                                         alreadySaved.Add(wifiOnAir);
                                     }
                                 }
@@ -627,13 +525,8 @@ namespace WiFiManager.Droid
                             var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
                             if (wifiAlreadySaved == null)
                             {
-                                var isBanned = wifiOnAir.IsEnabled ? "" : "1";
-                                var dummy = "";
-                                // prevent from further breaking of list load because of ';' in name or pwd or comments
-                                var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-                                fw.WriteLine($"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}");
+                                var res = WifiNetworkDto.ToStringInCSV(wifiOnAir);
+                                fw.WriteLine(res);
                             }
                         }
                     }
@@ -643,7 +536,7 @@ namespace WiFiManager.Droid
             }
             catch (Exception ex)
             {
-                Log.Error("WiFiManager", "SaveToCSV "+ ex.Message);
+                Log.Error(TAG, "SaveToCSV "+ ex.Message);
                 throw ex;
             }
             finally
@@ -652,6 +545,7 @@ namespace WiFiManager.Droid
                 fsBAK?.Dispose();
             }
         }
+
 
         //public void SaveToJSON(List<WifiNetworkDto> wifiNetworks)
         //{
@@ -665,8 +559,8 @@ namespace WiFiManager.Droid
         {
             WifiConnectionInfo info2 = null;
 
-
-            if (TryConnectViaMethod(dto, ref info2))
+            info2 = await TryConnectViaMethod(dto);
+            if (info2 != null)
             {
                 var coords = await GetCoordsAsync();
                 if (coords != null)
@@ -681,14 +575,14 @@ namespace WiFiManager.Droid
             return info2;
         }
 
-        bool TryConnectViaMethod(WifiNetworkDto dto, ref WifiConnectionInfo info2)
+        async Task<WifiConnectionInfo> TryConnectViaMethod(WifiNetworkDto dto)
         {
             string bssid = dto.BssID;
             string ssid = dto.Name;
             string password = dto.Password;
             var formattedSsid = $"\"{ssid}\"";
             var formattedPassword = $"\"{password}\"";
-
+            WifiConnectionInfo info2 = null;
 
 
             var wifiConfig = new WifiConfiguration
@@ -737,31 +631,40 @@ namespace WiFiManager.Droid
                 //    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
 
                 //};
-                return false;
+                return null;
             }
             else
             {
-                wifiManager.SetWifiEnabled(true);
-                var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
-                var bd = wifiManager.Disconnect();
-                var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
-                var brc = wifiManager.Reconnect();
-
-                var gwAddr = (wifiManager.DhcpInfo.Gateway & 0xFF) + "." +
-                    ((wifiManager.DhcpInfo.Gateway >> 8) & 0xFF) + "." +
-                    ((wifiManager.DhcpInfo.Gateway >> 16) & 0xFF) + "." +
-                    ((wifiManager.DhcpInfo.Gateway >> 24) & 0xFF);
-                info2 = new WifiConnectionInfo
+                var t1 = Task.Run(() =>
                 {
-                    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
-                    // https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
-                    RouterWebUIIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
-                };
+                    wifiManager.SetWifiEnabled(true);
+                    var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
+                    var bd = wifiManager.Disconnect();
+                    var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
+                    var brc = wifiManager.Reconnect();
+
+                    DhcpInfo dhcpInfo = wifiManager.DhcpInfo;
+                    //byte[] ipAddress = BitConverter.GetBytes(dhcpInfo.Gateway);
+                    int gwip = wifiManager.DhcpInfo.Gateway;
+                    Task.Delay(500);
+                    gwip = wifiManager.DhcpInfo.Gateway;
+
+                    var gwAddr = (gwip & 0xFF) + "." +
+                        ((gwip >> 8) & 0xFF) + "." +
+                        ((gwip >> 16) & 0xFF) + "." +
+                        ((gwip >> 24) & 0xFF);
+                    info2 = new WifiConnectionInfo
+                    {
+                        FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+                        // https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
+                        RouterWebUIIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
+                    };
+                });
             }
 
             var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" && info2.RouterWebUIIP != "127.0.0.1";
 
-            return isConnectedToAP;
+            return isConnectedToAP ? info2 : null;
         }
 
         public async Task DisConnectAsync()
@@ -796,7 +699,7 @@ namespace WiFiManager.Droid
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("WiFiManager", "CanLoadFromFile " + ex.Message);
+                    Log.Error(TAG, "CanLoadFromFile " + ex.Message);
                     throw;
                 }
             }
@@ -878,7 +781,9 @@ namespace WiFiManager.Droid
         private string GetSDCardDir()
         {
             if (UseInternalStorageForCSV)
+            {
                 return Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+            }
             else
             {
                 var context = Android.App.Application.Context;
@@ -895,7 +800,7 @@ namespace WiFiManager.Droid
                     }
                     catch (Exception ex)
                     {
-                        Android.Util.Log.Error("!!!",ex.Message );
+                        Android.Util.Log.Error("!!!", ex.Message);
                         break;
                     }
                 }

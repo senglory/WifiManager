@@ -6,13 +6,17 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 using Xamarin.Forms;
-
-
+using System.Text;
+using System.Text.RegularExpressions;
+using AutoMapper;
+using System.Globalization;
+using System.Reflection;
 
 namespace WiFiManager.Common.BusinessObjects
 {
     public class WifiNetworkDto : INotifyPropertyChanged
     {
+
         public string Name { get; set; }
         public string BssID { get; set; }
         public string NetworkType { get; set; }
@@ -428,6 +432,131 @@ namespace WiFiManager.Common.BusinessObjects
         public override string ToString()
         {
             return BssID + " " + Name + " " +  Math.Abs(Level).ToString ();
+        }
+
+        static MapperConfiguration _config;
+        static IMapper _mapper;
+        static readonly CultureInfo _cultUS = new CultureInfo("en-us");
+        static readonly CultureInfo _cultRU = new CultureInfo("ru-ru");
+
+        static readonly Regex _rxForBssId1 = new Regex(@"[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+        static readonly Regex _rxForBssId2 = new Regex(@"[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}-[0-9a-f]{2}", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+        const string SEMICOLON_REPLACEMENT_IN_CSV = @"\x3B";
+
+        static WifiNetworkDto()
+        {
+            _config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<WifiNetwork, WifiNetworkDto>();
+                cfg.CreateMap<WifiNetworkDto, WifiNetwork>();
+                cfg.IgnoreUnmapped();
+            });
+            _config.AssertConfigurationIsValid();
+            var mi = typeof(AutoMapper.Mappers.EnumToEnumMapper).GetRuntimeMethods().First(m => m.IsStatic);
+            _mapper = _config.CreateMapper();
+        }
+
+        public static WifiNetworkDto GetWifiDtoFromString(string s)
+        {
+            var arrs = s.Split(new char[] { ';' }, StringSplitOptions.None);
+            // parse potential BSSID value
+            var bssidRaw = arrs[1].ToUpper().Trim();
+            var bssid = bssidRaw;
+            var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(bssidRaw))
+            {
+                if (_rxForBssId1.IsMatch(bssidRaw) || _rxForBssId2.IsMatch(bssidRaw))
+                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
+                        bssidRaw.Substring(0, 2),
+                        bssidRaw.Substring(3, 2),
+                        bssidRaw.Substring(6, 2),
+                        bssidRaw.Substring(9, 2),
+                        bssidRaw.Substring(12, 2),
+                        bssidRaw.Substring(15, 2)).ToString();
+                else
+                    bssid = sb.AppendFormat("{0}:{1}:{2}:{3}:{4}:{5}",
+                        bssidRaw.Substring(0, 2),
+                        bssidRaw.Substring(2, 2),
+                        bssidRaw.Substring(4, 2),
+                        bssidRaw.Substring(6, 2),
+                        bssidRaw.Substring(8, 2),
+                        bssidRaw.Substring(10, 2)).ToString();
+            }
+            WifiNetwork nw = null;
+            string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
+
+            nw = new WifiNetwork
+            {
+                BssID = bssid,
+                Name = arrs[0],
+                Password = arrs[2],
+                IsEnabled = !Convert.ToBoolean(int.Parse(isEna)),
+                NetworkType = arrs[4],
+                Provider = arrs[5],
+                WpsPin = arrs[6],
+                FirstConnectPublicIP = arrs[8],
+                RouterWebUIIP = arrs[9],
+                FirstConnectMac = arrs[10],
+                Level = -1 * Constants.NO_SIGNAL_LEVEL
+            };
+            if (!string.IsNullOrEmpty(arrs[11]))
+                nw.FirstCoordLat = Convert.ToDouble(arrs[11], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[12]))
+                nw.FirstCoordLong = Convert.ToDouble(arrs[12], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[13]))
+                nw.FirstCoordAlt = Convert.ToDouble(arrs[13], _cultUS);
+
+            if (!string.IsNullOrEmpty(arrs[14]))
+                nw.LastCoordLat = Convert.ToDouble(arrs[14], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[15]))
+                nw.LastCoordLong = Convert.ToDouble(arrs[15], _cultUS);
+            if (!string.IsNullOrEmpty(arrs[16]))
+                nw.LastCoordAlt = Convert.ToDouble(arrs[16], _cultUS);
+
+            // get first connection date
+            if (!string.IsNullOrEmpty(arrs[7]))
+            {
+                try
+                {
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultUS);
+                }
+                catch (Exception)
+                {
+                    nw.FirstConnectWhen = DateTime.Parse(arrs[7], _cultRU);
+                }
+            }
+
+            // prevent from further breaking of list load because of ';' in name or pwd or comments
+            var nameAdj = nw.Name.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            var passwordAdj = nw.Password.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            var commentsAdj = nw.Provider.Replace(SEMICOLON_REPLACEMENT_IN_CSV, ";");
+            nw.Name = nameAdj;
+            nw.Password = passwordAdj;
+            nw.Provider = commentsAdj;
+
+            var wifiDtoFromFile = _mapper.Map<WifiNetwork, WifiNetworkDto>(nw);
+            return wifiDtoFromFile;
+        }
+
+        public static string ToStringInCSV(WifiNetworkDto wifiOnAir)
+        {
+            var isBanned = wifiOnAir.IsEnabled ? "" : "1";
+            var dummy = "";
+            var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
+            // prevent from further breaking of list load because of ';' in name or pwd or comments
+            var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            return $"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}";
+
+            //var isBanned = wifiOnAir.IsEnabled ? "" : "1";
+            //var dummy = "";
+            //// prevent from further breaking of list load because of ';' in name or pwd or comments
+            //var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            //var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            //var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+            //return $"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}";
+
         }
 
 

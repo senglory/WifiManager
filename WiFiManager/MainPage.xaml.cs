@@ -31,27 +31,50 @@ namespace WiFiManager
         {
             InitializeComponent();
             this.mgr = mgr;
-			vm.AddMgr(mgr);
-			this.BindingContext = vm;
-
-            CrossConnectivity.Current.ConnectivityChanged +=  (sender, args) =>
-            {
-                if (args.IsConnected)
-                {
-                    WifiConnectNotify();
-                }
-                else
-                {
-                    WifiDisConnectNotify();
-                }
-            };
+            vm.AddMgr(mgr);
+            this.BindingContext = vm;
         }
 
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            //CrossConnectivity.Current.ConnectivityChanged += async (sender, args) => {
+            //    if (args.IsConnected)
+            //    {
+            //        WifiConnectNotify();
+            //    }
+            //    else
+            //    {
+            //        WifiDisConnectNotify();
+            //    }
+            //};
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            //CrossConnectivity.Current.ConnectivityChanged -= await WifiConnectNotifyNotifyAsync;
+        }
+
+        async Task WifiConnectNotifyNotifyAsync(object sender, Plugin.Connectivity.Abstractions.ConnectivityChangedEventArgs args)
+        {
+            if (args.IsConnected)
+            {
+                WifiConnectNotify();
+            }
+            else
+            {
+                WifiDisConnectNotify();
+            }
+        }
 
         public void WifiConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
             var current = Connectivity.NetworkAccess;
+
 
             mpv.IsConnected = true;
 
@@ -80,7 +103,7 @@ namespace WiFiManager
             mpv.IsBusy =false ;
         }
 
-        public void RefreshAvailableNetworks(bool doVibrateUponFinish = false)
+        public void RefreshAvailableNetworks(bool doVibrateUponFinish)
         {
             System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - START");
 
@@ -189,12 +212,12 @@ namespace WiFiManager
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
                 var wi = await mgr.ConnectAsync(nw);
-				// successfull connection attempt - update info in CSV
-				if (wi != null)
-				{
-					nw.TryUpdateFirstConnectionInfo(wi);
-					mpv.DoSave(nw);
-				}
+                // successfull connection attempt - update info in CSV
+                if (wi != null)
+                {
+                    nw.TryUpdateFirstConnectionInfo(wi);
+                    mpv.DoSave(nw);
+                }
             }
             catch (Exception ex)
             {
@@ -208,14 +231,14 @@ namespace WiFiManager
             }
         }
 
-		void WebAdm_Clicked(object sender, EventArgs e){
-			var mpv = this.BindingContext as MainPageVM;
+        void WebAdm_Clicked(object sender, EventArgs e){
+            var mpv = this.BindingContext as MainPageVM;
 
-			Device.OpenUri(new Uri(mpv.SelectedNetwork.RouterWebUIIP));
-		}
+            Device.OpenUri(new Uri(mpv.SelectedNetwork.RouterWebUIIP));
+        }
 
 
-		async void Disconn_Clicked(object sender, EventArgs e)
+        async void Disconn_Clicked(object sender, EventArgs e)
         {
             var mpv = this.BindingContext as MainPageVM;
 
@@ -262,9 +285,14 @@ namespace WiFiManager
 
         async void RefreshNetworks_Clicked(object sender, EventArgs e)
         {
-            await Task.Run(() => RefreshAvailableNetworks());
+            await Task.Run(() => RefreshAvailableNetworks(false));
         }
- 
+
+        //void RefreshNetworks_Clicked(object sender, EventArgs e)
+        //{
+        //    RefreshAvailableNetworks(false);
+        //}
+
 
         void MenuItem_DeleteNetwork_Clicked(object sender, EventArgs e)
         {
@@ -282,15 +310,15 @@ namespace WiFiManager
             {
                 mpv.IsBusy = true;
 
-				var t = mpv.DoRefreshCoords();
-				await t.ContinueWith(t3 =>
-			   {
-				  // notify about finishing via vibration
-				  var v = Plugin.Vibrate.CrossVibrate.Current;
-				   v.Vibration(TimeSpan.FromSeconds(0.5));
-			   });
-			}
-			finally
+                var t = mpv.DoRefreshCoords();
+                await t.ContinueWith(t3 =>
+               {
+                  // notify about finishing via vibration
+                  var v = Plugin.Vibrate.CrossVibrate.Current;
+                   v.Vibration(TimeSpan.FromSeconds(0.5));
+               });
+            }
+            finally
             {
                 mpv.IsBusy = false ;
             }
@@ -313,31 +341,31 @@ namespace WiFiManager
             }
         }
 
-		void MenuItem_AddToSaveList_Clicked(object sender, EventArgs e)
-		{
-			try
-			{
-				var bo = sender as BindableObject;
-				var mpv = this.BindingContext as MainPageVM;
-				var dto = bo.BindingContext as WifiNetworkDto;
+        void MenuItem_AddToSaveList_Clicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var bo = sender as BindableObject;
+                var mpv = this.BindingContext as MainPageVM;
+                var dto = bo.BindingContext as WifiNetworkDto;
 
-				mpv.WifiNetworksSaveList.TryAdd(dto);
-			}
-			catch (Exception ex)
-			{
+                mpv.WifiNetworksSaveList.TryAdd(dto);
+            }
+            catch (Exception ex)
+            {
 
-				var qq = 555;
-			}
-		}
+                var qq = 555;
+            }
+        }
 
-		private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
+        private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
         {
             var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
             var dto = bo.BindingContext as WifiNetworkDto;
 
-			if (mpv.IsBusy)
-				return;
+            if (mpv.IsBusy)
+                return;
 
             try
             {
@@ -351,10 +379,15 @@ namespace WiFiManager
             }
         }
 
-		async void SetDescrForAll_Clicked(object sender, EventArgs e)
-		{
-			var detailPage = new DescrForAllPage(this.BindingContext as MainPageVM);
-			await Navigation.PushModalAsync(detailPage);
-		}
-	}
+        async void SetDescrForAll_Clicked(object sender, EventArgs e)
+        {
+            var detailPage = new DescrForAllPage(this.BindingContext as MainPageVM);
+            await Navigation.PushModalAsync(detailPage);
+        }
+
+        void MenuItem_CreateUnixFiles_Clicked(object sender, EventArgs e)
+        {
+
+        }
+    }
 }

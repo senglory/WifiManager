@@ -16,9 +16,11 @@ namespace WiFiManager.Common
         List<WifiNetworkDto> GetActiveWifiNetworks();
         WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw );
 
-		IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId);
+        void MoveCSVFromBluetoothFolder();
 
-		Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworks);
+        IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId);
+
+        Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworks);
 
         bool CanLoadFromFile { get; }
 

@@ -20,62 +20,62 @@ namespace WiFiManager.Common
     {
         IWifiManagerOperations mgr;
 
-		#region Properties
-		#region Different lists
-		WifiNetworksObservableCollection _wifiNetworks = new WifiNetworksObservableCollection();
-		public WifiNetworksObservableCollection WifiNetworks
-		{
-			get
-			{
-				return _wifiNetworks;
-			}
-			set
-			{
-				SetProperty(ref _wifiNetworks, value, nameof(WifiNetworks));
-			}
-		}
+        #region Properties
+        #region Different lists
+        WifiNetworksObservableCollection _wifiNetworks = new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworks
+        {
+            get
+            {
+                return _wifiNetworks;
+            }
+            set
+            {
+                SetProperty(ref _wifiNetworks, value, nameof(WifiNetworks));
+            }
+        }
 
-		WifiNetworksObservableCollection _wifiNetworksInLookup = new WifiNetworksObservableCollection();
-		public WifiNetworksObservableCollection WifiNetworksInLookup
-		{
-			get
-			{
-				return _wifiNetworksInLookup;
-			}
-			set
-			{
-				SetProperty(ref _wifiNetworksInLookup, value, nameof(WifiNetworksInLookup));
-			}
-		}
+        WifiNetworksObservableCollection _wifiNetworksInLookup = new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworksInLookup
+        {
+            get
+            {
+                return _wifiNetworksInLookup;
+            }
+            set
+            {
+                SetProperty(ref _wifiNetworksInLookup, value, nameof(WifiNetworksInLookup));
+            }
+        }
 
-		WifiNetworksObservableCollection _wifiNetworksHunting = new WifiNetworksObservableCollection();
-		public WifiNetworksObservableCollection WifiNetworksHunting
-		{
-			get
-			{
-				return _wifiNetworksHunting;
-			}
-			set
-			{
-				SetProperty(ref _wifiNetworksHunting, value, nameof(WifiNetworksHunting));
-			}
-		}
+        WifiNetworksObservableCollection _wifiNetworksHunting = new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworksHunting
+        {
+            get
+            {
+                return _wifiNetworksHunting;
+            }
+            set
+            {
+                SetProperty(ref _wifiNetworksHunting, value, nameof(WifiNetworksHunting));
+            }
+        }
 
-		WifiNetworksObservableCollection _wifiNetworksSaveList = new WifiNetworksObservableCollection();
-		public WifiNetworksObservableCollection WifiNetworksSaveList
-		{
-			get
-			{
-				return _wifiNetworksSaveList;
-			}
-			set
-			{
-				SetProperty(ref _wifiNetworksSaveList, value, nameof(WifiNetworksSaveList));
-			}
-		} 
-		#endregion
+        WifiNetworksObservableCollection _wifiNetworksSaveList = new WifiNetworksObservableCollection();
+        public WifiNetworksObservableCollection WifiNetworksSaveList
+        {
+            get
+            {
+                return _wifiNetworksSaveList;
+            }
+            set
+            {
+                SetProperty(ref _wifiNetworksSaveList, value, nameof(WifiNetworksSaveList));
+            }
+        } 
+        #endregion
 
-		WifiNetworkDto _selectedNetwork;
+        WifiNetworkDto _selectedNetwork;
         public WifiNetworkDto SelectedNetwork
         {
             get
@@ -195,7 +195,7 @@ namespace WiFiManager.Common
             }
         }
 
-		bool isNightTheme;
+        bool isNightTheme;
         public bool IsNightTheme
         {
             get { return isNightTheme; }
@@ -213,6 +213,16 @@ namespace WiFiManager.Common
             set
             {
                 SetProperty(ref wiFiNameOrBssIdLookup, value, nameof(WiFiNameOrBssIdLookup));
+            }
+        }
+
+        bool tryCopyFromBluetoothFolder;
+        public bool TryCopyFromBluetoothFolder
+        {
+            get { return tryCopyFromBluetoothFolder; }
+            set
+            {
+                SetProperty(ref tryCopyFromBluetoothFolder, value, nameof(TryCopyFromBluetoothFolder));
             }
         }
         #endregion
@@ -271,6 +281,10 @@ namespace WiFiManager.Common
                 {
                     mgr.DeleteInfoAboutWifiNetworks();
                 }
+                if (TryCopyFromBluetoothFolder)
+                {
+                    mgr.MoveCSVFromBluetoothFolder();
+                }
                 // clean CSV cache if it was used
                 mgr.ClearCachedCSVNetworkList();
                 var allOnAir = mgr.GetActiveWifiNetworks();
@@ -324,6 +338,8 @@ namespace WiFiManager.Common
                 var lst1 = allOnAir.OrderBy(nw => nw.IsInCSVList).ThenBy(nw => Math.Abs(nw.Level));
                 WifiNetworks = new WifiNetworksObservableCollection(lst1);
 
+                // put currently connected on the top
+
                 //var ts2 = DateTime.Now;
                 //var elapsed2 = ts2 - ts0;
                 //Logging.Info("WiFiManager", $"DoRefreshNetworks: finished, elapsed: {elapsed2.TotalSeconds} sec");
@@ -331,8 +347,10 @@ namespace WiFiManager.Common
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;
             }
-            catch {
+            catch (Exception ex)
+            {
                 IsFailed = true;
+                Logging.Error("DoRefreshCoords", ex);
             }
             finally
             {
@@ -415,15 +433,15 @@ namespace WiFiManager.Common
                 Task.Run(() =>
                 {
                     List<WifiNetworkDto> lst = new List<WifiNetworkDto>();
-					if (null == theOne)
-					{
-						if (WifiNetworksSaveList.Count > 0)
-							lst.AddRange(WifiNetworksSaveList);
-						else
-							lst.AddRange(WifiNetworks);
-					}
-					else
-						lst.Add(theOne);
+                    if (null == theOne)
+                    {
+                        if (WifiNetworksSaveList.Count > 0)
+                            lst.AddRange(WifiNetworksSaveList);
+                        else
+                            lst.AddRange(WifiNetworks);
+                    }
+                    else
+                        lst.Add(theOne);
                     mgr.SaveToCSVAsync(lst);
                 })
                 .Wait();
@@ -433,8 +451,8 @@ namespace WiFiManager.Common
             }
             finally
             {
-				WifiNetworksSaveList.Clear();
-				IsBusy = false;
+                WifiNetworksSaveList.Clear();
+                IsBusy = false;
             }
         }
 
@@ -469,13 +487,13 @@ namespace WiFiManager.Common
                     IsBusy = false;
                 }
             }
-			,
-			( x) =>
-			{
-				// Return true if there's something to search for.
-				return !string.IsNullOrWhiteSpace (  WiFiNameOrBssIdLookup);
-			}
-			);
+            ,
+            ( x) =>
+            {
+                // Return true if there's something to search for.
+                return !string.IsNullOrWhiteSpace (  WiFiNameOrBssIdLookup);
+            }
+            );
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
