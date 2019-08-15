@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WiFiManager.Common.BusinessObjects
 {
-    public class WifiNetwork
+    public struct WifiNetwork
     {
         public string Name { get; set; }
         public string BssID { get; set; }

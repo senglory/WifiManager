@@ -264,7 +264,7 @@ namespace WiFiManager.Droid
             var results = wifiManager.ScanResults;
             foreach (ScanResult nw in results)
             {
-                var netw = new WifiNetworkDto()
+                var netw = new WifiNetworkDto(wifiManager.ConnectionInfo?.BSSID)
                 {
                     BssID = nw.Bssid.ToUpper(),
                     Name = nw.Ssid,
@@ -454,7 +454,9 @@ namespace WiFiManager.Droid
         {
             if (System.IO.File.Exists(_filePathCSVinBluetooth))
             {
-                System.IO.File.Copy(_filePathCSVinBluetooth, _filePathCSV, true);
+                // works in 2017, busted in 2019 - "Access denied"
+                //System.IO.File.Copy(_filePathCSVinBluetooth, _filePathCSV, true);
+                SafeFileCopy(_filePathCSVinBluetooth, _filePathCSV);
                 System.IO.File.Delete(_filePathCSVinBluetooth);
             }
         }
@@ -478,7 +480,13 @@ namespace WiFiManager.Droid
                 var csvAlreadyExists = System.IO. File.Exists(_filePathCSV);
                 if (csvAlreadyExists)
                 {
-                    System.IO.File.Copy(_filePathCSV, _filePathCSVBAK, true);
+                    if (System.IO.File.Exists(_filePathCSVBAK))
+                    {
+                        //System.IO.File.Delete(_filePathCSVBAK);
+                    }
+                    // works in 2017, busted in 2019 - "Access denied"
+                    //System.IO.File.Copy(_filePathCSV, _filePathCSVBAK, true);
+                    SafeFileCopy(_filePathCSV, _filePathCSVBAK);
                 }
                 var alreadySaved = new List<WifiNetworkDto>();
                 if (csvAlreadyExists)
@@ -546,6 +554,28 @@ namespace WiFiManager.Droid
             }
         }
 
+        private void SafeFileCopy(string filePathCSV, string filePathCSVBAK)
+        {
+            using (var fsr = new FileStream(filePathCSV, FileMode.Open))
+            {
+                using (var sr = new StreamReader(fsr, Constants.UNIVERSAL_ENCODING))
+                {
+                    using (var fsw = new FileStream(filePathCSVBAK, FileMode.Create))
+                    {
+                        using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                        {
+                            while (!sr.EndOfStream)
+                            {
+                                var s2 = sr.ReadLine();
+
+                                fw.WriteLine(s2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         //public void SaveToJSON(List<WifiNetworkDto> wifiNetworks)
         //{
@@ -555,11 +585,11 @@ namespace WiFiManager.Droid
         //    System.IO.File.WriteAllText(filePathJSON, str);
         //}
 
-        public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto dto)
+        public async Task<WifiConnectionInfo> ConnectAsync(WifiNetworkDto network)
         {
             WifiConnectionInfo info2 = null;
 
-            info2 = await TryConnectViaMethod(dto);
+            info2 = TryConnectViaMethod(network);
             if (info2 != null)
             {
                 var coords = await GetCoordsAsync();
@@ -575,7 +605,7 @@ namespace WiFiManager.Droid
             return info2;
         }
 
-        async Task<WifiConnectionInfo> TryConnectViaMethod(WifiNetworkDto dto)
+        WifiConnectionInfo TryConnectViaMethod(WifiNetworkDto dto)
         {
             string bssid = dto.BssID;
             string ssid = dto.Name;
@@ -635,37 +665,38 @@ namespace WiFiManager.Droid
             }
             else
             {
-                var t1 = Task.Run(() =>
+                wifiManager.SetWifiEnabled(true);
+                var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
+                var bd = wifiManager.Disconnect();
+                var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
+                var brc = wifiManager.Reconnect();
+
+                DhcpInfo dhcpInfo = wifiManager.DhcpInfo;
+                //byte[] ipAddress = BitConverter.GetBytes(dhcpInfo.Gateway);
+                int gwip = wifiManager.DhcpInfo.Gateway;
+                Task.Delay(500);
+                gwip = wifiManager.DhcpInfo.Gateway;
+
+                var gwAddr = (gwip & 0xFF) + "." +
+                    ((gwip >> 8) & 0xFF) + "." +
+                    ((gwip >> 16) & 0xFF) + "." +
+                    ((gwip >> 24) & 0xFF);
+                info2 = new WifiConnectionInfo
                 {
-                    wifiManager.SetWifiEnabled(true);
-                    var addNetworkIdx = wifiManager.AddNetwork(wifiConfig);
-                    var bd = wifiManager.Disconnect();
-                    var enableNetwork = wifiManager.EnableNetwork(addNetworkIdx, true);
-                    var brc = wifiManager.Reconnect();
-
-                    DhcpInfo dhcpInfo = wifiManager.DhcpInfo;
-                    //byte[] ipAddress = BitConverter.GetBytes(dhcpInfo.Gateway);
-                    int gwip = wifiManager.DhcpInfo.Gateway;
-                    Task.Delay(500);
-                    gwip = wifiManager.DhcpInfo.Gateway;
-
-                    var gwAddr = (gwip & 0xFF) + "." +
-                        ((gwip >> 8) & 0xFF) + "." +
-                        ((gwip >> 16) & 0xFF) + "." +
-                        ((gwip >> 24) & 0xFF);
-                    info2 = new WifiConnectionInfo
-                    {
-                        FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
-                        // https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
-                        RouterWebUIIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
-                    };
-                });
+                    FirstConnectMac = wifiManager.ConnectionInfo.MacAddress,
+                    // https://theconfuzedsourcecode.wordpress.com/2015/05/16/how-to-easily-get-device-ip-address-in-xamarin-forms-using-dependencyservice/
+                    RouterWebUIIP = gwAddr //DependencyService.Get<IIPAddressManager>().GetIPAddress(),
+                };
             }
 
-            var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" && info2.RouterWebUIIP != "127.0.0.1";
+            var isConnectedToAP = wifiManager.ConnectionInfo.BSSID != "00:00:00:00:00:00" 
+                && info2.RouterWebUIIP != "127.0.0.1"
+                && info2.RouterWebUIIP != "0.0.0.0";
 
             return isConnectedToAP ? info2 : null;
         }
+
+
 
         public async Task DisConnectAsync()
         {
@@ -985,6 +1016,50 @@ namespace WiFiManager.Droid
             //throw new NotImplementedException();
         }
         #endregion
+
+        public void CreateUnixFiles(WifiNetworkDto network)
+        {
+            var sdCardPathDCIM = GetSDCardDir();
+            var pwdFileName = "";
+
+            if (network.NetworkType.Contains("[WEP]"))
+            {
+/*
+network={
+	ssid="JODEL"
+	key_mgmt=NONE
+	wep_key0="1234567..."
+	wep_tx_keyidx=0
+}
+*/
+            }
+            else
+            {
+                pwdFileName = network.BssID.ReplaceNullSafe(":", "-") + "--1";
+                var fn1 = Path.Combine(sdCardPathDCIM, pwdFileName + ".sh");
+                using (var fsw = new FileStream(fn1, FileMode.Create))
+                {
+                    using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                    {
+                        // write header
+                        fw.Write("#!/bin/bash" + '\xA');
+                        fw.Write($"wpa_passphrase \"{network.Name}\" {network.Password} | sudo tee /mnt/sdb/{pwdFileName}.conf" + '\xA');
+                    }
+                }
+            }
+
+            var connectFileName = network.BssID.ReplaceNullSafe(":", "-") + "--2";
+            var fn2 = Path.Combine(sdCardPathDCIM, connectFileName + ".sh");
+            using (var fsw = new FileStream(fn2, FileMode.Create))
+            {
+                using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                {
+                    // write header
+                    fw.Write("#!/bin/bash" + '\xA');
+                    fw.Write($"wpa_supplicant -i wlan0 -c /mnt/sdb/{pwdFileName}.conf" + '\xA');
+                }
+            }
+        }
     }
 }
 

@@ -211,13 +211,21 @@ namespace WiFiManager
                 mpv.IsBusy = true;
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
-                var wi = await mgr.ConnectAsync(nw);
-                // successfull connection attempt - update info in CSV
-                if (wi != null)
-                {
-                    nw.TryUpdateFirstConnectionInfo(wi);
-                    mpv.DoSave(nw);
-                }
+                var t = mgr.ConnectAsync(nw);
+                var t2 = t.ContinueWith( ec=> {
+                    if (ec.IsCompleted)
+                    {
+                        var wi = ec.Result;
+                        // successfull connection attempt - update info in CSV
+                        if (wi != null)
+                        {
+                            nw.TryUpdateFirstConnectionInfo(wi);
+                            mpv.DoSave(nw);
+                        }
+                    }
+                });
+                await t;
+                await t2;
             }
             catch (Exception ex)
             {
@@ -282,16 +290,6 @@ namespace WiFiManager
                 mpv.IsBusy = false;
             }
         }
-
-        async void RefreshNetworks_Clicked(object sender, EventArgs e)
-        {
-            await Task.Run(() => RefreshAvailableNetworks(false));
-        }
-
-        //void RefreshNetworks_Clicked(object sender, EventArgs e)
-        //{
-        //    RefreshAvailableNetworks(false);
-        //}
 
 
         void MenuItem_DeleteNetwork_Clicked(object sender, EventArgs e)

@@ -220,7 +220,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        string[] _vulnerableBssIds = new string[] {
+        readonly string[] _vulnerableBssIds = new string[] {
             "00:0E:8F",
             "00:1F:CE",
             "00:18:E7",
@@ -301,7 +301,7 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        string[] _bssIdsWithVPN = new string[] {
+        readonly string[] _bssIdsWithVPN = new string[] {
                 "08:60:6E",
                 "10:7B:44",
                 "10:BF:48",
@@ -361,8 +361,19 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        public WifiNetworkDto()
+        string _currentlyActiveWifiSSID;
+
+        public bool IsBeingUsed
         {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(_currentlyActiveWifiSSID) && BssID.ToUpper() == _currentlyActiveWifiSSID.ToUpper();
+            }
+        }
+
+        public WifiNetworkDto(string currentlyActiveWifiSSID = null)
+        {
+            _currentlyActiveWifiSSID = currentlyActiveWifiSSID;
             CoordsAndPower = new ObservableCollection<CoordsAndPower>();
             ConnectDisconnectCommand = new Command(ExecuteConnectDisconnectCommand);
             RefeshCoordsCommand = new Command(DoRefeshCoordsCommand);
@@ -482,7 +493,7 @@ namespace WiFiManager.Common.BusinessObjects
                         bssidRaw.Substring(8, 2),
                         bssidRaw.Substring(10, 2)).ToString();
             }
-            WifiNetwork nw = null;
+            WifiNetwork nw;
             string isEna = string.IsNullOrWhiteSpace(arrs[3]) ? "0" : arrs[3];
 
             nw = new WifiNetwork

@@ -31,12 +31,14 @@ namespace WiFiManager.Common
         Task<Tuple<double, double, double>> GetCoordsAsync();
 
         Task ActualizeCoordsWifiNetworkAsync(WifiNetworkDto network);
-        Task<WifiConnectionInfo>  ConnectAsync(WifiNetworkDto nw);
+        Task<WifiConnectionInfo>  ConnectAsync(WifiNetworkDto network);
 
         Task DisConnectAsync();
 
         bool UseInternalStorageForCSV { get; set; }
         bool UseCachedNetworkLookup { get; set; }
         void ClearCachedCSVNetworkList();
+
+        void CreateUnixFiles(WifiNetworkDto network);
     }
 }

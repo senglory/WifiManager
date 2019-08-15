@@ -257,7 +257,7 @@ namespace WiFiManager.Common
             SaveCommand = new Command((parameter) => { this.DoSave(null); });
             ConnectCommand = new Command(ExecuteConnect);
             DisconnectCommand = new Command(DoDisconnect);
-            RefreshNetworksCommand = new Command(DoRefreshNetworks);
+            //RefreshNetworksCommand = new Command(DoRefreshNetworks);
             StopHuntingCommand = new Command(DoStopHunting);
             //DoLookupCommand = new Command((wifiNameOrBssId) => { this.DoLookup(wifiNameOrBssId); });
             //DoLookupCommand = new Command(async x => await DoLookupAsync((string)x));
@@ -334,11 +334,10 @@ namespace WiFiManager.Common
                 {
                     allOnAir = allOnAir.Where(x => x.IsWithVPN).ToList();
                 }
-
-                var lst1 = allOnAir.OrderBy(nw => nw.IsInCSVList).ThenBy(nw => Math.Abs(nw.Level));
+                // put currently connected on the top
+                var lst1 = allOnAir.OrderByDescending(nw => nw.IsBeingUsed). ThenBy(nw => nw.IsInCSVList).ThenBy(nw => Math.Abs(nw.Level));
                 WifiNetworks = new WifiNetworksObservableCollection(lst1);
 
-                // put currently connected on the top
 
                 //var ts2 = DateTime.Now;
                 //var elapsed2 = ts2 - ts0;
@@ -346,6 +345,9 @@ namespace WiFiManager.Common
 
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;
+
+                var v = Plugin.Vibrate.CrossVibrate.Current;
+                v.Vibration(TimeSpan.FromSeconds(0.5));
             }
             catch (Exception ex)
             {
@@ -458,7 +460,17 @@ namespace WiFiManager.Common
 
 
         public Command SaveCommand { get; set; }
-        public Command RefreshNetworksCommand { get; set; }
+        public ICommand RefreshNetworksCommand => new Command(
+            x => {
+                Task.Run( () => DoRefreshNetworks());
+            }
+            ,
+            (x) =>
+            {
+                // Return true if there's something to search for.
+                return !IsBusy;
+            }
+            );
         public Command ConnectCommand { get; set; }
         public Command DisconnectCommand { get; set; }
         public Command StopHuntingCommand { get; set; }

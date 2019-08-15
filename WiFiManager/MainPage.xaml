@@ -244,8 +244,7 @@
                             <Button Text="GPS" Clicked="RefreshCoords_Clicked"  FontSize="Micro"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" WidthRequest="40"></Button>
                             <Button Text="Descr" Clicked="SetDescrForAll_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" FontSize="Micro" WidthRequest="40"></Button>
                             <Button Text="Disconn" Command="{Binding DisconnectCommand}"  FontSize="Micro" WidthRequest="60"></Button>
-                            <Button Text="Refresh" Clicked="RefreshNetworks_Clicked"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"  FontSize="Micro"></Button>
-                            <!--<Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"  FontSize="Micro"></Button>-->
+                            <Button Text="Refresh" Command="{Binding RefreshNetworksCommand}"  IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}"  FontSize="Micro"></Button>
                         </StackLayout>
 
                         <ListView
