@@ -21,6 +21,7 @@ namespace WiFiManager.Common
         IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId);
 
         Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworks);
+        Task DumpRawListAsync(List<WifiNetworkDto> wifiNetworks);
 
         bool CanLoadFromFile { get; }
 

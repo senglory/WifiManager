@@ -69,6 +69,8 @@ namespace WiFiManager.Droid
         delegate bool FindDelegate(WifiNetworkDto nw, WifiNetworkDto nw2);
         delegate bool FindDelegateBulk( WifiNetworkDto nw2);
 
+        static readonly CultureInfo _cultUS = new CultureInfo("en-us");
+        static readonly CultureInfo _cultRU = new CultureInfo("ru-ru");
 
         string _filePathCSV
         {
@@ -84,6 +86,15 @@ namespace WiFiManager.Droid
             {
                 var sdCardPathDCIM = GetSDCardDir();
                 return Path.Combine(sdCardPathDCIM, "WIFINETWORKS.bak");
+            }
+        }
+
+        string _filePathRawDumpCSV
+        {
+            get
+            {
+                var sdCardPathDCIM = GetSDCardDir();
+                return Path.Combine(sdCardPathDCIM, "WIFINETWORKS-RAW.csv");
             }
         }
 
@@ -519,7 +530,7 @@ namespace WiFiManager.Droid
                                     }
                                     else
                                     {
-                                        var res = WifiNetworkDto.ToStringInCSV(wifiOnAir);
+                                        var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir);
                                         fw.WriteLine(res);
 
                                         alreadySaved.Add(wifiOnAir);
@@ -533,7 +544,7 @@ namespace WiFiManager.Droid
                             var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
                             if (wifiAlreadySaved == null)
                             {
-                                var res = WifiNetworkDto.ToStringInCSV(wifiOnAir);
+                                var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir);
                                 fw.WriteLine(res);
                             }
                         }
@@ -551,6 +562,41 @@ namespace WiFiManager.Droid
             {
                 fsBAK?.Close();
                 fsBAK?.Dispose();
+            }
+        }
+
+        public async Task DumpRawListAsync(List<WifiNetworkDto> wifiNetworksOnAir)
+        {
+            try
+            {
+                var hasPermission = await Utils.CheckPermissions(Plugin.Permissions.Abstractions.Permission.Storage);
+                if (!hasPermission)
+                    return;
+
+                var fileAlreadyExists = System.IO.File.Exists(_filePathRawDumpCSV);
+                using (var fsw = new FileStream(_filePathRawDumpCSV, fileAlreadyExists? FileMode.Append : FileMode.Create))
+                {
+                    using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                    {
+                        if (!fileAlreadyExists)
+                        {
+                            // write header
+                            fw.WriteLine("Name  Bssid   Level   TimeUtc    Lat   Long  Alt");
+                        }
+                        foreach (var wifiOnAir in wifiNetworksOnAir)
+                        {
+                            fw.WriteLine($"{WifiNetworkDto.ToStringInCSV (wifiOnAir.Name)}\t{wifiOnAir.BssID}\t{wifiOnAir.Level}\t{DateTime.UtcNow.ToString(_cultUS)}\t{wifiOnAir.LastCoordLat}\t{wifiOnAir.LastCoordLong}\t{wifiOnAir.LastCoordAlt}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(TAG, "DumpRawListAsync " + ex.Message);
+                throw ex;
+            }
+            finally
+            {
             }
         }
 

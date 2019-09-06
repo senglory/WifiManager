@@ -114,6 +114,13 @@ namespace WiFiManager
                 if (mpv.IsBusy)
                     return;
                 mpv.DoRefreshNetworks();
+
+                if (mpv.DumpRawList)
+                {
+                    mpv.DoRefreshCoords();
+                    mpv.DoSave();
+                }
+
                 if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV))
                 {
                     Device.BeginInvokeOnMainThread(() =>

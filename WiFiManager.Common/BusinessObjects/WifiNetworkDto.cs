@@ -203,20 +203,25 @@ namespace WiFiManager.Common.BusinessObjects
                 return this.Name == "Telekom_FON"
                        || this.Name == "Unitymedia WifiSpot"
                        || this.Name == "Globus_Gast"
-                       || this.Name == "mycloud"
                        || this.Name == "MT_FREE"
-                       || this.Name == "AndroidAP"
                        || this.Name == "TSUM Discount"
                        || this.Name == "CPPK_Free"
+                       || this.Name == "VTB_WiFi_Free"
+                       || this.Name == "TANUKI_WiFi_FREE_TURBO"
+                       || this.Name == "free_wi - fi_raiffeisenbank"
+                       || this.Name == "Moscow_WiFi_Free"
                        || this.Name == "Metropolis_FREE"
+                       || this.Name == "McDonalds_WiFi_Free"
                        || this.Name == "Mosinter"
                        || this.Name == "Beeline_WiFi_FREE"
                        || this.Name == "Beeline_WiFi_Starbucks_FREE"
+                       || this.Name == "Tele2_WiFi_Free"
                        || this.Name == "Starbucks_Beeline_Free"
                        || this.Name == "Moscow_WiFi_Free"
                        || this.Name == "MetropolisNew-WiFi_FREE"
                        || this.Name == "Aeroexpress_iras"
-                       || this.Name == "Shokoladniza-Guest";
+                       || this.Name == "Shokoladniza-Guest"
+                       || this.Name.StartsWithNullSafe("((lovit))");
             }
         }
 
@@ -224,69 +229,85 @@ namespace WiFiManager.Common.BusinessObjects
             "00:0E:8F",
             "00:1F:CE",
             "00:18:E7",
-            "08:C6:B3",
             "04:BF:6D",
-            "84:C9:B2",
-            "F8:C0:91",
-            "EE:43:F6",
-            "EC:43:F6",
-            "EA:28:5D",
-            "EA:37:7A",
-            "E8:CD:2D",
-            "E4:F4:C6",
-            "E4:BE:ED",
-            "E0:3F:49",
-            "D8:50:E6",
-            "D8:EB:97",
-            "D4:BF:7F",
-            "D4:6E:0E",
-            "D4:21:22",
-            "CC:5D:4E",
-            "C8:6C:87",
-            "C8:60:00",
-            "C8:3A:35",
-            "C0:25:E9",
-            "B4:75:0E",
-            "B0:B2:DC",
-            "B0:4E:26",
-            "90:EF:68",
-            "90:94:E4",
-            "92:7B:EF",
-            "94:4A:0C",
-            "70:4D:7B",
-            "78:44:76",
-            "74:DA:38",
+            "04:D4:C4",
+            "08:C6:B3",
+            "0C:80:63",
+            "10:7B:EF", // Keenetic
+            "10:BF:48",
+            "10:C3:7B",
+            "14:A9:E3",
+            "14:DD:A9",
+            "18:A6:F7",
+            "18:D6:C7",
+            "1C:B7:2C",
+            "1C:7E:E5",
+            "1C:74:0D", // Keenetic
+            "28:28:5D", // Keenetic
+            "28:C6:8E", // Keenetic
+            "2C:56:DC",
+            "2C:4D:54",
+            "2C:FD:A1",
+            "30:5A:3A",
+            "30:85:A9", // ASUS
+            "38:2C:4A", // ASUS
+            "38:D5:47", // ASUS
+            "40:16:7E",
+            "40:4A:03",
+            "44:94:FC",
+            "4E:5D:4E",
+            "4C:60:DE",
+            "5C:F4:AB",
+            "50:67:F0",
+            "50:46:5D", // ASUS
+            "58:8B:F3",
             "60:31:97",
             "60:A4:4C", // ASUS
             "64:6E:EA",
             "6A:28:5D",
-            "5C:F4:AB",
-            "50:67:F0",
-            "50:67:F0",
-            "50:46:5D", // ASUS
-            "4E:5D:4E",
-            "4C:60:DE",
-            "40:4A:03",
-            "40:16:7E",
-                    
-            "30:85:A9", // ASUS
-                    
-            "38:2C:4A", // ASUS
-                    
-            "38:D5:47", // ASUS
-                    
+            "70:4D:7B",
+            "74:DA:38",
+            "78:44:76",
+            "84:C9:B2",
+            "88:D7:F6", // ASUS
+            "90:94:E4",
+            "90:EF:68",
+            "92:7B:EF",
+            "94:4A:0C",
+            "AA:28:5D",
+            "AC:22:0B",
+            "AC:84:C6",
+            "AC:F1:DF",
+            "B0:B2:DC",
+            "B0:4E:26",
+            "b0be76",
+            "B4:75:0E",
+            "C0:25:E9",
+            "c46e1f",
+            "CC:5D:4E",
+            "C8:6C:87",
+            "C8:60:00",
+            "C8:3A:35",
+            "D8:50:E6",
+            "D8:EB:97",
+            "D8:FE:E3", // D-Link DIR-620
+            "D4:BF:7F",
+            "D4:6E:0E",
+            "D4:21:22", // Beeline Smart_box
+            "E0:3F:49",
+            "E4:F4:C6",
+            "E4:BE:ED",
+            "E8:37:7A",
+            "E8:CD:2D", // MGTS
+            "EE:43:F6", // Keenetic
+            "EC:08:6B", // TP-LINK
+            "EC:43:F6", // Keenetic
+            "EA:28:5D",
+            "EA:37:7A",
             "F8:32:E4", // ASUS
+            "F8:C0:91", // Upvel OnLime NetByNet
+            "FC:F5:28", // Keenetic
             "FE:F5:28", // Keenetic
-            "28:28:5D", // Keenetic
-            "28:C6:8E", // Keenetic
-            "2C:56:DC",
-            "1C:B7:2C",
-            "1C:7E:E5",
-            "18:D6:C7",
-            "14:A9:E3",
-            "10:C3:7B",
-            "10:7B:EF", // Keenetic
-            "1C:74:0D", // Keenetic
         };  
 
         public bool IsVulnerable
@@ -344,6 +365,14 @@ namespace WiFiManager.Common.BusinessObjects
                 "F0:B4:29"
         };
 
+        public bool IsWithVPN
+        {
+            get
+            {
+                return _bssIdsWithVPN.Any(w => BssID.StartsWithNullSafe(w));
+            }
+        }
+
 
         public bool IsOpen
         {
@@ -353,11 +382,35 @@ namespace WiFiManager.Common.BusinessObjects
             }
         }
 
-        public bool IsWithVPN
+        public bool IsWEP
         {
             get
             {
-                return _bssIdsWithVPN.Any(w => BssID.StartsWithNullSafe(w));
+                return NetworkType.Contains("[WEP]");
+            }
+        }
+
+        public bool IsWPS
+        {
+            get
+            {
+                return NetworkType.Contains("[WPS]");
+            }
+        }
+
+        public bool IsWithPassword
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(Password);
+            }
+        }
+
+        public bool IsWithWPSPIN
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(WpsPin);
             }
         }
 
@@ -549,7 +602,7 @@ namespace WiFiManager.Common.BusinessObjects
             return wifiDtoFromFile;
         }
 
-        public static string ToStringInCSV(WifiNetworkDto wifiOnAir)
+        public static string NetworkToStringInCSV(WifiNetworkDto wifiOnAir)
         {
             var isBanned = wifiOnAir.IsEnabled ? "" : "1";
             var dummy = "";
@@ -570,6 +623,10 @@ namespace WiFiManager.Common.BusinessObjects
 
         }
 
+        public static string ToStringInCSV(string s)
+        {
+            return s.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
+        }
 
 
         #region INotifyPropertyChanged

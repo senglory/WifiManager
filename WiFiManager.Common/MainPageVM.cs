@@ -225,6 +225,17 @@ namespace WiFiManager.Common
                 SetProperty(ref tryCopyFromBluetoothFolder, value, nameof(TryCopyFromBluetoothFolder));
             }
         }
+
+        bool dumpRawList;
+        public bool DumpRawList
+        {
+            get { return dumpRawList; }
+            set
+            {
+                SetProperty(ref dumpRawList, value, nameof(DumpRawList));
+            }
+        }
+
         #endregion
 
 
@@ -327,7 +338,7 @@ namespace WiFiManager.Common
 
                 if (WEPOnly)
                 {
-                    allOnAir = allOnAir.Where(x => x.NetworkType.Contains("WEP")).ToList();
+                    allOnAir = allOnAir.Where(x => x.IsWEP).ToList();
                 }
 
                 if (WithVPNOnly)
@@ -346,8 +357,8 @@ namespace WiFiManager.Common
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;
 
-                var v = Plugin.Vibrate.CrossVibrate.Current;
-                v.Vibration(TimeSpan.FromSeconds(0.5));
+                //var v = Plugin.Vibrate.CrossVibrate.Current;
+                //v.Vibration(TimeSpan.FromSeconds(0.5));
             }
             catch (Exception ex)
             {
@@ -434,17 +445,24 @@ namespace WiFiManager.Common
                 IsBusy = true;
                 Task.Run(() =>
                 {
-                    List<WifiNetworkDto> lst = new List<WifiNetworkDto>();
-                    if (null == theOne)
+                    List<WifiNetworkDto> lst = new List<WifiNetworkDto>(WifiNetworks);
+                    if (DumpRawList)
                     {
-                        if (WifiNetworksSaveList.Count > 0)
-                            lst.AddRange(WifiNetworksSaveList);
-                        else
-                            lst.AddRange(WifiNetworks);
+                        mgr.DumpRawListAsync(lst);
                     }
                     else
-                        lst.Add(theOne);
-                    mgr.SaveToCSVAsync(lst);
+                    {
+                        if (null == theOne)
+                        {
+                            if (WifiNetworksSaveList.Count > 0)
+                                lst.AddRange(WifiNetworksSaveList);
+                            else
+                                lst.AddRange(WifiNetworks);
+                        }
+                        else
+                            lst.Add(theOne);
+                        mgr.SaveToCSVAsync(lst);
+                    }
                 })
                 .Wait();
             }
