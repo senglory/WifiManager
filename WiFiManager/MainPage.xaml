@@ -90,7 +90,8 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition  Width="5"/>
                             <ColumnDefinition  Width="5"/>
-                            <ColumnDefinition  Width="10"/>
+                            <ColumnDefinition  Width="5"/>
+                            <ColumnDefinition  Width="5"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="Lime" HeightRequest="20" />
                         <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal"  HorizontalOptions="Fill" HeightRequest="20">
