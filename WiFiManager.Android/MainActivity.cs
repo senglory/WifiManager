@@ -346,11 +346,15 @@ namespace WiFiManager.Droid
                 // Refactor lookup code, also do the same for FindWifiInCSV()
                 // Use FindDelegate
                 var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
-                    (nwtmp) => {
+                    (nwFromCache) => {
+                        if (string.IsNullOrEmpty(nwFromCache.BssID) )
+                        {
+                            return nwFromCache.Name == nw.Name;
+                        }
                         if ( string.IsNullOrEmpty (  nw.BssID))
-                            return nwtmp.Name == nw.Name;
+                            return nwFromCache.Name == nw.Name;
                         else
-                            return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper();
+                            return nwFromCache.BssID.ToUpper() == nw.BssID.ToUpper();
                     });
 
                 wifiDtoFromFile = wifiDtoFromFileKVP;
