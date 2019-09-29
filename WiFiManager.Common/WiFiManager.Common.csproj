@@ -9,7 +9,7 @@
     <PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
     <PackageReference Include="Xam.Plugins.Logging" Version="1.1.1" />
     <PackageReference Include="Xam.Plugins.Vibrate" Version="4.0.0.5" />
-    <PackageReference Include="Xamarin.Forms" Version="4.1.0.555618" />
+    <PackageReference Include="Xamarin.Forms" Version="4.2.0.815419" />
   </ItemGroup>
 
 </Project>

@@ -236,6 +236,27 @@ namespace WiFiManager.Common
             }
         }
 
+        bool searchByBssIDOnly;
+
+        public bool SearchByBssIDOnly
+        {
+            get { return searchByBssIDOnly; }
+            set
+            {
+                SetProperty(ref searchByBssIDOnly, value, nameof(SearchByBssIDOnly));
+            }
+        }
+
+        bool scanWifiAndGps;
+
+        public bool ScanWifiAndGps
+        {
+            get { return scanWifiAndGps; }
+            set
+            {
+                SetProperty(ref scanWifiAndGps, value, nameof(ScanWifiAndGps));
+            }
+        }
         #endregion
 
 
@@ -320,7 +341,7 @@ namespace WiFiManager.Common
                     for (int i = 0; i < allOnAir.Count; i++)
                     {
                         var wifiOnAir = allOnAir[i];
-                        var wifiDtoFromFile = mgr.FindWifiInCSV(wifiOnAir);
+                        var wifiDtoFromFile = mgr.FindWifiInCSV(wifiOnAir, SearchByBssIDOnly);
                         var isInFileAndOnAir = wifiDtoFromFile != null;
                         if (isInFileAndOnAir)
                         {
@@ -357,13 +378,18 @@ namespace WiFiManager.Common
                 IsConnected = mgr.IsConnected();
                 SelectedNetwork = null;
 
+                if (ScanWifiAndGps)
+                {
+                    Task.Run(() => DoRefreshCoords());
+                }
+
                 //var v = Plugin.Vibrate.CrossVibrate.Current;
                 //v.Vibration(TimeSpan.FromSeconds(0.5));
             }
             catch (Exception ex)
             {
                 IsFailed = true;
-                Logging.Error("DoRefreshCoords", ex);
+                Logging.Error("DoRefreshNetworks", ex);
             }
             finally
             {
@@ -445,13 +471,15 @@ namespace WiFiManager.Common
                 IsBusy = true;
                 Task.Run(() =>
                 {
-                    List<WifiNetworkDto> lst = new List<WifiNetworkDto>(WifiNetworks);
+                    List<WifiNetworkDto> lst;
                     if (DumpRawList)
                     {
+                        lst = new List<WifiNetworkDto>(WifiNetworks);
                         mgr.DumpRawListAsync(lst);
                     }
                     else
                     {
+                        lst = new List<WifiNetworkDto>();
                         if (null == theOne)
                         {
                             if (WifiNetworksSaveList.Count > 0)

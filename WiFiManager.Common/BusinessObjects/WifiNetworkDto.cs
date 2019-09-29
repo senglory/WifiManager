@@ -612,15 +612,6 @@ namespace WiFiManager.Common.BusinessObjects
             var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
             var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
             return $"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}";
-
-            //var isBanned = wifiOnAir.IsEnabled ? "" : "1";
-            //var dummy = "";
-            //// prevent from further breaking of list load because of ';' in name or pwd or comments
-            //var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            //var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            //var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            //return $"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{wifiOnAir.FirstConnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}";
-
         }
 
         public static string ToStringInCSV(string s)

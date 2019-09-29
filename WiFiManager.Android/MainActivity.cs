@@ -128,9 +128,9 @@ namespace WiFiManager.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
-            Log.Info(TAG, "MainActivity - OnCreate - before  CreateMapper");
+            //Log.Info(TAG, "MainActivity - OnCreate - before  CreateMapper");
 
-            Log.Info(TAG, "MainActivity - OnCreate - after  CreateMapper");
+            //Log.Info(TAG, "MainActivity - OnCreate - after  CreateMapper");
 
             _CachedCSVNetworkList = new List<WifiNetworkDto>();
 
@@ -315,7 +315,7 @@ namespace WiFiManager.Droid
 
 
 
-        WifiNetworkDto FindInternal(WifiNetworkDto nw, FindDelegate findMethod)
+        WifiNetworkDto FindInternal(WifiNetworkDto nw, bool byBssIdOnly, FindDelegate findMethod)
         {
             WifiNetworkDto wifiDtoFromFile;
 
@@ -344,10 +344,7 @@ namespace WiFiManager.Droid
                 }
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // Refactor lookup code, also do the same for FindWifiInCSV()
-                //var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
-                //    (nwtmp) => {
-                //    return nwtmp.BssID.ToUpper() == nw.BssID.ToUpper() && nwtmp.Name == nw.Name ;
-                //});
+                // Use FindDelegate
                 var wifiDtoFromFileKVP = _CachedCSVNetworkList.FirstOrDefault(
                     (nwtmp) => {
                         if ( string.IsNullOrEmpty (  nw.BssID))
@@ -384,7 +381,7 @@ namespace WiFiManager.Droid
             return wifiDtoFromFile;
         }
 
-        public WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw)
+        public WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly)
         {
             WifiNetworkDto res=null;
 
@@ -395,19 +392,23 @@ namespace WiFiManager.Droid
                     return null;
                 }
 
-                res = FindInternal(nw, (nw1, wifiDtoFromFile)=> {
-                    return nw1.Name == wifiDtoFromFile.Name && nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper();
+                res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile)=> {
+                    return (byBssIdOnly && nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper()) || (nw1.Name == wifiDtoFromFile.Name && !byBssIdOnly && nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper());
                 });
+                if (byBssIdOnly)
+                {
+                    return res;
+                }
                 if (res == null)
                 {
-                    res = FindInternal(nw, (nw1, wifiDtoFromFile) =>
+                    res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
                     {
                         return nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper();
                     });
                 }
                 if (res == null)
                 {
-                    res = FindInternal(nw, (nw1, wifiDtoFromFile) =>
+                    res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
                     {
                         return nw1.Name == wifiDtoFromFile.Name;
                     });

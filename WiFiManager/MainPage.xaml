@@ -399,6 +399,14 @@
                 <Switch IsToggled="{Binding Path=TryCopyFromBluetoothFolder}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
+                <Label Text="Scan Wifi And Gps" />
+                <Switch IsToggled="{Binding Path=ScanWifiAndGps}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Lookup Wifis only by BSSID" />
+                <Switch IsToggled="{Binding Path=SearchByBssIDOnly}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
                 <Label Text="Dump only raw list" />
                 <Switch IsToggled="{Binding Path=DumpRawList}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>

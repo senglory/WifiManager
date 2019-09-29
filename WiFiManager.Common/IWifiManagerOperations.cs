@@ -14,7 +14,7 @@ namespace WiFiManager.Common
     public interface IWifiManagerOperations
     {
         List<WifiNetworkDto> GetActiveWifiNetworks();
-        WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw );
+        WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly);
 
         void MoveCSVFromBluetoothFolder();
 
