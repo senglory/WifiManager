@@ -25,7 +25,7 @@ namespace WiFiManager
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : TabbedPage
     {
-        IWifiManagerOperations mgr;
+        readonly IWifiManagerOperations mgr;
 
         public MainPage(IWifiManagerOperations mgr, MainPageVM vm)
         {
@@ -113,12 +113,16 @@ namespace WiFiManager
             {
                 if (mpv.IsBusy)
                     return;
+                Device.BeginInvokeOnMainThread(() => {
+                    IsBusy = true;
+                });
+
                 await mpv.DoRefreshNetworks();
 
                 if (mpv.DumpRawList)
                 {
                     await mpv.DoRefreshCoords();
-                    mpv.DoSave();
+                    await mpv.DoSave();
                 }
 
                 if (!string.IsNullOrEmpty(mpv.FirstFailedLineInCSV))
@@ -132,7 +136,7 @@ namespace WiFiManager
                 if (doVibrateUponFinish)
                 {
                     var v = Plugin.Vibrate.CrossVibrate.Current;
-                    v.Vibration(TimeSpan.FromSeconds(0.5));
+                    v.Vibration(Constants.VIBRATE_DURATION);
                 }
             }
             catch (InvalidDataException ex)
@@ -150,6 +154,12 @@ namespace WiFiManager
                     DisplayAlert("Fatal", ex.Message, "OK");
                 });
                 throw;
+            }
+            finally
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    IsBusy = false;
+                });
             }
 
             System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - END");
@@ -217,7 +227,7 @@ namespace WiFiManager
                 mpv.IsConnected = false;
                 var nw = mpv.SelectedNetwork;
                 var t = mgr.ConnectAsync(nw);
-                var t2 = t.ContinueWith( ec=> {
+                var t2 = t.ContinueWith(async ec => {
                     if (ec.IsCompleted)
                     {
                         var wi = ec.Result;
@@ -225,7 +235,7 @@ namespace WiFiManager
                         if (wi != null)
                         {
                             nw.TryUpdateFirstConnectionInfo(wi);
-                            mpv.DoSave(nw);
+                            await mpv.DoSave(nw);
                         }
                     }
                 });
@@ -244,10 +254,12 @@ namespace WiFiManager
             }
         }
 
-        void WebAdm_Clicked(object sender, EventArgs e){
+        // TODO !!!!!!!!!!!!!!!!!!!!!!!
+        // Replace void with Task
+        async void WebAdm_Clicked(object sender, EventArgs e){
             var mpv = this.BindingContext as MainPageVM;
 
-            Device.OpenUri(new Uri(mpv.SelectedNetwork.RouterWebUIIP));
+            await Launcher.OpenAsync(new Uri(mpv.SelectedNetwork.RouterWebUIIP));
         }
 
 
@@ -278,21 +290,17 @@ namespace WiFiManager
             var mpv = this.BindingContext as MainPageVM;
             try
             {
-                Task.Run(() => {
-                    mpv.IsBusy = true;
-                    mpv.DoSave();
-                }
-                );
+                Task.Run(async () => {
+                        await mpv.DoSave();
+                    }
+                )
+                .Wait();
             }
             catch (Exception ex)
             {
                 Device.BeginInvokeOnMainThread(() => {
                     DisplayAlert("Error", ex.Message, "OK");
                 });
-            }
-            finally
-            {
-                mpv.IsBusy = false;
             }
         }
 
@@ -305,6 +313,8 @@ namespace WiFiManager
             mpv.WifiNetworks.Remove(n);
         }
 
+        // TODO !!!!!!!!!!!!!!!!!!!!!!!
+        // Replace void with Task
         async void RefreshCoords_Clicked(object sender, EventArgs e)
         {
             var mpv = this.BindingContext as MainPageVM;
@@ -361,7 +371,7 @@ namespace WiFiManager
             }
         }
 
-        private void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
+        void MenuItem_SaveThis_Clicked(object sender, EventArgs e)
         {
             var bo = sender as BindableObject;
             var mpv = this.BindingContext as MainPageVM;
@@ -372,7 +382,11 @@ namespace WiFiManager
 
             try
             {
-                mpv.DoSave(dto);
+                Task.Run(async () => {
+                    await mpv.DoSave(dto);
+                }
+                )
+                .Wait();
             }
             catch (Exception ex)
             {
@@ -382,6 +396,8 @@ namespace WiFiManager
             }
         }
 
+        // TODO !!!!!!!!!!!!!!!!!!!!!!!
+        // Replace void with Task
         async void SetDescrForAll_Clicked(object sender, EventArgs e)
         {
             var detailPage = new DescrForAllPage(this.BindingContext as MainPageVM);

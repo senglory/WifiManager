@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:behaviorsPack="clr-namespace:Xamarin.Forms.BehaviorsPack;assembly=Xamarin.Forms.BehaviorsPack"
-             xmlns:b="clr-namespace:Xamarin.Behaviors;assembly=Xamarin.Behaviors"
+             xmlns:b="clr-namespace:Xamarin.Behaviors;assembly=Xamarin.Forms.BehaviorsPack"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain"
             >
@@ -165,7 +165,7 @@
                     <MenuItem Clicked="MenuItem_AddToSaveList_Clicked"
                                   Text="Add to 'Save List'" IsDestructive="False" 
                                    IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-                    <MenuItem Command="{Binding CreateUnixFilesCommand}"
+                    <MenuItem Command="{Binding CreateUnixFilesCommand, Source={StaticResource MainPageVM}}"
                                   Text="Files for Unix" IsDestructive="False" 
                                    IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
                 </ViewCell.ContextActions>

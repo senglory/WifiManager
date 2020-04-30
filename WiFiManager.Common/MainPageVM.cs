@@ -18,7 +18,6 @@ namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
-        
         IWifiManagerOperations mgr;
 
         #region Properties
@@ -267,11 +266,6 @@ namespace WiFiManager.Common
                 SetProperty(ref scanWifiAndGps, value, nameof(ScanWifiAndGps));
             }
         }
-        #endregion
-
-
-
-        public string FirstFailedLineInCSV;
 
         bool isFailed;
         public bool IsFailed
@@ -282,6 +276,11 @@ namespace WiFiManager.Common
                 SetProperty(ref isFailed, value, nameof(IsFailed));
             }
         }
+
+        #endregion
+
+        public string FirstFailedLineInCSV;
+
 
         /// <summary>
         ///    Just FOR xaml
@@ -295,15 +294,6 @@ namespace WiFiManager.Common
         {
             this.mgr = mgr;
 
-            // !!!!! TO BE REWRITTEN
-            SaveCommand = new Command((parameter) => { this.DoSave(null); });
-            ConnectCommand = new Command(ExecuteConnect);
-            DisconnectCommand = new Command(DoDisconnect);
-            //RefreshNetworksCommand = new Command(DoRefreshNetworks);
-            StopHuntingCommand = new Command(DoStopHunting);
-            //DoLookupCommand = new Command((wifiNameOrBssId) => { this.DoLookup(wifiNameOrBssId); });
-            //DoLookupCommand = new Command(async x => await DoLookupAsync((string)x));
-
             IsConnected = mgr.IsConnected();
         }
 
@@ -311,7 +301,6 @@ namespace WiFiManager.Common
         {
             try
             {
-                IsBusy = true;
                 IsFailed = false;
 
                 var ts0 = DateTime.Now;
@@ -399,10 +388,6 @@ namespace WiFiManager.Common
                 IsFailed = true;
                 Logging.Error("DoRefreshNetworks", ex);
             }
-            finally
-            {
-                IsBusy = false;
-            }
         }
 
         public void DoStopHunting()
@@ -472,34 +457,33 @@ namespace WiFiManager.Common
             }
         }
 
-        public void DoSave(WifiNetworkDto theOne=null)
+        public async Task DoSave(WifiNetworkDto theOne=null)
         {
             try
             {
-                IsBusy = true; var t = Task.Run( async () =>
+                Device.BeginInvokeOnMainThread(() => {
+                    IsBusy = true;
+                });
+                List<WifiNetworkDto> lst;
+                if (DumpRawList)
                 {
-                    List<WifiNetworkDto> lst;
-                    if (DumpRawList)
+                    lst = new List<WifiNetworkDto>(WifiNetworks);
+                    await mgr.DumpRawListAsync(lst);
+                }
+                else
+                {
+                    lst = new List<WifiNetworkDto>();
+                    if (null == theOne)
                     {
-                        lst = new List<WifiNetworkDto>(WifiNetworks);
-                        await mgr.DumpRawListAsync(lst);
+                        if (WifiNetworksSaveList.Count > 0)
+                            lst.AddRange(WifiNetworksSaveList);
+                        else
+                            lst.AddRange(WifiNetworks);
                     }
                     else
-                    {
-                        lst = new List<WifiNetworkDto>();
-                        if (null == theOne)
-                        {
-                            if (WifiNetworksSaveList.Count > 0)
-                                lst.AddRange(WifiNetworksSaveList);
-                            else
-                                lst.AddRange(WifiNetworks);
-                        }
-                        else
-                            lst.Add(theOne);
-                        await mgr.SaveToCSVAsync(lst);
-                    }
-                });
-                t.Wait();
+                        lst.Add(theOne);
+                    await mgr.SaveToCSVAsync(lst);
+                }
             }
             catch
             {
@@ -508,15 +492,30 @@ namespace WiFiManager.Common
             finally
             {
                 WifiNetworksSaveList.Clear();
-                IsBusy = false;
+                Device.BeginInvokeOnMainThread(() => {
+                    IsBusy = false;
+                });
             }
         }
 
 
-        public Command SaveCommand { get; set; }
+        public ICommand SaveCommand => new Command(async x => { await DoSave(null); });
         public ICommand RefreshNetworksCommand => new Command(
-            x => {
-                Task.Run( async () => await DoRefreshNetworks());
+            async (x) => {
+                try
+                {
+                    Device.BeginInvokeOnMainThread(() => {
+                        IsBusy = true;
+                    });
+
+                    await DoRefreshNetworks();
+                }
+                finally
+                {
+                    Device.BeginInvokeOnMainThread(() => {
+                        IsBusy = false;
+                    });
+                }
             }
             ,
             (x) =>
@@ -525,12 +524,12 @@ namespace WiFiManager.Common
                 return !IsBusy;
             }
             );
-        public Command ConnectCommand { get; set; }
-        public Command DisconnectCommand { get; set; }
-        public Command StopHuntingCommand { get; set; }
-        //public Command DoLookupCommand { get; set; }
-        public ICommand DoLookupCommand => new Command<string>( async(x) =>
-            {
+        public ICommand ConnectCommand => new Command(ExecuteConnect);
+        public ICommand DisconnectCommand => new Command(DoDisconnect);
+        public ICommand StopHuntingCommand => new Command(DoStopHunting);
+
+        public ICommand DoLookupCommand => new Command<string>( 
+            async(x) => {
                 try
                 {
                     IsBusy = true;
@@ -572,6 +571,9 @@ namespace WiFiManager.Common
                 return !IsBusy;
             }
             );
+        //DoLookupCommand = new Command((wifiNameOrBssId) => { this.DoLookup(wifiNameOrBssId); });
+        //DoLookupCommand = new Command(async x => await DoLookupAsync((string)x));
+
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;

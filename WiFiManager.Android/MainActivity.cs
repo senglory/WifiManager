@@ -547,10 +547,10 @@ namespace WiFiManager.Droid
                                 while (!sr.EndOfStream)
                                 {
                                     s = await sr.ReadLineAsync();
+                                    // skip header from BAK
                                     if (isHeaderline)
                                     {
                                         isHeaderline = false;
-                                        await fw.WriteLineAsync(s);
                                         continue;
                                     }
                                     WifiNetworkDto wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(s, delimiter);
