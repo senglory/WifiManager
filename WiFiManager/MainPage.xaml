@@ -165,7 +165,7 @@
                     <MenuItem Clicked="MenuItem_AddToSaveList_Clicked"
                                   Text="Add to 'Save List'" IsDestructive="False" 
                                    IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
-                    <MenuItem Clicked="MenuItem_CreateUnixFiles_Clicked"
+                    <MenuItem Command="{Binding CreateUnixFilesCommand}"
                                   Text="Files for Unix" IsDestructive="False" 
                                    IsEnabled="{Binding Source={StaticResource MainPageVM}, Path=IsNotBusy}" />
                 </ViewCell.ContextActions>
@@ -354,6 +354,10 @@
             <StackLayout Orientation="Horizontal">
                 <Label Text="Use Internal Phone Storage" />
                 <Switch IsToggled="{Binding Path=UseInternalStorageForCSV}" HorizontalOptions="FillAndExpand"/>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <Label Text="Use TAB as delimiter" />
+                <Switch IsToggled="{Binding Path=UseTAB}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
                 <Label Text="Use Cached Network Lookup" />

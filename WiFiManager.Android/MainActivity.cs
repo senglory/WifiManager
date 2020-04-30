@@ -44,8 +44,7 @@ using WiFiManager.Common;
 using Java.Util;
 using Android.Support.V4.Content;
 using Android.Support.V4.App;
-
-
+using System.Threading.Tasks.Dataflow;
 
 namespace WiFiManager.Droid
 {
@@ -128,6 +127,9 @@ namespace WiFiManager.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
+            UseInternalStorageForCSV = true;
+            UseCachedNetworkLookup = true;
+
             //Log.Info(TAG, "MainActivity - OnCreate - before  CreateMapper");
 
             //Log.Info(TAG, "MainActivity - OnCreate - after  CreateMapper");
@@ -202,6 +204,8 @@ namespace WiFiManager.Droid
 
 
         public bool UseInternalStorageForCSV { get; set; }
+
+        public bool UseTAB { get; set; }
 
         public bool UseCachedNetworkLookup { get; set; }
 
@@ -291,33 +295,48 @@ namespace WiFiManager.Droid
             return wifiNetworks;
         }
 
-        IEnumerable<WifiNetworkDto> FindInternal(FindDelegateBulk findMethod)
+        async Task<IEnumerable<WifiNetworkDto>> FindInternal(FindDelegateBulk findMethod)
         {
+            var delimiter = ';';
+            if (UseTAB)
+            {
+                delimiter = '\t';
+            }
+            var lstRes = new List<WifiNetworkDto>();
             using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
             {
                 using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                 {
                     // skip header
-                    var ss2 = fr.ReadLine();
+                    var ss2 = await fr.ReadLineAsync();
                     while (!fr.EndOfStream)
                     {
-                        var lineFromCSV = fr.ReadLine();
+                        var lineFromCSV = await fr.ReadLineAsync();
                         if (string.IsNullOrWhiteSpace(lineFromCSV))
                             continue;
-                        var wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV);
+                        var wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV, delimiter);
 
-                        if (findMethod( wifiDtoFromFile))
-                            yield return wifiDtoFromFile;
+                        if (findMethod(wifiDtoFromFile))
+                        {
+                            lstRes.Add(wifiDtoFromFile);
+                        }
                     }
                 }
             }
+
+            return lstRes;
         }
 
 
 
-        WifiNetworkDto FindInternal(WifiNetworkDto nw, bool byBssIdOnly, FindDelegate findMethod)
+        async Task<WifiNetworkDto> FindInternal(WifiNetworkDto nw, bool byBssIdOnly, FindDelegate findMethod)
         {
             WifiNetworkDto wifiDtoFromFile;
+            var delimiter = ';';
+            if (UseTAB)
+            {
+                delimiter = '\t';
+            }
 
             if (UseCachedNetworkLookup)
             {
@@ -335,7 +354,7 @@ namespace WiFiManager.Droid
                                 var lineFromCSV = fr.ReadLine();
                                 if (string.IsNullOrWhiteSpace(lineFromCSV))
                                     continue;
-                                wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV);
+                                wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(lineFromCSV, delimiter);
                                 _CachedCSVNetworkList.Add(wifiDtoFromFile);
                             }
                         }
@@ -366,13 +385,13 @@ namespace WiFiManager.Droid
                     using (var fr = new StreamReader(fs, Constants.UNIVERSAL_ENCODING))
                     {
                         // skip header
-                        var ss2 = fr.ReadLine();
+                        var ss2 = await fr.ReadLineAsync();
                         while (!fr.EndOfStream)
                         {
-                            var lineFromCSV = fr.ReadLine();
+                            var lineFromCSV = await fr.ReadLineAsync();
                             if (string.IsNullOrWhiteSpace(lineFromCSV))
                                 continue;
-                            wifiDtoFromFile = WifiNetworkDto.GetWifiDtoFromString(lineFromCSV);
+                            wifiDtoFromFile = WifiNetworkDto.GetWifiDtoFromString(lineFromCSV, delimiter);
 
                             if (findMethod(nw, wifiDtoFromFile))
                                 return wifiDtoFromFile;
@@ -385,7 +404,7 @@ namespace WiFiManager.Droid
             return wifiDtoFromFile;
         }
 
-        public WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly)
+        public async Task<WifiNetworkDto> FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly)
         {
             WifiNetworkDto res=null;
 
@@ -396,7 +415,7 @@ namespace WiFiManager.Droid
                     return null;
                 }
 
-                res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile)=> {
+                res = await FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile)=> {
                     return (byBssIdOnly && nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper()) || (nw1.Name == wifiDtoFromFile.Name && !byBssIdOnly && nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper());
                 });
                 if (byBssIdOnly)
@@ -405,14 +424,14 @@ namespace WiFiManager.Droid
                 }
                 if (res == null)
                 {
-                    res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
+                    res = await FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
                     {
                         return nw1.BssID.ToUpper() == wifiDtoFromFile.BssID.ToUpper();
                     });
                 }
                 if (res == null)
                 {
-                    res = FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
+                    res = await FindInternal(nw, byBssIdOnly, (nw1, wifiDtoFromFile) =>
                     {
                         return nw1.Name == wifiDtoFromFile.Name;
                     });
@@ -426,7 +445,7 @@ namespace WiFiManager.Droid
             return res;
         }
 
-        public IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId)
+        public async Task<IEnumerable<WifiNetworkDto>> FindWifiInCSV(string wifiNameOrBssId)
         {
             IEnumerable<WifiNetworkDto> res = new List<WifiNetworkDto>();
 
@@ -437,12 +456,12 @@ namespace WiFiManager.Droid
                     return null;
                 }
 
-                res = FindInternal( (nw1) => {
+                res = await FindInternal( (nw1) => {
                     return nw1.Name.StartsWithNullSafe(wifiNameOrBssId);
                 });
                 if (res.Count() == 0)
                 {
-                    res = FindInternal(( nw1) =>
+                    res = await FindInternal(( nw1) =>
                     {
                         return nw1.BssID.StartsWithNullSafe(wifiNameOrBssId);
                     });
@@ -466,13 +485,13 @@ namespace WiFiManager.Droid
             return (ni1 != null && ni1.IsConnected && ni1.Type == ConnectivityType.Wifi);
         }
 
-        public void MoveCSVFromBluetoothFolder()
+        public async Task MoveCSVFromBluetoothFolder()
         {
             if (System.IO.File.Exists(_filePathCSVinBluetooth))
             {
                 // works in 2017, busted in 2019 - "Access denied"
                 //System.IO.File.Copy(_filePathCSVinBluetooth, _filePathCSV, true);
-                SafeFileCopy(_filePathCSVinBluetooth, _filePathCSV);
+                await SafeFileCopy(_filePathCSVinBluetooth, _filePathCSV);
                 System.IO.File.Delete(_filePathCSVinBluetooth);
             }
         }
@@ -480,6 +499,11 @@ namespace WiFiManager.Droid
         public async Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworksOnAir)
         {
             FileStream fsBAK = null;
+            var delimiter = ';';
+            if (UseTAB)
+            {
+                delimiter = '\t';
+            }
 
             try
             {
@@ -502,43 +526,46 @@ namespace WiFiManager.Droid
                     }
                     // works in 2017, busted in 2019 - "Access denied"
                     //System.IO.File.Copy(_filePathCSV, _filePathCSVBAK, true);
-                    SafeFileCopy(_filePathCSV, _filePathCSVBAK);
-                }
-                var alreadySaved = new List<WifiNetworkDto>();
-                if (csvAlreadyExists)
-                {
+                    await SafeFileCopy(_filePathCSV, _filePathCSVBAK);
                     fsBAK = new FileStream(_filePathCSVBAK, FileMode.Open);
                 }
+                var alreadySavedWifis = new List<WifiNetworkDto>();
                 var s = "";
                 using (var fsw = new FileStream(_filePathCSV, FileMode.Create))
                 {
                     using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                     {
                         // write header
-                        fw.WriteLine("Name;Bssid;Password;IsBanned;NetworkType;Provider;WpsPin;FirstConnectWhen;FirstConnectPublicIP;RouterWebUIIP;FirstConnectMac;FirstCoordLat;FirstCoordLong;FirstCoordAlt;LastCoordLat;LastCoordLong;LastCoordAlt;");
+                        await fw.WriteLineAsync($"Name{delimiter}Bssid{delimiter}Password{delimiter}IsBanned{delimiter}NetworkType{delimiter}Provider{delimiter}WpsPin{delimiter}FirstConnectWhen{delimiter}FirstConnectPublicIP{delimiter}RouterWebUIIP{delimiter}FirstConnectMac{delimiter}FirstCoordLat{delimiter}FirstCoordLong{delimiter}FirstCoordAlt{delimiter}LastCoordLat{delimiter}LastCoordLong{delimiter}LastCoordAlt{delimiter}");
 
 
                         if (csvAlreadyExists)
                         {
                             using (var sr = new StreamReader(fsBAK, Constants.UNIVERSAL_ENCODING))
                             {
-                                s = sr.ReadLine();
+                                var isHeaderline = true;
                                 while (!sr.EndOfStream)
                                 {
-                                    s = sr.ReadLine();
-                                    WifiNetworkDto wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(s);
+                                    s = await sr.ReadLineAsync();
+                                    if (isHeaderline)
+                                    {
+                                        isHeaderline = false;
+                                        await fw.WriteLineAsync(s);
+                                        continue;
+                                    }
+                                    WifiNetworkDto wifiDtoFromFile = WifiNetworkDto. GetWifiDtoFromString(s, delimiter);
 
                                     var wifiOnAir = wifiNetworksOnAir.GetExistingWifiDto(wifiDtoFromFile);
                                     if (wifiOnAir == null)
                                     {
-                                        fw.WriteLine(s);
+                                        await fw.WriteLineAsync(s);
                                     }
                                     else
                                     {
-                                        var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir);
-                                        fw.WriteLine(res);
+                                        var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir, delimiter);
+                                        await fw.WriteLineAsync(res);
 
-                                        alreadySaved.Add(wifiOnAir);
+                                        alreadySavedWifis.Add(wifiOnAir);
                                     }
                                 }
                             }
@@ -546,11 +573,11 @@ namespace WiFiManager.Droid
 
                         foreach (var wifiOnAir in wifiNetworksOnAir)
                         {
-                            var wifiAlreadySaved = alreadySaved.GetExistingWifiDto(wifiOnAir);
+                            var wifiAlreadySaved = alreadySavedWifis.GetExistingWifiDto(wifiOnAir);
                             if (wifiAlreadySaved == null)
                             {
-                                var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir);
-                                fw.WriteLine(res);
+                                var res = WifiNetworkDto.NetworkToStringInCSV(wifiOnAir, delimiter);
+                                await fw.WriteLineAsync(res);
                             }
                         }
                     }
@@ -561,7 +588,7 @@ namespace WiFiManager.Droid
             catch (Exception ex)
             {
                 Log.Error(TAG, "SaveToCSV "+ ex.Message);
-                throw ex;
+                throw;
             }
             finally
             {
@@ -586,11 +613,11 @@ namespace WiFiManager.Droid
                         if (!fileAlreadyExists)
                         {
                             // write header
-                            fw.WriteLine("Name  Bssid   Level   TimeUtc    Lat   Long  Alt");
+                            await fw.WriteLineAsync("Name  Bssid   Level   TimeUtc    Lat   Long  Alt");
                         }
                         foreach (var wifiOnAir in wifiNetworksOnAir)
                         {
-                            fw.WriteLine($"{WifiNetworkDto.ToStringInCSV (wifiOnAir.Name)}\t{wifiOnAir.BssID}\t{wifiOnAir.Level}\t{DateTime.UtcNow.ToString(_cultUS)}\t{wifiOnAir.LastCoordLat}\t{wifiOnAir.LastCoordLong}\t{wifiOnAir.LastCoordAlt}");
+                            await fw.WriteLineAsync($"{WifiNetworkDto.ToStringInCSV (wifiOnAir.Name)}\t{wifiOnAir.BssID}\t{wifiOnAir.Level}\t{DateTime.UtcNow.ToString(_cultUS)}\t{wifiOnAir.LastCoordLat}\t{wifiOnAir.LastCoordLong}\t{wifiOnAir.LastCoordAlt}");
                         }
                     }
                 }
@@ -605,26 +632,30 @@ namespace WiFiManager.Droid
             }
         }
 
-        private void SafeFileCopy(string filePathCSV, string filePathCSVBAK)
+        private async Task SafeFileCopy(string filePathCSV, string filePathCSVBAK)
         {
-            using (var fsr = new FileStream(filePathCSV, FileMode.Open))
-            {
-                using (var sr = new StreamReader(fsr, Constants.UNIVERSAL_ENCODING))
+            var block = new ActionBlock<string>(async message => {
+                using (var fsr = new FileStream(filePathCSV, FileMode.Open))
                 {
-                    using (var fsw = new FileStream(filePathCSVBAK, FileMode.Create))
+                    using (var sr = new StreamReader(fsr, Constants.UNIVERSAL_ENCODING))
                     {
-                        using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
+                        using (var fsw = new FileStream(filePathCSVBAK, FileMode.Create))
                         {
-                            while (!sr.EndOfStream)
+                            using (var fw = new StreamWriter(fsw, Constants.UNIVERSAL_ENCODING))
                             {
-                                var s2 = sr.ReadLine();
-
-                                fw.WriteLine(s2);
+                                while (!sr.EndOfStream)
+                                {
+                                    var s2 = await sr.ReadLineAsync();
+                                    await fw.WriteLineAsync(s2);
+                                }
                             }
                         }
                     }
                 }
-            }
+            }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = 1 });
+            block.Post(null);
+            block.Complete();
+            await block.Completion;
         }
 
 
@@ -1041,10 +1072,10 @@ namespace WiFiManager.Droid
         /// </summary>
         protected virtual async Task HandleShaking()
         {
-            await Task.Run(() => {
+            //await Task.Run(async () => {
                 var wnd = Xamarin.Forms.Application.Current?.MainPage as MainPage;
-                wnd?.RefreshAvailableNetworks(true);
-            });
+                await wnd?.RefreshAvailableNetworks(true);
+            //});
         }
 
         public void OnLocationChanged(Location location)

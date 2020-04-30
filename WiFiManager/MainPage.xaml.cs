@@ -62,7 +62,7 @@ namespace WiFiManager
         {
             if (args.IsConnected)
             {
-                WifiConnectNotify();
+                await WifiConnectNotify();
             }
             else
             {
@@ -70,7 +70,7 @@ namespace WiFiManager
             }
         }
 
-        public void WifiConnectNotify()
+        public async Task WifiConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
             var current = Connectivity.NetworkAccess;
@@ -89,13 +89,13 @@ namespace WiFiManager
             // get external IP (for the very first connection to the particular network)
             if (string.IsNullOrEmpty(nw.FirstConnectPublicIP))
             {
-                nw.FirstConnectPublicIP = getPublicIp();
+                nw.FirstConnectPublicIP = await getPublicIp();
             }
             // stop 'please wait'
             mpv.IsBusy = false;
         }
 
-        public void WifiDisConnectNotify()
+        public void  WifiDisConnectNotify()
         {
             var mpv = this.BindingContext as MainPageVM;
             mpv.IsConnected = false ;
@@ -103,7 +103,7 @@ namespace WiFiManager
             mpv.IsBusy =false ;
         }
 
-        public void RefreshAvailableNetworks(bool doVibrateUponFinish)
+        public async Task  RefreshAvailableNetworks(bool doVibrateUponFinish)
         {
             System.Diagnostics.Debug.WriteLine("RefreshAvailableNetworks - START");
 
@@ -113,11 +113,11 @@ namespace WiFiManager
             {
                 if (mpv.IsBusy)
                     return;
-                mpv.DoRefreshNetworks();
+                await mpv.DoRefreshNetworks();
 
                 if (mpv.DumpRawList)
                 {
-                    mpv.DoRefreshCoords();
+                    await mpv.DoRefreshCoords();
                     mpv.DoSave();
                 }
 
@@ -184,7 +184,7 @@ namespace WiFiManager
         /// Taken from https://forums.xamarin.com/discussion/2260/get-current-ip-address
         /// </summary>
         /// <returns></returns>
-        string getPublicIp()
+        async Task<string > getPublicIp()
         {
             // from https://www.c-sharpcorner.com/uploadfile/scottlysle/getting-an-external-ip-address-locally/
             // and https://wtfismyip.com/text
@@ -196,10 +196,8 @@ namespace WiFiManager
             //String externalIp = utf8.GetString(ar);
 
             var client = new HttpClient();
-            var t1 = Task.Run(() =>  client.GetAsync("https://api.ipify.org/?format=json"));
-            var response = t1.Result;
-            var t2 = Task.Run(() => response.Content.ReadAsStringAsync());
-             var resultString = t2.Result;
+            var response = await client.GetAsync("https://api.ipify.org/?format=json");
+             var resultString = await response.Content.ReadAsStringAsync();
 
             var result = Newtonsoft.Json.JsonConvert.DeserializeObject<IpResult>(resultString);
 

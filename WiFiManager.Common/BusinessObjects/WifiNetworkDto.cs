@@ -4,19 +4,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
-using Xamarin.Forms;
 using System.Text;
 using System.Text.RegularExpressions;
-using AutoMapper;
 using System.Globalization;
 using System.Reflection;
+
+using Xamarin.Forms;
+using AutoMapper;
+
+
 
 namespace WiFiManager.Common.BusinessObjects
 {
     public class WifiNetworkDto : INotifyPropertyChanged
     {
-
         public string Name { get; set; }
         public string BssID { get; set; }
         public string NetworkType { get; set; }
@@ -234,13 +235,13 @@ namespace WiFiManager.Common.BusinessObjects
             "00:1F:CE",
             "00:18:E7", // Rostelecom DIR-655 A4
             "04:BF:6D",
-            "04:D4:C4",
+            "04:D4:C4", // ASUS
             "08:C6:B3",
             "0C:80:63", // TP-Link
             "10:7B:EF", // Keenetic
             "10:BF:48",
             "10:C3:7B",
-            "14:A9:E3",
+            "14:A9:E3", // Beeline N150L
             "14:DD:A9",
             "18:A6:F7",
             "18:D6:C7", // TP-Link Archer C20
@@ -249,25 +250,25 @@ namespace WiFiManager.Common.BusinessObjects
             "1C:74:0D", // Keenetic
             "28:28:5D", // Keenetic
             "28:C6:8E", // Keenetic
-            "2C:56:DC",
             "2C:4D:54",
-            "2C:FD:A1",
-            "30:5A:3A",
+            "2C:56:DC", // ASUS
+            "2C:FD:A1", // ASUS RT-N12VP
+            "30:5A:3A", // ASUS RT-N11P
             "30:85:A9", // ASUS
             "30:B5:C2", // TP-Link
             "38:2C:4A", // ASUS RT-N11P
             "38:D5:47", // ASUS
             "40:16:7E", // ASUS RT-AC52U
-            "40:4A:03", // Keenetic
+            "40:4A:03", // Keenetic NBG460N EE AP
             "44:32:C8",
             "44:94:FC",
-            "4E:5D:4E",
             "4C:60:DE", // NETGEAR JWNR2000v2
-            "5C:F4:AB",
-            "50:67:F0",
+            "4E:5D:4E",
+            "50:67:F0", // Keenetic
             "50:46:5D", // ASUS
             "58:23:8C",
-            "58:8B:F3",
+            "58:8B:F3", // Keenetic
+            "5C:F4:AB", // Keenetic
             "60:31:97", // Keenetic
             "60:A4:4C", // ASUS
             "64:6E:EA",
@@ -282,7 +283,7 @@ namespace WiFiManager.Common.BusinessObjects
             "90:94:E4",
             "90:EF:68", // Keenetic
             "92:7B:EF",
-            "94:4A:0C",
+            "94:4A:0C", // Beeline Smart_box
             "AA:28:5D",
             "AC:22:0B",
             "AC:84:C6",
@@ -298,15 +299,16 @@ namespace WiFiManager.Common.BusinessObjects
             "C8:6C:87", // Keenetic
             "C8:60:00", // ASUS RT-N12
             "C8:3A:35",
-            "CC:5D:4E",
-            "CE:5D:4E",
+            "CC:5D:4E", // Keenetic
+            "CE:5D:4E", // Keenetic
+            "D4:21:22", // Beeline Smart_box
             "D4:BF:7F",
             "D4:6E:0E",
-            "D4:21:22", // Beeline Smart_box
             "D8:50:E6",
-            "D8:EB:97",
+            "D8:EB:97", // Trendnet TEW-652BRU
             "D8:FE:E3", // D-Link DIR-620
             "E0:3F:49",
+            "E0:60:66", // WiFire, Beeline, MGTS-GPON
             "E4:F4:C6",
             "E4:BE:ED",
             "E8:37:7A", // Keenetic
@@ -390,6 +392,7 @@ namespace WiFiManager.Common.BusinessObjects
 
         readonly string[] _bssIdsWithVPNEasy = new string[] {
                 "1C:B7:2C", // !!!!!!!!!!! ASUS RT-N11P
+                "30:5A:3A", // ASUS RT-N11P
                 "38:2C:4A"  // !!!!!!!!!!! ASUS RT-N11P
         };
 
@@ -548,9 +551,9 @@ namespace WiFiManager.Common.BusinessObjects
             _mapper = _config.CreateMapper();
         }
 
-        public static WifiNetworkDto GetWifiDtoFromString(string s)
+        public static WifiNetworkDto GetWifiDtoFromString(string s, char delimiter)
         {
-            var arrs = s.Split(new char[] { ';' }, StringSplitOptions.None);
+            var arrs = s.Split(new char[] { delimiter }, StringSplitOptions.None);
             // parse potential BSSID value
             var bssidRaw = arrs[1].ToUpper().Trim();
             var bssid = bssidRaw;
@@ -630,16 +633,16 @@ namespace WiFiManager.Common.BusinessObjects
             return wifiDtoFromFile;
         }
 
-        public static string NetworkToStringInCSV(WifiNetworkDto wifiOnAir)
+        public static string NetworkToStringInCSV(WifiNetworkDto wifiOnAir, char delimiter)
         {
             var isBanned = wifiOnAir.IsEnabled ? "" : "1";
             var dummy = "";
             var firstCOnnectWhen = wifiOnAir.FirstConnectWhen.HasValue ? wifiOnAir.FirstConnectWhen.Value.ToString(_cultUS) : "";
             // prevent from further breaking of list load because of ';' in name or pwd or comments
-            var nameAdj = wifiOnAir.Name.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            var passwordAdj = wifiOnAir.Password.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe(";", SEMICOLON_REPLACEMENT_IN_CSV);
-            return $"{nameAdj};{wifiOnAir.BssID};{passwordAdj};{isBanned};{dummy};{commentsAdj};{wifiOnAir.WpsPin};{firstCOnnectWhen};{wifiOnAir.FirstConnectPublicIP};{wifiOnAir.RouterWebUIIP};{wifiOnAir.FirstConnectMac};{wifiOnAir.FirstCoordLat};{wifiOnAir.FirstCoordLong};{wifiOnAir.FirstCoordAlt};{wifiOnAir.LastCoordLat};{wifiOnAir.LastCoordLong};{wifiOnAir.LastCoordAlt}";
+            var nameAdj = ToStringInCSV(wifiOnAir.Name.ReplaceNullSafe($"{delimiter}", SEMICOLON_REPLACEMENT_IN_CSV));
+            var passwordAdj = wifiOnAir.Password.ReplaceNullSafe($"{delimiter}", SEMICOLON_REPLACEMENT_IN_CSV);
+            var commentsAdj = wifiOnAir.Provider.ReplaceNullSafe($"{delimiter}", SEMICOLON_REPLACEMENT_IN_CSV);
+            return $"{nameAdj}{delimiter}{wifiOnAir.BssID}{delimiter}{passwordAdj}{delimiter}{isBanned}{delimiter}{dummy}{delimiter}{commentsAdj}{delimiter}{wifiOnAir.WpsPin}{delimiter}{firstCOnnectWhen}{delimiter}{wifiOnAir.FirstConnectPublicIP}{delimiter}{wifiOnAir.RouterWebUIIP}{delimiter}{wifiOnAir.FirstConnectMac}{delimiter}{wifiOnAir.FirstCoordLat}{delimiter}{wifiOnAir.FirstCoordLong}{delimiter}{wifiOnAir.FirstCoordAlt}{delimiter}{wifiOnAir.LastCoordLat}{delimiter}{wifiOnAir.LastCoordLong}{delimiter}{wifiOnAir.LastCoordAlt}";
         }
 
         public static string ToStringInCSV(string s)

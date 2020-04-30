@@ -14,11 +14,11 @@ namespace WiFiManager.Common
     public interface IWifiManagerOperations
     {
         List<WifiNetworkDto> GetActiveWifiNetworks();
-        WifiNetworkDto FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly);
+        Task<WifiNetworkDto> FindWifiInCSV(WifiNetworkDto nw, bool byBssIdOnly);
 
-        void MoveCSVFromBluetoothFolder();
+        Task MoveCSVFromBluetoothFolder();
 
-        IEnumerable<WifiNetworkDto> FindWifiInCSV(string wifiNameOrBssId);
+        Task<IEnumerable<WifiNetworkDto>> FindWifiInCSV(string wifiNameOrBssId);
 
         Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworks);
         Task DumpRawListAsync(List<WifiNetworkDto> wifiNetworks);
@@ -37,6 +37,7 @@ namespace WiFiManager.Common
         Task DisConnectAsync();
 
         bool UseInternalStorageForCSV { get; set; }
+        bool UseTAB { get; set; }
         bool UseCachedNetworkLookup { get; set; }
         void ClearCachedCSVNetworkList();
 

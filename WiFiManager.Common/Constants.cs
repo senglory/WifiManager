@@ -10,6 +10,7 @@ namespace WiFiManager.Common
         public const int WIFI_CONFIG_PRIORITY = 10000;
         public const int GPS_TIMEOUT = 5;
         public const int GPS_ACCURACY = 1;
-        public static readonly Encoding UNIVERSAL_ENCODING = Encoding.UTF8; 
+        public static readonly Encoding UNIVERSAL_ENCODING = Encoding.UTF8;
+        public const int REFRESH_COORDS_WAIT_MS = 2000;
     }
 }

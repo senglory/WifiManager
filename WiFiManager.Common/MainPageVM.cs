@@ -18,6 +18,7 @@ namespace WiFiManager.Common
 {
     public class MainPageVM : INotifyPropertyChanged
     {
+        
         IWifiManagerOperations mgr;
 
         #region Properties
@@ -134,6 +135,17 @@ namespace WiFiManager.Common
             }
         }
 
+        public bool UseTAB
+        {
+            get { return mgr.UseTAB; }
+            set
+            {
+                bool useTAB = value;
+                mgr.UseTAB = useTAB;
+                SetProperty(ref useTAB, value, nameof(UseTAB));
+            }
+        }
+
         public bool UseCachedNetworkLookup
         {
             get { return mgr.UseCachedNetworkLookup; }
@@ -195,7 +207,7 @@ namespace WiFiManager.Common
             }
         }
 
-        bool isNightTheme;
+        bool isNightTheme = false;
         public bool IsNightTheme
         {
             get { return isNightTheme; }
@@ -237,7 +249,6 @@ namespace WiFiManager.Common
         }
 
         bool searchByBssIDOnly;
-
         public bool SearchByBssIDOnly
         {
             get { return searchByBssIDOnly; }
@@ -247,8 +258,7 @@ namespace WiFiManager.Common
             }
         }
 
-        bool scanWifiAndGps;
-
+        bool scanWifiAndGps = true;
         public bool ScanWifiAndGps
         {
             get { return scanWifiAndGps; }
@@ -295,18 +305,16 @@ namespace WiFiManager.Common
             //DoLookupCommand = new Command(async x => await DoLookupAsync((string)x));
 
             IsConnected = mgr.IsConnected();
-            IsNightTheme = false;
-
         }
 
-        public void DoRefreshNetworks()
+        public async Task DoRefreshNetworks()
         {
             try
             {
-                var ts0 = DateTime.Now;
-
                 IsBusy = true;
                 IsFailed = false;
+
+                var ts0 = DateTime.Now;
 
                 FirstFailedLineInCSV = null;
                 if (DoDisconnectBeforeRefresh)
@@ -315,7 +323,7 @@ namespace WiFiManager.Common
                 }
                 if (TryCopyFromBluetoothFolder)
                 {
-                    mgr.MoveCSVFromBluetoothFolder();
+                    await mgr.MoveCSVFromBluetoothFolder();
                 }
                 // clean CSV cache if it was used
                 mgr.ClearCachedCSVNetworkList();
@@ -341,7 +349,7 @@ namespace WiFiManager.Common
                     for (int i = 0; i < allOnAir.Count; i++)
                     {
                         var wifiOnAir = allOnAir[i];
-                        var wifiDtoFromFile = mgr.FindWifiInCSV(wifiOnAir, SearchByBssIDOnly);
+                        var wifiDtoFromFile = await mgr.FindWifiInCSV(wifiOnAir, SearchByBssIDOnly);
                         var isInFileAndOnAir = wifiDtoFromFile != null;
                         if (isInFileAndOnAir)
                         {
@@ -380,7 +388,7 @@ namespace WiFiManager.Common
 
                 if (ScanWifiAndGps)
                 {
-                    Task.Run(() => DoRefreshCoords());
+                    await DoRefreshCoords();
                 }
 
                 //var v = Plugin.Vibrate.CrossVibrate.Current;
@@ -424,7 +432,7 @@ namespace WiFiManager.Common
                                     wifi.TryUpdateRecentCoords(t2.Result);
                                 }
                             }
-                            Thread.Sleep(2000);
+                            Thread.Sleep(Constants.REFRESH_COORDS_WAIT_MS);
                         }
                         else
                         {
@@ -468,14 +476,13 @@ namespace WiFiManager.Common
         {
             try
             {
-                IsBusy = true;
-                Task.Run(() =>
+                IsBusy = true; var t = Task.Run( async () =>
                 {
                     List<WifiNetworkDto> lst;
                     if (DumpRawList)
                     {
                         lst = new List<WifiNetworkDto>(WifiNetworks);
-                        mgr.DumpRawListAsync(lst);
+                        await mgr.DumpRawListAsync(lst);
                     }
                     else
                     {
@@ -489,12 +496,13 @@ namespace WiFiManager.Common
                         }
                         else
                             lst.Add(theOne);
-                        mgr.SaveToCSVAsync(lst);
+                        await mgr.SaveToCSVAsync(lst);
                     }
-                })
-                .Wait();
+                });
+                t.Wait();
             }
-            catch {
+            catch
+            {
                 IsFailed = true;
             }
             finally
@@ -508,7 +516,7 @@ namespace WiFiManager.Common
         public Command SaveCommand { get; set; }
         public ICommand RefreshNetworksCommand => new Command(
             x => {
-                Task.Run( () => DoRefreshNetworks());
+                Task.Run( async () => await DoRefreshNetworks());
             }
             ,
             (x) =>
@@ -521,7 +529,7 @@ namespace WiFiManager.Common
         public Command DisconnectCommand { get; set; }
         public Command StopHuntingCommand { get; set; }
         //public Command DoLookupCommand { get; set; }
-        public ICommand DoLookupCommand => new Command<string>( x =>
+        public ICommand DoLookupCommand => new Command<string>( async(x) =>
             {
                 try
                 {
@@ -530,7 +538,7 @@ namespace WiFiManager.Common
                     WifiNetworksInLookup.Clear();
                     if (string.IsNullOrWhiteSpace(WiFiNameOrBssIdLookup))
                         return;
-                    var lst = mgr.FindWifiInCSV(WiFiNameOrBssIdLookup);
+                    var lst = await mgr.FindWifiInCSV(WiFiNameOrBssIdLookup);
                     foreach (var wifi in lst)
                     {
                         WifiNetworksInLookup.Add(wifi);
@@ -552,6 +560,19 @@ namespace WiFiManager.Common
                 return !string.IsNullOrWhiteSpace (  WiFiNameOrBssIdLookup);
             }
             );
+
+        public ICommand CreateUnixFilesCommand => new Command(
+            x => {
+                mgr.CreateUnixFiles(SelectedNetwork );
+            }
+            ,
+            (x) =>
+            {
+                // Return true if there's a long-running operation.
+                return !IsBusy;
+            }
+            );
+
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
