@@ -45,6 +45,7 @@ using Java.Util;
 using Android.Support.V4.Content;
 using Android.Support.V4.App;
 using System.Threading.Tasks.Dataflow;
+using Plugin.CurrentActivity;
 
 namespace WiFiManager.Droid
 {
@@ -205,8 +206,6 @@ namespace WiFiManager.Droid
 
         public bool UseInternalStorageForCSV { get; set; }
 
-        public bool UseTAB { get; set; }
-
         public bool UseCachedNetworkLookup { get; set; }
 
         List<WifiNetworkDto> _CachedCSVNetworkList { get; set; }
@@ -297,11 +296,8 @@ namespace WiFiManager.Droid
 
         async Task<IEnumerable<WifiNetworkDto>> FindInternal(FindDelegateBulk findMethod)
         {
-            var delimiter = ';';
-            if (UseTAB)
-            {
-                delimiter = '\t';
-            }
+            var delimiter = '\t';
+
             var lstRes = new List<WifiNetworkDto>();
             using (var fs = new FileStream(_filePathCSV, FileMode.Open, FileAccess.Read))
             {
@@ -332,11 +328,7 @@ namespace WiFiManager.Droid
         async Task<WifiNetworkDto> FindInternal(WifiNetworkDto nw, bool byBssIdOnly, FindDelegate findMethod)
         {
             WifiNetworkDto wifiDtoFromFile;
-            var delimiter = ';';
-            if (UseTAB)
-            {
-                delimiter = '\t';
-            }
+            var delimiter = '\t';
 
             if (UseCachedNetworkLookup)
             {
@@ -499,11 +491,7 @@ namespace WiFiManager.Droid
         public async Task SaveToCSVAsync(List<WifiNetworkDto> wifiNetworksOnAir)
         {
             FileStream fsBAK = null;
-            var delimiter = ';';
-            if (UseTAB)
-            {
-                delimiter = '\t';
-            }
+            var delimiter = '\t';
 
             try
             {
@@ -712,11 +700,11 @@ namespace WiFiManager.Droid
                 wifiConfig.WepTxKeyIndex = 0;
                 wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
 
-                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
-                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep40);
-                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Wpa);
+                wifiConfig.AllowedProtocols.Set((int)Android.Net.Wifi.ProtocolType.Rsn);
+                wifiConfig.AllowedGroupCiphers.Set((int)Android.Net.Wifi.GroupCipherType.Wep40);
+                wifiConfig.AllowedProtocols.Set((int)Android.Net.Wifi.ProtocolType.Wpa);
 
-                wifiConfig.AllowedGroupCiphers.Set((int)WifiConfiguration.GroupCipher.Wep104);
+                wifiConfig.AllowedGroupCiphers.Set((int)Android.Net.Wifi.GroupCipherType.Wep104);
             }
             else
             if (dto.NetworkType.Contains("[WPA"))
@@ -727,7 +715,7 @@ namespace WiFiManager.Droid
             else
             {
                 // open networks
-                wifiConfig.AllowedProtocols.Set((int)WifiConfiguration.Protocol.Rsn);
+                wifiConfig.AllowedProtocols.Set((int)Android.Net.Wifi.ProtocolType.Rsn);
                 wifiConfig.AllowedKeyManagement.Set((int)KeyManagementType.None);
             }
 

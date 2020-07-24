@@ -134,17 +134,6 @@ namespace WiFiManager.Common
             }
         }
 
-        public bool UseTAB
-        {
-            get { return mgr.UseTAB; }
-            set
-            {
-                bool useTAB = value;
-                mgr.UseTAB = useTAB;
-                SetProperty(ref useTAB, value, nameof(UseTAB));
-            }
-        }
-
         public bool UseCachedNetworkLookup
         {
             get { return mgr.UseCachedNetworkLookup; }
@@ -449,7 +438,9 @@ namespace WiFiManager.Common
             try
             {
                 IsBusy = true;
-                Task.Run ( () =>  { mgr.DisConnectAsync(); });
+
+                var t = Task.Run ( async () =>  { await mgr.DisConnectAsync(); });
+                t.Wait();
             }
             finally
             {
@@ -501,20 +492,21 @@ namespace WiFiManager.Common
 
         public ICommand SaveCommand => new Command(async x => { await DoSave(null); });
         public ICommand RefreshNetworksCommand => new Command(
-            async (x) => {
+            x => {
                 try
                 {
-                    Device.BeginInvokeOnMainThread(() => {
+//                    Device.BeginInvokeOnMainThread(() => {
                         IsBusy = true;
-                    });
+//                    });
 
-                    await DoRefreshNetworks();
+                    var t = Task.Run(async () => { await DoRefreshNetworks(); });
+                    t.Wait();
                 }
                 finally
                 {
-                    Device.BeginInvokeOnMainThread(() => {
+//                    Device.BeginInvokeOnMainThread(() => {
                         IsBusy = false;
-                    });
+//                    });
                 }
             }
             ,

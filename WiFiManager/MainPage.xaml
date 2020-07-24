@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WiFiManager"
              xmlns:behaviorsPack="clr-namespace:Xamarin.Forms.BehaviorsPack;assembly=Xamarin.Forms.BehaviorsPack"
-             xmlns:b="clr-namespace:Xamarin.Behaviors;assembly=Xamarin.Forms.BehaviorsPack"
              x:Class="WiFiManager.MainPage"
              x:Name="MainPageMain"
             >
@@ -196,12 +195,13 @@
                     <Setter Property="BorderColor" Value="Beige" />
                     <Setter Property="BorderWidth" Value="1" />
                     <Style.Triggers>
-                        <EventTrigger Event="Pressed">
+                        <EventTrigger Event="Clicked">
                             <local:ButtonTriggerAction BackgroundColor="Maroon" />
                         </EventTrigger>
                         <EventTrigger Event="Released">
-                            <!-- BgColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" -->
-                            <local:ButtonTriggerAction BackgroundColor="Black" />
+                            <!--<local:ButtonTriggerAction BgColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvt1}}" />-->
+                            <!--<local:ButtonTriggerAction BackgroundColor="{Binding Source={StaticResource MainPageVM}, Path=IsNightTheme, Converter={StaticResource ThemeSwitchCvtButtons}}" />-->
+                            <local:ButtonTriggerAction BackgroundColor="White" />
                         </EventTrigger>
                     </Style.Triggers>
                 </Style>
@@ -327,8 +327,8 @@
                      AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1">
 
                     <ActivityIndicator x:Name="pleaseWait"
-                           IsRunning="{Binding IsBusy}"
-                           IsVisible="{Binding IsBusy}"
+                           IsRunning="True"
+                           IsVisible="True"
                            VerticalOptions="Center" 
                            BackgroundColor="Black"
                            />
@@ -354,10 +354,6 @@
             <StackLayout Orientation="Horizontal">
                 <Label Text="Use Internal Phone Storage" />
                 <Switch IsToggled="{Binding Path=UseInternalStorageForCSV}" HorizontalOptions="FillAndExpand"/>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <Label Text="Use TAB as delimiter" />
-                <Switch IsToggled="{Binding Path=UseTAB}" HorizontalOptions="FillAndExpand"/>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
                 <Label Text="Use Cached Network Lookup" />

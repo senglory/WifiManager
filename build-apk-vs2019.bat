@@ -1,0 +1,2 @@
+.nuget\nuget restore C:\prj\Demo\WiFiManager\WiFiManager.Android\WiFiManager.Android.csproj
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe" /t:Rebuild,PackageForAndroid,SignAndroidPackage /p:Configuration=Release C:\prj\Demo\WiFiManager\WiFiManager.Android\WiFiManager.Android.csproj

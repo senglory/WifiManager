@@ -215,6 +215,7 @@ namespace WiFiManager.Common.BusinessObjects
                        || this.Name == "Moscow_WiFi_Free"
                        || this.Name == "Metropolis_FREE"
                        || this.Name == "McDonalds_WiFi_Free"
+                       || this.Name == "McDonalds_WiFi_FREE"
                        || this.Name == "Mosinter"
                        || this.Name == "Beeline_WiFi_FREE"
                        || this.Name == "Beeline_WiFi_Starbucks_FREE"
@@ -231,13 +232,16 @@ namespace WiFiManager.Common.BusinessObjects
         }
 
         readonly string[] _vulnerableBssIds = new string[] {
-            "00:0E:8F", // Beeline Smart_box
+            "00:0E:8F", // Beeline Smart_box v1
             "00:1F:CE",
             "00:18:E7", // Rostelecom DIR-655 A4
+            "00:22:75",
+            "00:24:01",
             "04:BF:6D",
             "04:D4:C4", // ASUS
+            "08:60:6E", // ASUS
             "08:C6:B3",
-            "0C:80:63", // TP-Link
+            "0C:80:63", // TP-Link Archer C20
             "10:7B:EF", // Keenetic
             "10:BF:48",
             "10:C3:7B",
@@ -248,16 +252,19 @@ namespace WiFiManager.Common.BusinessObjects
             "1C:B7:2C", // ASUS RT-N11P
             "1C:7E:E5",
             "1C:74:0D", // Keenetic
+            "20:E8:82", // 
             "28:28:5D", // Keenetic
+            "28:31:52",
             "28:C6:8E", // Keenetic
+            "2C:39:96",
             "2C:4D:54",
             "2C:56:DC", // ASUS
-            "2C:FD:A1", // ASUS RT-N12VP
+            "2C:FD:A1", // ASUS RT-N12VP RT-AC750
             "30:5A:3A", // ASUS RT-N11P
             "30:85:A9", // ASUS
             "30:B5:C2", // TP-Link
             "38:2C:4A", // ASUS RT-N11P
-            "38:D5:47", // ASUS
+            "38:D5:47", // ASUS RT-N11P
             "40:16:7E", // ASUS RT-AC52U
             "40:4A:03", // Keenetic NBG460N EE AP
             "44:32:C8",
@@ -266,48 +273,64 @@ namespace WiFiManager.Common.BusinessObjects
             "4E:5D:4E",
             "50:67:F0", // Keenetic
             "50:46:5D", // ASUS
+            "50:D4:F7", // TP-LINK TL-841N
+            "54:04:A6",
             "58:23:8C",
             "58:8B:F3", // Keenetic
             "5C:F4:AB", // Keenetic
             "60:31:97", // Keenetic
             "60:A4:4C", // ASUS
-            "64:6E:EA",
+            "64:6E:EA", // RT2860 Innbox70_2.4G
+            "64:66:B3",
             "64:70:02", // TP-Link TL-WR1042N
+            "68:FF:7B",
             "6A:28:5D",
             "70:4D:7B",
+            "70:71:BC",
             "74:DA:38",
+            "74:DA:88", // TP-Link Archer C20 5.0
+            "74:B5:7E",
             "78:44:76",
             "7C:8B:CA", // TP-Link
             "84:C9:B2", // D-Link
             "88:D7:F6", // ASUS
+            "8C:59:73", // ZyXEL
             "90:94:E4",
             "90:EF:68", // Keenetic
+            "90:F6:52", // TP-Link
             "92:7B:EF",
             "94:4A:0C", // Beeline Smart_box
             "AA:28:5D",
             "AC:22:0B",
+            "AC:4E:91",
             "AC:84:C6",
             "AC:F1:DF",
             "B0:B2:DC", // Keenetic
-            "B0:4E:26", // TP-LINK Archer C20
-            "b0:be:76", // TP-LINK
+            "B0:4E:26", // TP-LINK Archer C20 4.0
+            "b0:be:76", // TP-LINK Archer C6
             "B4:75:0E",
-            "CC:03:FA",
+            "B4:EF:FA",
+            "BC:AE:C5", // ASUS
+            "BC:EE:7B", // ASUS RT-N10E
             "C0:25:E9", // TP-LINK Archer C50
+            "C0:4A:00",
             "C4:27:95",
             "c4:6e:1f",
             "C8:6C:87", // Keenetic
             "C8:60:00", // ASUS RT-N12
             "C8:3A:35",
+            "CC:03:FA",
+            "CC:32:E5", // TP-Link archer C5 4.0
             "CC:5D:4E", // Keenetic
             "CE:5D:4E", // Keenetic
-            "D4:21:22", // Beeline Smart_box
+            "D4:21:22", // Beeline Smart_box v1
+            "D4:6E:0E", // TP-Link Archer C20
             "D4:BF:7F",
-            "D4:6E:0E",
-            "D8:50:E6",
+            "D8:50:E6", // ASUS
             "D8:EB:97", // Trendnet TEW-652BRU
             "D8:FE:E3", // D-Link DIR-620
-            "E0:3F:49",
+            "DC:99:14", // Huawei
+            "E0:3F:49", // ASUS RT-N10E
             "E0:60:66", // WiFire, Beeline, MGTS-GPON
             "E4:F4:C6",
             "E4:BE:ED",
@@ -318,8 +341,10 @@ namespace WiFiManager.Common.BusinessObjects
             "EC:08:6B", // TP-LINK
             "EC:43:F6", // Keenetic
             "EE:43:F6", // Keenetic
-            "F4:F2:6D",
+            "F0:7D:68",
+            "F4:F2:6D", // TP-Link
             "F4:EC:38",
+            "F8:1A:67",
             "F8:32:E4", // ASUS
             "F8:C0:91", // Upvel OnLime NetByNet
             "FC:F5:28", // Keenetic
@@ -361,8 +386,9 @@ namespace WiFiManager.Common.BusinessObjects
                 "54:04:A6",
                 "54:A0:50",
                 "60:45:CB",
-                "60:A4:4C",
+                "60:A4:4C", // ASUS RT-N12LX
                 "70:4D:7B",
+                "70:88:СВ", // ASUS RT-N12D1
                 "72:4D:7B",
                 "74:D0:2B",
                 "78:24:AF",

@@ -16,7 +16,14 @@ namespace WiFiManager
         }
 
 
-		public static readonly BindableProperty BgColor = BindableProperty.Create(nameof(BgColor), typeof(Color), typeof(Color));
+		public static readonly BindableProperty BgColorProperty = BindableProperty.Create("BgColor", typeof(Color), typeof(Color)
+            ,
+                propertyChanging: (bindable, oldValue, newValue) =>
+                {
+                    var control = bindable as Button;
+                    var changingFrom = oldValue as string;
+                    var changingTo = newValue as string;
+                });
 		public Color BackgroundColorValue
 		{
 			get { return BackgroundColor; }
